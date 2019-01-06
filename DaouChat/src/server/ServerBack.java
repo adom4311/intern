@@ -10,6 +10,8 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.rowset.spi.SyncResolver;
+
 import dao.ServerDAO;
 
 public class ServerBack {
@@ -33,6 +35,16 @@ public class ServerBack {
 		ServerBack serverBack = new ServerBack();
 		serverBack.setting();
 	}
+	
+	// intToByte
+		public  byte[] intToByteArray(int value) {
+			byte[] byteArray = new byte[4];
+			byteArray[0] = (byte)(value >> 24);
+			byteArray[1] = (byte)(value >> 16);
+			byteArray[2] = (byte)(value >> 8);
+			byteArray[3] = (byte)(value);
+			return byteArray;
+		}
 	
 	public  int byteArrayToInt(byte bytes[]) {
 		return ((((int)bytes[0] & 0xff) << 24) |
@@ -58,11 +70,13 @@ public class ServerBack {
 		} 
 	}
 	
+	public synchronized int increment() {
+		return non_login_increment++;
+		
+	}
+	
 	/* 현재접속자 맵에 추가 */
 	public void addClient(String id, DataOutputStream os) {
-		if(id == null) {
-			id = "GM" + non_login_increment++;
-		}
 		currentClientMap.put(id, os);
 	}
 	
@@ -70,11 +84,12 @@ public class ServerBack {
 	class Receiver extends Thread{
 		private DataInputStream is;
 		private DataOutputStream os;
+		String tempId = "GM" + increment();
 		public Receiver(Socket socket) {
 			try {
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
-				addClient(null,os);
+				addClient(tempId,os);
 				System.out.println("리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -104,7 +119,7 @@ public class ServerBack {
 						int read;
 						reciveData = new byte[datalength]; 
 						
-						// 파일 받을때까지 계속
+						// 파일 받을때까지 계속 
 						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
 							buffer.write(reciveData,0,read);
 							datalength -= read;
@@ -122,6 +137,7 @@ public class ServerBack {
 						
 					}// 회원가입 END
 					
+					/* 로그인 */
 					else if(headerBuffer[1] == LOGIN) {
 						System.out.println("로그인");
 						
@@ -150,7 +166,52 @@ public class ServerBack {
 						
 						buffer.flush();
 						int chk = sDao.login(data[0],data[1]);
+						if(chk > 0) {
+							currentClientMap.put(data[0], currentClientMap.remove(tempId)); // 임시아이디를 로그인 아이디로 변경
+						}
 						os.writeInt(chk);
+					}// 로그인 END
+					
+					/* 친구 찾기(전체 목록) */
+					else if(headerBuffer[1] == FRIFIND) {
+						System.out.println(tempId + "가 친구목록 달래");
+						Object rowData[][] = sDao.friFind(tempId); // 친구목록 int , String, String(4+20+20) 44
+						System.out.println("여기함? " + rowData[0][0]);
+						int bodylength = rowData.length*44;
+						
+						byte sendData[] = new byte[6 + bodylength];
+						
+						sendData[0] = STX; // 시작?
+						sendData[1] = FRIFIND; // 친구찾기
+						byte[] bodySize = intToByteArray(bodylength);
+						for (int i = 0; i < bodySize.length; i++) {
+							sendData[2+i] = (byte)bodySize[i];
+						} // 보낼 데이터 크기 - 여기선 totalUserCnt
+						
+						byte body[] = new byte[bodylength];
+						int readcnt = 0;
+						for (int i = 0; i < rowData.length; i++) {
+							System.out.println("아이디 : " + (String)rowData[i][1]);
+							System.arraycopy(intToByteArray((int)rowData[i][0]), 0, body, readcnt, 4);
+							readcnt += 4;
+							System.arraycopy(String.valueOf(rowData[i][1]).getBytes(), 0, body, readcnt, String.valueOf(rowData[i][1]).length());
+							
+							System.out.println(String.valueOf(rowData[i][1]).getBytes().length);
+							
+							readcnt += String.valueOf(rowData[i][1]).length();
+							System.arraycopy(new byte[20 - String.valueOf(rowData[i][1]).length()], 0, body, readcnt, 20 - String.valueOf(rowData[i][1]).length());
+							readcnt += 20 - String.valueOf(rowData[i][1]).length();
+							System.arraycopy(String.valueOf(rowData[i][2]).getBytes(), 0, body, readcnt, String.valueOf(rowData[i][2]).length());
+							readcnt += String.valueOf(rowData[i][2]).length();
+							System.arraycopy(new byte[20 - String.valueOf(rowData[i][2]).length()], 0, body, readcnt, 20 - String.valueOf(rowData[i][2]).length());
+							readcnt += 20 - String.valueOf(rowData[i][2]).length();
+							//총 44byte 씩 반복
+						}
+						
+						System.arraycopy(body, 0, sendData, 6, body.length);
+						
+						os.write(sendData);
+						
 					}
 				}
 			}catch (SocketException e) {

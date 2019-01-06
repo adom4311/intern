@@ -70,6 +70,42 @@ public class ServerDAO {
 			}
         }
         return chk;
+	} 
+
+	public Object[][] friFind(String tempId) {
+		if( con != null ) {
+            try {
+            	Object rowData[][] = new Object[totalUserCnt()][3];
+				pstmt = con.prepareStatement("select userid from user");
+		        rs = pstmt.executeQuery();		        
+		        int i=0;
+		        while(rs.next()) {
+		        	rowData[i][0] = i + 1;
+		        	rowData[i][1] = rs.getString(1);
+		        	rowData[i++][2] = "";
+		        }
+		        return rowData;
+			} catch (SQLException e) {
+				return null;
+			}
+        }
+        return null;
+	}
+	
+	public int totalUserCnt() {
+		int chk = 0;
+		if( con != null ) {
+            try {
+				pstmt = con.prepareStatement("select count(userid) from user");
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	return rs.getInt(1);
+		        }
+			} catch (SQLException e) {
+				return -1;
+			}
+        }
+        return chk;
 	}
    
 }

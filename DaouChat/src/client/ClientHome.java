@@ -21,8 +21,8 @@ public class ClientHome extends JFrame {
 	private JPanel contentPane;
 	private ClientBack clientback;
 	private JTextField textField;
-	private JTable table;
-	private JTable table2;
+	private JTable chatGrouptable;
+	private JTable findFritable;
 	JScrollPane scrollPane;
 
 	/**
@@ -87,8 +87,8 @@ public class ClientHome extends JFrame {
 			{ 3, "칸쵸코", "과자계의 레전드" }
 			};
 	
-		table = new JTable(rowData, columnNames);
-		scrollPane.setViewportView(table);
+			chatGrouptable = new JTable(rowData, columnNames);
+		scrollPane.setViewportView(chatGrouptable);
 		
 		JButton button_2 = new JButton("\uCC44\uD305\uBC29 \uAC1C\uC124");
 		button_2.setBounds(12, 542, 331, 43);
@@ -97,6 +97,11 @@ public class ClientHome extends JFrame {
 	}
 
 	public ClientHome(ClientBack clientBack) {
+		String findFricolumnNames[] =
+			{ "번호", "아이디", "상태메세지" };
+		String chatGroupcolumnNames[] =
+			{ "번호", "채팅방명", "최근 내용" };
+		
 		this.clientback = clientBack;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 370, 650);
@@ -119,7 +124,16 @@ public class ClientHome extends JFrame {
 		JButton btnNewButton_1 = new JButton("친구 찾기");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				scrollPane.setViewportView(table2);
+				Object rowData[][] = clientBack.findFriend();
+//				Object rowData[][] =
+//					{
+//					{ 1, "이병헌", "ㅋㅋㅋㅋ" },
+//					{ 2, "이민정", "카톡고장" },
+//					{ 3, "박보검", "구르미 그린 달빛" },
+//					};
+				
+				findFritable = new JTable(rowData, findFricolumnNames); // 친구 찾기 테이블
+				scrollPane.setViewportView(findFritable);
 			}
 		});
 		btnNewButton_1.setBounds(12, 383, 331, 43);
@@ -136,9 +150,9 @@ public class ClientHome extends JFrame {
 		JButton button_2 = new JButton("채팅방 목록");
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				scrollPane.setViewportView(table);
+				scrollPane.setViewportView(chatGrouptable);
 			}
-		});
+		}); 
 		button_2.setBounds(12, 542, 331, 43);
 		getContentPane().add(button_2);
 		getContentPane().add(button_2);
@@ -147,8 +161,7 @@ public class ClientHome extends JFrame {
 		scrollPane.setBounds(12, 41, 329, 332);
 		getContentPane().add(scrollPane);
 		
-		String columnNames[] =
-			{ "번호", "채팅방명", "최근 내용" };
+		
 
 			Object rowData[][] =
 			{
@@ -156,18 +169,10 @@ public class ClientHome extends JFrame {
 			{ 2, "아폴로", "불량식품" },
 			{ 3, "칸쵸코", "과자계의 레전드" }};
 		
-		String columnNames2[] =
-			{ "번호", "아이디", "상태메세지" };
+		
 
-			Object rowData2[][] =
-			{
-			{ 1, "이병헌", "ㅋㅋㅋㅋ" },
-			{ 2, "이민정", "카톡고장" },
-			{ 3, "박보검", "구르미 그린 달빛" },
-			};
-	
-		table = new JTable(rowData, columnNames); // 채팅방 목록 테이블
-		table2 = new JTable(rowData2, columnNames2); // 친구 찾기 테이블
-		scrollPane.setViewportView(table);
+		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
+		
+		scrollPane.setViewportView(chatGrouptable);
 	}
 }

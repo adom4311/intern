@@ -1,5 +1,6 @@
 package client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -27,6 +28,13 @@ public class ClientBack {
 	
 	public ClientBack() {
 		connect();
+	}
+	
+	public  int byteArrayToInt(byte bytes[]) {
+		return ((((int)bytes[0] & 0xff) << 24) |
+				(((int)bytes[1] & 0xff) << 16) |
+				(((int)bytes[2] & 0xff) << 8) |
+				(((int)bytes[3] & 0xff)));
 	}
 	
 	// intToByte
@@ -136,5 +144,83 @@ public class ClientBack {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public Object[][] findFriend() {
+		Object rowData[][];
+		try {
+			byte sendData[] = new byte[6]; // 전체 보낼 데이터
+			
+			sendData[0] = STX; // 시작?
+			sendData[1] = FRIFIND; // 친구찾기
+			byte[] bodySize = intToByteArray(0);
+			for (int i = 0; i < bodySize.length; i++) {
+				sendData[2+i] = (byte)bodySize[i];
+			} // 보낼 데이터 크기
+			
+			os.write(sendData);
+			os.flush();
+			
+			while(is != null) {
+				byte[] reciveData = null;
+				byte[] headerBuffer = new byte[6];
+				is.read(headerBuffer);
+				
+				/* 친구 찾기 목록 */
+				if(headerBuffer[1] == FRIFIND) {
+					System.out.println("친구 찾기");
+					byte[] lengthChk = new byte[4]; // 데이터길이
+					lengthChk[0] = headerBuffer[2];
+					lengthChk[1] = headerBuffer[3];
+					lengthChk[2] = headerBuffer[4];
+					lengthChk[3] = headerBuffer[5];
+					int datalength = byteArrayToInt(lengthChk);
+					System.out.println("데이터길이 : " + datalength);
+					
+					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+					int read;
+					reciveData = new byte[datalength]; // 읽는 단위?
+					
+					// 파일 받을때까지 계속
+					while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+						buffer.write(reciveData,0,read);
+						datalength -= read;
+						if(datalength <= 0) { // 다 받으면 break
+							break;
+						}
+					}
+					System.out.println("친구 목록 받기 성공");
+					System.out.println("총 갯수 : " + reciveData.length/44);
+					byte num[] = new byte[4];
+					byte friendId[] = new byte[20];
+					byte friendStatus[] = new byte[20];
+					rowData = new Object[reciveData.length/44][3];
+					
+					
+					int cnt = 0;
+					for (int i = 0; i < reciveData.length/44; i++) {
+						System.arraycopy(reciveData, cnt, num, 0, 4);
+						cnt += 4;
+						System.arraycopy(reciveData, cnt, friendId, 0, 20);
+						cnt += 20;
+						System.arraycopy(reciveData, cnt, friendStatus, 0, 20);
+						cnt += 20;
+						System.out.println("번호 : " + byteArrayToInt(num));
+						System.out.println("아이디 : " + new String(friendId).trim());
+						System.out.println("상메 : " + new String(friendStatus).trim());
+						rowData[i][0] = byteArrayToInt(num);
+						rowData[i][1] = new String(friendId).trim();
+						rowData[i][2] = new String(friendStatus).trim();
+					}
+					buffer.flush();
+					
+					return rowData;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
