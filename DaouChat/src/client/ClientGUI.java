@@ -4,6 +4,7 @@ import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -211,4 +212,5 @@ public class ClientGUI extends JFrame {
 	public void Alert(String msg) {
 		JOptionPane.showMessageDialog(null, msg);
 	}
+	
 }

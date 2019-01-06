@@ -13,6 +13,7 @@ public class ClientBack {
 	public static final byte LOGIN = 0x02; // 로그인
 	public static final byte MSG = 0x03; // 일반메시지
 	public static final byte FRIFIND = 0x04; // 친구찾기
+	public static final byte ADDFRI = 0x05; // 친구추가
 	
 	private Socket socket;
 	private ClientGUI gui;
@@ -133,6 +134,7 @@ public class ClientBack {
 					gui.loginInvi();
 					gui.setVisible(false);
 					home = new ClientHome();
+					home.setuserid(id);
 					home.home(this);
 					break;
 				}else {
@@ -164,7 +166,7 @@ public class ClientBack {
 			os.flush();
 			
 			while(is != null) {
-				byte[] reciveData = null;
+				byte[] reciveData = null; 
 				byte[] headerBuffer = new byte[6];
 				is.read(headerBuffer);
 				
@@ -224,5 +226,45 @@ public class ClientBack {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void addFriend(String friendId) {
+		try {
+			int bodylength = friendId.getBytes("UTF-8").length; // 아이디 + 패스워드 바이트
+			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
+			
+			sendData[0] = STX; // 시작?
+			sendData[1] = ADDFRI; // 친구 추가
+			byte[] bodySize = intToByteArray(bodylength);
+			System.out.println("보낼 데이터의 크기 : " + bodylength);
+			for (int i = 0; i < bodySize.length; i++) {
+				sendData[2+i] = (byte)bodySize[i];
+			} // 보낼 데이터 크기
+			byte body[] = new byte[bodylength];
+			body = friendId.getBytes("UTF-8");
+			
+			System.arraycopy(body, 0, sendData, 6, body.length);
+			
+			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+
+			os.write(sendData);
+			os.flush();
+			
+			while(is!=null) {
+				int chk = is.readInt();
+				if(chk > 0) {
+					gui.Alert("친구추가 성공!");
+					home.getFrame().fn_addfri(this);
+					break;
+				}else {
+					gui.Alert("로그인 실패. 아이디 또는 비밀번호 오류.");
+					break;
+				}
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

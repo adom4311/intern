@@ -21,6 +21,7 @@ public class ServerBack {
 	public static final byte LOGIN = 0x02; // 로그인
 	public static final byte MSG = 0x03; // 일반메시지
 	public static final byte FRIFIND = 0x04; // 친구찾기
+	public static final byte ADDFRI = 0x05; // 친구추가
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private Socket socket; // 받아올 소켓
@@ -84,12 +85,12 @@ public class ServerBack {
 	class Receiver extends Thread{
 		private DataInputStream is;
 		private DataOutputStream os;
-		String tempId = "GM" + increment();
+		String connectId = "GM" + increment();
 		public Receiver(Socket socket) {
 			try {
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
-				addClient(tempId,os);
+				addClient(connectId,os);
 				System.out.println("리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -168,15 +169,16 @@ public class ServerBack {
 						buffer.flush();
 						int chk = sDao.login(data[0],data[1]);
 						if(chk > 0) {
-							currentClientMap.put(data[0], currentClientMap.remove(tempId)); // 임시아이디를 로그인 아이디로 변경
+							connectId = data[0];
+							currentClientMap.put(data[0], currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
 						}
 						os.writeInt(chk);
 					}// 로그인 END
 					
 					/* 친구 찾기(전체 목록) */
 					else if(headerBuffer[1] == FRIFIND) {
-						System.out.println(tempId + "가 친구목록 달래");
-						Object rowData[][] = sDao.friFind(tempId); // 친구목록 int , String, String(4+20+20) 44
+						System.out.println(connectId + "가 친구목록 달래");
+						Object rowData[][] = sDao.friFind(connectId); // 친구목록 int , String, String(4+20+20) 44
 						System.out.println("여기함? " + rowData[0][0]);
 						int bodylength = rowData.length*44;
 						
@@ -213,6 +215,40 @@ public class ServerBack {
 						System.arraycopy(body, 0, sendData, 6, body.length);
 						
 						os.write(sendData);
+						
+					}// 친구 찾기 END
+					 
+					/* ADDFRI */
+					else if(headerBuffer[1] == ADDFRI) {
+						System.out.println(connectId + "가 친구추가 해달래");
+						byte[] lengthChk = new byte[4]; // 데이터길이
+						lengthChk[0] = headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+						
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength]; 
+						
+						// 파일 받을때까지 계속
+						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+							buffer.write(reciveData,0,read);
+							datalength -= read;
+							if(datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						
+						System.out.println(buffer.toString("UTF-8"));
+						String data = buffer.toString("UTF-8");
+						
+						buffer.flush();
+						int chk = sDao.addfri(connectId,data);
+						
+						os.writeInt(chk);
 						
 					}
 				}

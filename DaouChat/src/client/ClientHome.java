@@ -2,28 +2,33 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 public class ClientHome extends JFrame {
-
+	private String userid;
 	private JPanel contentPane;
 	private ClientBack clientback;
 	private JTextField textField;
 	private JTable chatGrouptable;
 	private JTable findFritable;
+	ClientHome frame;
 	JScrollPane scrollPane;
+	private int menuInt;
+	String findFricolumnNames[] = { "번호", "아이디", "상태메세지" };
+	String chatGroupcolumnNames[] = { "번호", "채팅방명", "최근 내용" };
 
 	/**
 	 * Launch the application.
@@ -32,13 +37,21 @@ public class ClientHome extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientHome frame = new ClientHome(clientBack);
+					frame = new ClientHome(clientBack);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
+	}
+	
+	public ClientHome getFrame() {
+		return frame;
+	}
+	
+	public void setuserid(String userid) {
+		this.userid = userid;
 	}
 
 	public ClientHome() {
@@ -48,7 +61,6 @@ public class ClientHome extends JFrame {
 		textField.setBounds(12, 10, 227, 21);
 		getContentPane().add(textField);
 		textField.setColumns(10);
-		
 		JButton btnNewButton = new JButton("채팅방 선택");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -97,11 +109,7 @@ public class ClientHome extends JFrame {
 	}
 
 	public ClientHome(ClientBack clientBack) {
-		String findFricolumnNames[] =
-			{ "번호", "아이디", "상태메세지" };
-		String chatGroupcolumnNames[] =
-			{ "번호", "채팅방명", "최근 내용" };
-		
+		menuInt = 1;
 		this.clientback = clientBack;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 370, 650);
@@ -118,38 +126,54 @@ public class ClientHome extends JFrame {
 		textField.setColumns(10);
 		
 		JButton btnNewButton = new JButton("검색");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				switch(menuInt) {
+				case 1: System.out.println("검색기능 구현");
+				break;
+				case 2: break;
+				case 3: break;
+				case 4: break;
+				}
+			}
+		});
 		btnNewButton.setBounds(246, 9, 97, 23);
 		getContentPane().add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("친구 찾기");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Object rowData[][] = clientBack.findFriend();
-//				Object rowData[][] =
-//					{
-//					{ 1, "이병헌", "ㅋㅋㅋㅋ" },
-//					{ 2, "이민정", "카톡고장" },
-//					{ 3, "박보검", "구르미 그린 달빛" },
-//					};
-				
-				findFritable = new JTable(rowData, findFricolumnNames); // 친구 찾기 테이블
-				scrollPane.setViewportView(findFritable);
+				fn_addfri(clientback);
 			}
 		});
 		btnNewButton_1.setBounds(12, 383, 331, 43);
 		getContentPane().add(btnNewButton_1);
 		
 		JButton button = new JButton("친구 목록");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				menuInt = 2;
+				
+			}
+		});
 		button.setBounds(12, 436, 331, 43);
 		getContentPane().add(button);
 		
 		JButton button_1 = new JButton("채팅방 개설");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				menuInt = 3;
+				
+			}
+		});
 		button_1.setBounds(12, 489, 331, 43);
 		getContentPane().add(button_1);
 		
 		JButton button_2 = new JButton("채팅방 목록");
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				menuInt = 4;
+
 				scrollPane.setViewportView(chatGrouptable);
 			}
 		}); 
@@ -174,5 +198,55 @@ public class ClientHome extends JFrame {
 		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
 		
 		scrollPane.setViewportView(chatGrouptable);
+		
+		
 	}
+	
+	public void fn_addfri(ClientBack clientback) {
+		System.out.println("ㅎㅇ");
+		menuInt = 1;
+		System.out.println(clientback);
+		Object rowData[][] = clientback.findFriend();
+		
+		// 내용 수정 불가 시작 //
+        DefaultTableModel mod = new DefaultTableModel(rowData, findFricolumnNames) {
+        public boolean isCellEditable(int rowIndex, int mColIndex) {
+                return false;
+            }
+        };
+		findFritable = new JTable(mod); // 친구 찾기 테이블
+		findFritable.addMouseListener(new MyMouseListener());
+		scrollPane.setViewportView(findFritable);
+	}
+	
+	/* 친구 찾기 테이블 클릭 이벤트 */
+	private class MyMouseListener extends MouseAdapter{
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getButton() == 1) {
+				if(e.getClickCount() == 2) {
+					System.out.println(findFritable.getValueAt(findFritable.getSelectedRow(),1));
+					System.out.println("더블클릭");
+
+					addFriendAlert((String)findFritable.getValueAt(findFritable.getSelectedRow(),1));
+				}
+			}
+		}
+		
+	}
+	
+	public void addFriendAlert(String friendId) {
+
+		int dialogButton = JOptionPane.showConfirmDialog(null, friendId + " 친구 추가하시겠습니까?","친구 추가",JOptionPane.YES_NO_OPTION);
+		
+		if(dialogButton == JOptionPane.YES_OPTION) {
+			clientback.addFriend(friendId);
+		}else {
+			System.out.println("안해");
+		}
+
+	}
+	
+	
 }

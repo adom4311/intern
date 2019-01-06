@@ -81,8 +81,11 @@ public class ServerDAO {
 	public Object[][] friFind(String tempId) {
 		if( con != null ) {
             try {
-            	Object rowData[][] = new Object[totalUserCnt()][3];
-				pstmt = con.prepareStatement("select userid from user order by userid asc");
+            	System.out.println("됨 : " + tempId);
+            	Object rowData[][] = new Object[totalUserCnt(tempId)][3];
+				pstmt = con.prepareStatement("select userid from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
+				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();		        
 		        int i=0;
 		        while(rs.next()) {
@@ -93,22 +96,52 @@ public class ServerDAO {
 		        return rowData;
 			} catch (SQLException e) {
 				return null;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
         }
         return null;
 	}
 	
-	public int totalUserCnt() {
+	public int totalUserCnt(String tempId) {
 		int chk = 0;
 		if( con != null ) {
             try {
-				pstmt = con.prepareStatement("select count(userid) from user");
+				pstmt = con.prepareStatement("select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
+				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	return rs.getInt(1);
 		        }
 			} catch (SQLException e) {
 				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return chk;
+	}
+
+	public int addfri(String connectId, String data) {
+		int chk = 0;
+
+        if( con != null ) {
+            try {
+				pstmt = con.prepareStatement("insert into friend values(?,?)");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
+		        chk = pstmt.executeUpdate();
+		        
+		        if(chk >0)
+		        	System.out.println("친구추가 성공");
+		        else
+		        	System.out.println("친구추가 실패");
+		        
+			} catch (SQLException e) {
+				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
         }
         return chk;
