@@ -1,5 +1,6 @@
 package dao;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,8 +36,9 @@ public class ServerDAO {
         if( con != null ) {
             try {
 				pstmt = con.prepareStatement("insert into user values(?,?)");
-				pstmt.setString(1, id);
-		        pstmt.setString(2, pw);
+				System.out.println("id");
+				pstmt.setString(1, new String(id.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(pw.getBytes("UTF-8"),"UTF-8"));
 		        chk = pstmt.executeUpdate();
 		        
 		        if(chk >0)
@@ -46,6 +48,8 @@ public class ServerDAO {
 		        
 			} catch (SQLException e) {
 				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
         }
         return chk;
@@ -57,8 +61,8 @@ public class ServerDAO {
 		if( con != null ) {
             try {
 				pstmt = con.prepareStatement("select * from user where userid = ? and password = ?");
-				pstmt.setString(1, id);
-		        pstmt.setString(2, pw);
+				pstmt.setString(1, new String(id.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(pw.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	System.out.println("로그인 성공");
@@ -67,6 +71,8 @@ public class ServerDAO {
 		        System.out.println("로그인 실패");
 			} catch (SQLException e) {
 				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
         }
         return chk;
@@ -76,7 +82,7 @@ public class ServerDAO {
 		if( con != null ) {
             try {
             	Object rowData[][] = new Object[totalUserCnt()][3];
-				pstmt = con.prepareStatement("select userid from user");
+				pstmt = con.prepareStatement("select userid from user order by userid asc");
 		        rs = pstmt.executeQuery();		        
 		        int i=0;
 		        while(rs.next()) {

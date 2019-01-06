@@ -62,7 +62,7 @@ public class ClientBack {
 
 	public void signUp(String id, String pw) {
 		try {
-			int bodylength = id.length() + pw.length() + 1; // 아이디 + 패스워드 바이트
+			int bodylength = id.getBytes("UTF-8").length + pw.getBytes("UTF-8").length + 1; // 아이디 + 패스워드 바이트
 			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
 			
 			sendData[0] = STX; // 시작?
@@ -74,6 +74,8 @@ public class ClientBack {
 			} // 보낼 데이터 크기
 			byte body[] = new byte[bodylength];
 			body = (id + "," + pw).getBytes("UTF-8");
+			
+			System.out.println("body length" + body.length);
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
@@ -104,7 +106,7 @@ public class ClientBack {
 
 	public void login(String id, String pw) {
 		try {
-			int bodylength = id.length() + pw.length() + 1; // 아이디 + 패스워드 바이트
+			int bodylength = id.getBytes("UTF-8").length + pw.getBytes("UTF-8").length + 1; // 아이디 + 패스워드 바이트
 			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
 			
 			sendData[0] = STX; // 시작?
@@ -206,11 +208,11 @@ public class ClientBack {
 						System.arraycopy(reciveData, cnt, friendStatus, 0, 20);
 						cnt += 20;
 						System.out.println("번호 : " + byteArrayToInt(num));
-						System.out.println("아이디 : " + new String(friendId).trim());
-						System.out.println("상메 : " + new String(friendStatus).trim());
+						System.out.println("아이디 : " + new String(friendId,"UTF-8").trim());
+						System.out.println("상메 : " + new String(friendStatus,"UTF-8").trim());
 						rowData[i][0] = byteArrayToInt(num);
-						rowData[i][1] = new String(friendId).trim();
-						rowData[i][2] = new String(friendStatus).trim();
+						rowData[i][1] = new String(friendId,"UTF-8").trim();
+						rowData[i][2] = new String(friendStatus,"UTF-8").trim();
 					}
 					buffer.flush();
 					

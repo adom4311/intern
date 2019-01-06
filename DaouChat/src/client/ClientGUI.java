@@ -41,7 +41,7 @@ public class ClientGUI extends JFrame {
 
 	/**
 	 * Create the frame.
-	 */ 
+	 */
 	public ClientGUI() {
 		clientback = new ClientBack();
 		clientback.setGui(this);

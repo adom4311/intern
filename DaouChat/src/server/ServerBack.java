@@ -127,11 +127,11 @@ public class ServerBack {
 								break;
 							}
 						}
-						System.out.println(buffer);
-						String data[] = buffer.toString().split(",");
+						System.out.println(buffer.toString("UTF-8"));
+						String data[] = buffer.toString("UTF-8").split(",");
 						
 						buffer.flush();
-						
+						System.out.println("data1의 크기는 : " +data[0].length());
 						int chk = sDao.signUp(data[0],data[1]);
 						os.writeInt(chk);
 						
@@ -161,8 +161,9 @@ public class ServerBack {
 								break;
 							}
 						}
-						System.out.println(buffer);
-						String data[] = buffer.toString().split(",");
+						
+						System.out.println(buffer.toString("UTF-8"));
+						String data[] = buffer.toString("UTF-8").split(",");
 						
 						buffer.flush();
 						int chk = sDao.login(data[0],data[1]);
@@ -186,25 +187,26 @@ public class ServerBack {
 						byte[] bodySize = intToByteArray(bodylength);
 						for (int i = 0; i < bodySize.length; i++) {
 							sendData[2+i] = (byte)bodySize[i];
-						} // 보낼 데이터 크기 - 여기선 totalUserCnt
+						} // 보낼 데이터 크기 // 여기선 totalUserCnt
 						
 						byte body[] = new byte[bodylength];
 						int readcnt = 0;
 						for (int i = 0; i < rowData.length; i++) {
 							System.out.println("아이디 : " + (String)rowData[i][1]);
+							byte friendId[] = String.valueOf(rowData[i][1]).getBytes("UTF-8");
+							byte friendStatus[] = String.valueOf(rowData[i][2]).getBytes("UTF-8");
+							int friendIdlength = friendId.length;
+							int friendStatuslength = friendStatus.length;
 							System.arraycopy(intToByteArray((int)rowData[i][0]), 0, body, readcnt, 4);
 							readcnt += 4;
-							System.arraycopy(String.valueOf(rowData[i][1]).getBytes(), 0, body, readcnt, String.valueOf(rowData[i][1]).length());
-							
-							System.out.println(String.valueOf(rowData[i][1]).getBytes().length);
-							
-							readcnt += String.valueOf(rowData[i][1]).length();
-							System.arraycopy(new byte[20 - String.valueOf(rowData[i][1]).length()], 0, body, readcnt, 20 - String.valueOf(rowData[i][1]).length());
-							readcnt += 20 - String.valueOf(rowData[i][1]).length();
-							System.arraycopy(String.valueOf(rowData[i][2]).getBytes(), 0, body, readcnt, String.valueOf(rowData[i][2]).length());
-							readcnt += String.valueOf(rowData[i][2]).length();
-							System.arraycopy(new byte[20 - String.valueOf(rowData[i][2]).length()], 0, body, readcnt, 20 - String.valueOf(rowData[i][2]).length());
-							readcnt += 20 - String.valueOf(rowData[i][2]).length();
+							System.arraycopy(friendId, 0, body, readcnt, friendIdlength);
+							readcnt += friendIdlength;
+							System.arraycopy(new byte[20 - friendIdlength], 0, body, readcnt, 20 - friendIdlength);
+							readcnt += 20 - friendIdlength;
+							System.arraycopy(friendStatus, 0, body, readcnt, friendStatuslength);
+							readcnt += friendStatus.length;
+							System.arraycopy(new byte[20 - friendStatuslength], 0, body, readcnt, 20 - friendStatuslength);
+							readcnt += 20 - friendStatuslength;
 							//총 44byte 씩 반복
 						}
 						
