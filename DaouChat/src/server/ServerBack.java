@@ -179,7 +179,6 @@ public class ServerBack {
 					else if(headerBuffer[1] == FRIFIND) {
 						System.out.println(connectId + "가 친구목록 달래");
 						Object rowData[][] = sDao.friFind(connectId); // 친구목록 int , String, String(4+20+20) 44
-						System.out.println("여기함? " + rowData[0][0]);
 						int bodylength = rowData.length*44;
 						
 						byte sendData[] = new byte[6 + bodylength];
