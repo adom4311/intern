@@ -23,6 +23,8 @@ public class ServerBack {
 	public static final byte FRIFIND = 0x04; // 친구찾기
 	public static final byte ADDFRI = 0x05; // 친구추가
 	public static final byte FRILIST = 0x06; // 친구목록
+	public static final byte MESSAGE = 0x07; // 메시지만
+	public static final byte CREATEGROUP = 0x08; // 그룹생성
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private Socket socket; // 받아올 소켓
@@ -294,6 +296,80 @@ public class ServerBack {
 						
 					}// 친구 목록 END
 					
+//					/* 메시지 전송 */
+//					else if(headerBuffer[1] == MESSAGE) {
+//						System.out.println("메시지 전송");
+//						
+//						byte[] lengthChk = new byte[4]; // 데이터길이
+//						lengthChk[0] = headerBuffer[2];
+//						lengthChk[1] = headerBuffer[3];
+//						lengthChk[2] = headerBuffer[4];
+//						lengthChk[3] = headerBuffer[5];
+//						int datalength = byteArrayToInt(lengthChk);
+//						System.out.println("데이터길이 : " + datalength);
+//						
+//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//						int read;
+//						reciveData = new byte[datalength]; 
+//						
+//						// 파일 받을때까지 계속
+//						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+//							buffer.write(reciveData,0,read);
+//							datalength -= read;
+//							if(datalength <= 0) { // 다 받으면 break
+//								break;
+//							}
+//						}
+//						
+//						System.out.println(buffer.toString("UTF-8"));
+//						String data = buffer.toString("UTF-8");
+//						
+//						buffer.flush();
+//						int chk = sDao.message(data); // 메시지 DB저장
+//						// 메시지를 전송!
+//						if(chk > 0) {
+//							connectId = data[0];
+//						}
+//						os.writeInt(chk);
+//					}// 메시지 END
+					
+					/* 채티방 개설 */
+					else if(headerBuffer[1] == CREATEGROUP) {
+						System.out.println("채팅방 개설");
+						
+						byte[] lengthChk = new byte[4]; // 데이터길이
+						lengthChk[0] = headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+						
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength]; 
+						
+						// 파일 받을때까지 계속
+						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+							buffer.write(reciveData,0,read);
+							datalength -= read;
+							if(datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						
+						System.out.println(buffer.toString("UTF-8"));
+						String data = buffer.toString("UTF-8");
+						
+						buffer.flush();
+						int chk = sDao.createGroup(connectId,data);
+						if(chk > 0) {
+							System.out.println("채팅방 개설 성공");
+						}else {
+							System.out.println("채팅방 개설 실패");
+						}
+						os.writeInt(chk);
+					}// 채팅방개설 END
 					
 				}
 			}catch (SocketException e) {

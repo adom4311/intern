@@ -252,27 +252,16 @@ public class ClientHome extends JFrame {
 	
 						addFriendAlert((String)findFritable.getValueAt(findFritable.getSelectedRow(),1));
 					}else if (menu == 2) { // 친구 목록 테이블 클릭 이벤트
-						System.out.println(friListtable.getValueAt(friListtable.getSelectedRow(),1));
-						System.out.println("더블클릭");
+						String friendid = friListtable.getValueAt(friListtable.getSelectedRow(),1).toString(); 
+						System.out.println(friendid);
+						System.out.println("친구 목록 더블클릭");
+						
+						//그룹 채팅방 생성
+						clientback.createGroup(friendid);
+						
+						new ClientChat().start(clientback);
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}
-				}
-			}
-		}
-		
-	}
-	
-	/* 친구 목록 테이블 클릭 이벤트 */
-	private class MyfriListMouseListener extends MouseAdapter{
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			if(e.getButton() == 1) {
-				if(e.getClickCount() == 2) {
-					System.out.println(findFritable.getValueAt(findFritable.getSelectedRow(),1));
-					System.out.println("더블클릭");
-
-					addFriendAlert((String)findFritable.getValueAt(findFritable.getSelectedRow(),1));
 				}
 			}
 		}

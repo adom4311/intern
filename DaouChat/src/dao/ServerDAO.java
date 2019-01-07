@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 public class ServerDAO {
 	String driver = "org.mariadb.jdbc.Driver";
@@ -192,6 +193,41 @@ public class ServerDAO {
         }
         return null;
 	}
+
+	public int createGroup(String connectId, String data) { // data는 friendId
+		Date today = new Date();
+		System.out.println(today);
+		String groupid = ("daou" + connectId + today);
+		int chk = 0;
+
+        if( con != null ) {
+            try {
+				pstmt = con.prepareStatement("insert into chatgroup(groupid, userid) values(?,?)");
+				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        chk = pstmt.executeUpdate();
+		        
+		        if(chk >0) {
+		        	System.out.println("채팅방개설 성공");
+		        	pstmt = con.prepareStatement("insert into chatmember values(?,?)");
+					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+					pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
+			        chk = pstmt.executeUpdate();      
+			        //트랙잰션 처리하면 좋을듯..
+		        }
+		        else
+		        	System.out.println("채팅방개설 실패");
+		        
+			} catch (SQLException e) {
+				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return chk;
+	}
+	
+	
    
 }
     

@@ -15,6 +15,8 @@ public class ClientBack {
 	public static final byte FRIFIND = 0x04; // 친구찾기
 	public static final byte ADDFRI = 0x05; // 친구추가
 	public static final byte FRILIST = 0x06; // 친구목록
+	public static final byte MESSAGE = 0x07; // 메시지만
+	public static final byte CREATEGROUP = 0x08; // 그룹생성
 	
 	private Socket socket;
 	private ClientGUI gui;
@@ -387,5 +389,86 @@ public class ClientBack {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void sendMessage(String msg) { // 채팅 전송
+//		try {
+//			int bodylength = msg.getBytes("UTF-8").length; // 채팅 길이
+//			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
+//			
+//			sendData[0] = STX; // 시작?
+//			sendData[1] = MESSAGE; // 메시지만
+//			byte[] bodySize = intToByteArray(bodylength);
+//			System.out.println("보낼 데이터의 크기 : " + bodylength);
+//			for (int i = 0; i < bodySize.length; i++) {
+//				sendData[2+i] = (byte)bodySize[i];
+//			} // 보낼 데이터 크기
+//			byte body[] = new byte[bodylength];
+//			body = msg.getBytes("UTF-8");
+//			
+//			System.arraycopy(body, 0, sendData, 6, body.length);
+//			
+//			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+//
+//			os.write(sendData);
+//			os.flush();
+//			
+//			while(is!=null) {
+//				int chk = is.readInt();
+//				if(chk > 0) {
+//					System.out.println("메시지 전송 성공");
+//					break;
+//				}else {
+//					System.out.println("메시지 전송 실패");
+//					break;
+//				}
+//			}
+//			
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	}
+
+	public void createGroup(String friendid) { // 채팅방 생성
+		try {
+			int bodylength = friendid.getBytes("UTF-8").length; // 아이디
+			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
+			
+			sendData[0] = STX; // 시작?
+			sendData[1] = CREATEGROUP; // 채팅방 생성
+			byte[] bodySize = intToByteArray(bodylength);
+			System.out.println("보낼 데이터의 크기 : " + bodylength);
+			for (int i = 0; i < bodySize.length; i++) {
+				sendData[2+i] = (byte)bodySize[i];
+			} // 보낼 데이터 크기
+			byte body[] = new byte[bodylength];
+			body = friendid.getBytes("UTF-8");
+			
+			System.out.println("body length" + body.length);
+			
+			System.arraycopy(body, 0, sendData, 6, body.length);
+			
+			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+
+			os.write(sendData);
+			os.flush();
+			
+			while(is!=null) {
+				int chk = is.readInt();
+				if(chk > 0) {
+					gui.Alert("채티방 개설 성공!");
+					break;
+				}else {
+					gui.Alert("채티방 개설 실패");
+					break;
+
+				}
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
