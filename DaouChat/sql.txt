@@ -1,0 +1,40 @@
+-chatgroup-
+
+create table chatgroup(
+groupid varchar(80),
+userid varchar(20),
+groupname varchar(45),
+primary key (groupid)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+insert into chatgroup(userid,groupname) values('1','1');
+
+
+-chatcontent-
+
+create table chatcontent(
+userid varchar(20),
+groupid varchar(45),
+content varchar(1000),
+attach MEDIUMBLOB,
+sendtime date
+)
+
+-user-
+create table user(
+userid varchar(20),
+password varchar(45),
+primary key(userid)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-friend-
+create table friend(
+userid varchar(20),
+friendid varchar(20)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-chatmember-
+create table chatmember(
+groupid varchar(80),
+userid varchar(20)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
