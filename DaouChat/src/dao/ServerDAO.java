@@ -21,6 +21,7 @@ public class ServerDAO {
                     "jdbc:mariadb://127.0.0.1:3306/sw_test",
                     "root",
                     "daou");
+        	con.setAutoCommit(false);
             
 			System.out.println("DB 접속 서엉공");
 		} catch (SQLException e) {
@@ -42,10 +43,14 @@ public class ServerDAO {
 		        pstmt.setString(2, new String(pw.getBytes("UTF-8"),"UTF-8"));
 		        chk = pstmt.executeUpdate();
 		        
-		        if(chk >0)
+		        if(chk >0) {
 		        	System.out.println("회원가입 성공");
-		        else
+		        	con.commit();
+		        }
+		        else {
 		        	System.out.println("회원가입 실패");
+		        	con.rollback();
+		        }
 		        
 			} catch (SQLException e) {
 				return -1;
@@ -155,10 +160,14 @@ public class ServerDAO {
 		        pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
 		        chk = pstmt.executeUpdate();
 		        
-		        if(chk >0)
+		        if(chk >0) {
 		        	System.out.println("친구추가 성공");
-		        else
+		        	con.commit();
+		        }
+		        else {
 		        	System.out.println("친구추가 실패");
+		        	con.rollback();
+		        }
 		        
 			} catch (SQLException e) {
 				return -1;
@@ -201,22 +210,78 @@ public class ServerDAO {
 		int chk = 0;
 
         if( con != null ) {
+//            try {
+//				pstmt = con.prepareStatement("insert into chatgroup(groupid, userid) values(?,?)");
+//				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+//				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+//		        chk = pstmt.executeUpdate();
+//		        
+//		        if(chk >0) {
+//		        	System.out.println("채팅방개설 성공");
+//		        	pstmt = con.prepareStatement("insert into chatmember values(?,?)");
+//					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+//					pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
+//			        chk = pstmt.executeUpdate();      
+//			        //트랙잰션 처리하면 좋을듯..
+//		        }
+//		        else
+//		        	System.out.println("채팅방개설 실패");
+//		        
+//			} catch (SQLException e) {
+//				return -1;
+//			} catch (UnsupportedEncodingException e) {
+//				e.printStackTrace();
+//			}
+
             try {
-				pstmt = con.prepareStatement("insert into chatgroup(groupid, userid) values(?,?)");
+            	// 여기 조건 다고쳐야함 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+            	/*
+            	 * select b.groupid from 
+					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('q','asdf') group by groupid having cnt =2) a) group by groupid) b
+					where b.ccnt = 2;
+            	 */
+            	String query1 = "insert into chatgroup(groupid, userid) select ?, ? from dual where NOT EXISTS (select b.groupid from \r\n" + 
+            			"					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?,?) group by groupid having cnt =?) a) group by groupid) b\r\n" + 
+            			"					where b.ccnt = 2)";
+            	//개설자와 초대자를 가진 채팅방을 찾고 채팅방의 사람수가 개설자+초대자 수와 같은방이 존재하지 않으면 인서트
+            	
+            	String query2 = "insert into chatmember(groupid,userid) values(?,?)";
+            	
+				pstmt = con.prepareStatement(query1);
 				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
 				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(3, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(4, new String(data.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setInt(5, 2);
 		        chk = pstmt.executeUpdate();
+		        pstmt.close();
+		        
+		        if(chk == 0) { // 이미있다면
+		        	return 0;
+		        }
+		        
+		        // chatmember에 개설자 아이디 추가
+		        pstmt = con.prepareStatement(query2);
+				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        chk = pstmt.executeUpdate();   
+				System.out.println("추가되는지:::::"+chk);
+
+		        
+		        // chatmember에 초대한 아이디 추가
+				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
+		        chk = pstmt.executeUpdate(); 
+		        pstmt.close();
 		        
 		        if(chk >0) {
+		        	con.commit();
 		        	System.out.println("채팅방개설 성공");
-		        	pstmt = con.prepareStatement("insert into chatmember values(?,?)");
-					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-					pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
-			        chk = pstmt.executeUpdate();      
-			        //트랙잰션 처리하면 좋을듯..
 		        }
-		        else
+		        else {
 		        	System.out.println("채팅방개설 실패");
+		        	con.rollback();
+		        }
 		        
 			} catch (SQLException e) {
 				return -1;

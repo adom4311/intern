@@ -459,10 +459,13 @@ public class ClientBack {
 				if(chk > 0) {
 					gui.Alert("채티방 개설 성공!");
 					break;
-				}else {
+				}else if(chk == 0) {
+					gui.Alert("있는 채팅방 불러오기");
+					break;
+				}
+				else {
 					gui.Alert("채티방 개설 실패");
 					break;
-
 				}
 			}
 			

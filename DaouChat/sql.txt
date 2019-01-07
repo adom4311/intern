@@ -38,3 +38,10 @@ create table chatmember(
 groupid varchar(80),
 userid varchar(20)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--존재하는그룹인지 확인--
+select b.groupid from 
+(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('q','asdf') group by groupid having cnt =2) a) group by groupid) b
+where b.ccnt = 2;
+
+

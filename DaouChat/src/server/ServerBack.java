@@ -365,7 +365,10 @@ public class ServerBack {
 						int chk = sDao.createGroup(connectId,data);
 						if(chk > 0) {
 							System.out.println("채팅방 개설 성공");
-						}else {
+						}else if(chk == 0){
+							System.out.println("채팅방 이미 있음");
+						}
+						else {
 							System.out.println("채팅방 개설 실패");
 						}
 						os.writeInt(chk);
