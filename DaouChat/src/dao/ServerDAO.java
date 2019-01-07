@@ -103,6 +103,7 @@ public class ServerDAO {
         return null;
 	}
 	
+	/* 친구 찾기 용 */
 	public int totalUserCnt(String tempId) {
 		int chk = 0;
 		if( con != null ) {
@@ -110,6 +111,26 @@ public class ServerDAO {
 				pstmt = con.prepareStatement("select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
 				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	return rs.getInt(1);
+		        }
+			} catch (SQLException e) {
+				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return chk;
+	}
+	
+	/* 친구 목록 용 */
+	public int totalFriCnt(String tempId) {
+		int chk = 0;
+		if( con != null ) {
+            try {
+				pstmt = con.prepareStatement("select count(friendid) from friend where userid = ?");
+				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	return rs.getInt(1);
@@ -145,6 +166,31 @@ public class ServerDAO {
 			}
         }
         return chk;
+	}
+
+	public Object[][] friList(String connectId) {
+		if( con != null ) {
+            try {
+            	System.out.println("됨 : " + connectId);
+            	Object rowData[][] = new Object[totalFriCnt(connectId)][3];
+				pstmt = con.prepareStatement("select friendid from friend where userid = ?");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();		        
+		        int i=0;
+		        while(rs.next()) {
+		        	rowData[i][0] = i + 1;
+		        	rowData[i][1] = rs.getString(1);
+		        	rowData[i++][2] = "";
+		        }
+		        return rowData;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return null;
 	}
    
 }

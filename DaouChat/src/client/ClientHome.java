@@ -18,15 +18,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 public class ClientHome extends JFrame {
-	private String userid;
+	private String userid; // 접속유저 아이디
 	private JPanel contentPane;
 	private ClientBack clientback;
 	private JTextField textField;
 	private JTable chatGrouptable;
-	private JTable findFritable;
+	private JTable findFritable; // 친구 찾기 테이블
+	private JTable friListtable; // 친구 목록 테이블
 	ClientHome frame;
 	JScrollPane scrollPane;
-	private int menuInt;
+	private int menuInt; // 검색버튼 메뉴 구분자
 	String findFricolumnNames[] = { "번호", "아이디", "상태메세지" };
 	String chatGroupcolumnNames[] = { "번호", "채팅방명", "최근 내용" };
 
@@ -152,8 +153,7 @@ public class ClientHome extends JFrame {
 		JButton button = new JButton("친구 목록");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				menuInt = 2;
-				
+				fn_friList(clientback);
 			}
 		});
 		button.setBounds(12, 436, 331, 43);
@@ -215,12 +215,55 @@ public class ClientHome extends JFrame {
             }
         };
 		findFritable = new JTable(mod); // 친구 찾기 테이블
-		findFritable.addMouseListener(new MyMouseListener());
+		findFritable.addMouseListener(new MyMouseListener(1));
 		scrollPane.setViewportView(findFritable);
+	}
+	
+	/* 친구 목록 */
+	public void fn_friList(ClientBack clientback) {
+		menuInt = 2;
+		Object rowData[][] = clientback.friList();
+		
+		// 내용 수정 불가 시작 //
+        DefaultTableModel mod = new DefaultTableModel(rowData, findFricolumnNames) {
+        public boolean isCellEditable(int rowIndex, int mColIndex) {
+                return false;
+            }
+        };
+        friListtable = new JTable(mod); // 친구 목록 테이블
+        friListtable.addMouseListener(new MyMouseListener(2));
+		scrollPane.setViewportView(friListtable);
 	}
 	
 	/* 친구 찾기 테이블 클릭 이벤트 */
 	private class MyMouseListener extends MouseAdapter{
+		int menu;
+		public MyMouseListener(int menu) {
+			super();
+			this.menu = menu;
+		}
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getButton() == 1) {
+				if(e.getClickCount() == 2) {
+					if(menu == 1) { // 친구 찾기 테이블 클릭 이벤트
+						System.out.println(findFritable.getValueAt(findFritable.getSelectedRow(),1));
+						System.out.println("더블클릭");
+	
+						addFriendAlert((String)findFritable.getValueAt(findFritable.getSelectedRow(),1));
+					}else if (menu == 2) { // 친구 목록 테이블 클릭 이벤트
+						System.out.println(friListtable.getValueAt(friListtable.getSelectedRow(),1));
+						System.out.println("더블클릭");
+						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
+					}
+				}
+			}
+		}
+		
+	}
+	
+	/* 친구 목록 테이블 클릭 이벤트 */
+	private class MyfriListMouseListener extends MouseAdapter{
 
 		@Override
 		public void mouseClicked(MouseEvent e) {

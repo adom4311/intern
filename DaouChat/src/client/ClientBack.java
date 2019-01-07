@@ -14,6 +14,7 @@ public class ClientBack {
 	public static final byte MSG = 0x03; // 일반메시지
 	public static final byte FRIFIND = 0x04; // 친구찾기
 	public static final byte ADDFRI = 0x05; // 친구추가
+	public static final byte FRILIST = 0x06; // 친구목록
 	
 	private Socket socket;
 	private ClientGUI gui;
@@ -251,7 +252,7 @@ public class ClientBack {
 
 	public void addFriend(String friendId) {
 		try {
-			int bodylength = friendId.getBytes("UTF-8").length; // 아이디 + 패스워드 바이트
+			int bodylength = friendId.getBytes("UTF-8").length; 
 			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
 			
 			sendData[0] = STX; // 시작?
@@ -287,5 +288,104 @@ public class ClientBack {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public Object[][] friList() {
+		Object rowData[][];
+		try {
+			byte sendData[] = new byte[6]; // 전체 보낼 데이터
+			
+			sendData[0] = STX; // 시작?
+			sendData[1] = FRILIST; // 친구목록
+			byte[] bodySize = intToByteArray(0);
+			for (int i = 0; i < bodySize.length; i++) {
+				sendData[2+i] = (byte)bodySize[i];
+			} // 보낼 데이터 크기
+			
+			os.write(sendData);
+			os.flush();
+			
+			while(is != null) {
+				byte[] reciveData = null; 
+				byte[] headerBuffer = new byte[6];
+				is.read(headerBuffer);
+				
+				/* 친구 찾기 목록 */
+				if(headerBuffer[1] == FRIFIND) {
+					System.out.println("친구 찾기");
+					byte[] lengthChk = new byte[4]; // 데이터길이
+					lengthChk[0] = headerBuffer[2];
+					lengthChk[1] = headerBuffer[3];
+					lengthChk[2] = headerBuffer[4];
+					lengthChk[3] = headerBuffer[5];
+					int datalength = byteArrayToInt(lengthChk);
+					System.out.println("데이터길이 : " + datalength);
+					
+					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+					int read;
+					reciveData = new byte[datalength]; // 읽는 단위?
+					
+					// 파일 받을때까지 계속
+//					while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+//						System.out.println("read : " + read);
+//						buffer.write(reciveData,0,read);
+//						datalength -= read;
+//						if(datalength <= 0) { // 다 받으면 break
+//							break;
+//						}
+//					}
+										
+					int start = 0;
+					while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+						System.out.println("start : " + start);
+						System.out.println("read : " + read);
+						
+						buffer.write(reciveData,0,read); // buffer에 reciveData내용 저장 ..뭔가 뒤바뀜
+						start += read;
+						datalength -= read;
+						System.out.println(datalength);
+						if(datalength <= 0) { // 다 받으면 break
+							break;
+						}
+					}
+					
+					
+					reciveData = buffer.toByteArray(); // 버퍼(byte...stream)에 저장된 내용을 바이트 배열에!
+					buffer.flush(); // 버퍼(byte...stream) 비우기
+					
+					System.out.println("친구 목록 받기 성공");
+					System.out.println("총 갯수 : " + reciveData.length/44);
+					System.out.println("총개수*44 : " + reciveData.length);
+					byte num[] = new byte[4];
+					byte friendId[] = new byte[20];
+					byte friendStatus[] = new byte[20];
+					rowData = new Object[reciveData.length/44][3];
+					
+					
+					
+					int cnt = 0;
+					for (int i = 0; i < reciveData.length/44; i++) {
+						System.arraycopy(reciveData, cnt, num, 0, 4);
+						cnt += 4;
+						System.arraycopy(reciveData, cnt, friendId, 0, 20);
+						cnt += 20;
+						System.arraycopy(reciveData, cnt, friendStatus, 0, 20);
+						cnt += 20;
+//						System.out.println("번호 : " + byteArrayToInt(num));
+//						System.out.println("아이디 : " + new String(friendId,"UTF-8").trim());
+//						System.out.println("상메 : " + new String(friendStatus,"UTF-8").trim());
+						rowData[i][0] = byteArrayToInt(num);
+						rowData[i][1] = new String(friendId,"UTF-8").trim();
+						rowData[i][2] = new String(friendStatus,"UTF-8").trim();
+					}
+					
+					return rowData;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

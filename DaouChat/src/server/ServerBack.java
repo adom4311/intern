@@ -22,6 +22,7 @@ public class ServerBack {
 	public static final byte MSG = 0x03; // 일반메시지
 	public static final byte FRIFIND = 0x04; // 친구찾기
 	public static final byte ADDFRI = 0x05; // 친구추가
+	public static final byte FRILIST = 0x06; // 친구목록
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private Socket socket; // 받아올 소켓
@@ -249,7 +250,51 @@ public class ServerBack {
 						
 						os.writeInt(chk);
 						
-					}
+					}/* ADDFRI END */
+					
+					/* 친구 목록 */
+					else if(headerBuffer[1] == FRILIST) {
+						System.out.println(connectId + "가 친구목록 달래");
+						Object rowData[][] = sDao.friList(connectId); // 친구목록 int , String, String(4+20+20) 44
+						int bodylength = rowData.length*44;
+						
+						byte sendData[] = new byte[6 + bodylength];
+						
+						sendData[0] = STX; // 시작?
+						sendData[1] = FRIFIND; // 친구찾기
+						byte[] bodySize = intToByteArray(bodylength);
+						for (int i = 0; i < bodySize.length; i++) {
+							sendData[2+i] = (byte)bodySize[i];
+						} // 보낼 데이터 크기 // 여기선 totalUserCnt
+						
+						byte body[] = new byte[bodylength];
+						int readcnt = 0;
+						for (int i = 0; i < rowData.length; i++) {
+							System.out.println("아이디 : " + (String)rowData[i][1]);
+							byte friendId[] = String.valueOf(rowData[i][1]).getBytes("UTF-8");
+							byte friendStatus[] = String.valueOf(rowData[i][2]).getBytes("UTF-8");
+							int friendIdlength = friendId.length;
+							int friendStatuslength = friendStatus.length;
+							System.arraycopy(intToByteArray((int)rowData[i][0]), 0, body, readcnt, 4);
+							readcnt += 4;
+							System.arraycopy(friendId, 0, body, readcnt, friendIdlength);
+							readcnt += friendIdlength;
+							System.arraycopy(new byte[20 - friendIdlength], 0, body, readcnt, 20 - friendIdlength);
+							readcnt += 20 - friendIdlength;
+							System.arraycopy(friendStatus, 0, body, readcnt, friendStatuslength);
+							readcnt += friendStatus.length;
+							System.arraycopy(new byte[20 - friendStatuslength], 0, body, readcnt, 20 - friendStatuslength);
+							readcnt += 20 - friendStatuslength;
+							//총 44byte 씩 반복
+						}
+						
+						System.arraycopy(body, 0, sendData, 6, body.length);
+						
+						os.write(sendData);
+						
+					}// 친구 목록 END
+					
+					
 				}
 			}catch (SocketException e) {
 				System.out.println("클라이언트 종료");
