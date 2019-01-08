@@ -210,31 +210,7 @@ public class ServerDAO {
 		int chk = 0;
 
         if( con != null ) {
-//            try {
-//				pstmt = con.prepareStatement("insert into chatgroup(groupid, userid) values(?,?)");
-//				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-//				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-//		        chk = pstmt.executeUpdate();
-//		        
-//		        if(chk >0) {
-//		        	System.out.println("채팅방개설 성공");
-//		        	pstmt = con.prepareStatement("insert into chatmember values(?,?)");
-//					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-//					pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
-//			        chk = pstmt.executeUpdate();      
-//			        //트랙잰션 처리하면 좋을듯..
-//		        }
-//		        else
-//		        	System.out.println("채팅방개설 실패");
-//		        
-//			} catch (SQLException e) {
-//				return -1;
-//			} catch (UnsupportedEncodingException e) {
-//				e.printStackTrace();
-//			}
-
             try {
-            	// 여기 조건 다고쳐야함 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
             	/*
             	 * select b.groupid from 
 					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('q','asdf') group by groupid having cnt =2) a) group by groupid) b

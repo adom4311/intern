@@ -83,7 +83,7 @@ public class ClientBack {
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
-			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+			System.out.println("보낼 데이터 : " + new String(body,"UTF-8") + sendData.length);
 
 			os.write(sendData);
 			os.flush();
@@ -456,6 +456,8 @@ public class ClientBack {
 			
 			while(is!=null) {
 				int chk = is.readInt();
+				//채팅방 groupid도 받아오기 -- 해야할것
+				//받아온 groupid를 채팅방에 보내서 채팅할시에 groupid 사용가능하게.
 				if(chk > 0) {
 					gui.Alert("채티방 개설 성공!");
 					break;

@@ -131,6 +131,8 @@ public class ServerBack {
 								break;
 							}
 						}
+						
+						/* 여기 buffer를 사용했는데 reciveData로 옮기고 buffer 비우기 해도 됨(만약 read가 적게되면 error는 안나지만 깨짐) */
 						System.out.println(buffer.toString("UTF-8"));
 						String data[] = buffer.toString("UTF-8").split(",");
 						
@@ -180,7 +182,7 @@ public class ServerBack {
 					
 					/* 친구 찾기(전체 목록) */
 					else if(headerBuffer[1] == FRIFIND) {
-						System.out.println(connectId + "가 친구목록 달래");
+						System.out.println(connectId + "가 모든 친구목록 달래");
 						Object rowData[][] = sDao.friFind(connectId); // 친구목록 int , String, String(4+20+20) 44
 						int bodylength = rowData.length*44;
 						
@@ -362,7 +364,8 @@ public class ServerBack {
 						String data = buffer.toString("UTF-8");
 						
 						buffer.flush();
-						int chk = sDao.createGroup(connectId,data);
+						int chk = sDao.createGroup(connectId,data); // 채팅방 개설
+						// 채팅방 groupid를 받아와야할듯?
 						if(chk > 0) {
 							System.out.println("채팅방 개설 성공");
 						}else if(chk == 0){
@@ -376,7 +379,7 @@ public class ServerBack {
 					
 				}
 			}catch (SocketException e) {
-				System.out.println("클라이언트 종료");
+				System.out.println(connectId + "님이 클라이언트 종료");
 			}catch (Exception e) {
 				e.printStackTrace();
 			}

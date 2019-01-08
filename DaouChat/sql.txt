@@ -45,3 +45,7 @@ select b.groupid from
 where b.ccnt = 2;
 
 
+--채팅그룹이있으면 groupid 가져오는 쿼리문--
+select b.groupid from 
+	(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('ㅁ','q') group by groupid having cnt =2) a) group by groupid) b 
+
