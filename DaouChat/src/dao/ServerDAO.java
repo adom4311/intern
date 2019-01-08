@@ -203,7 +203,7 @@ public class ServerDAO {
         return null;
 	}
 
-	public int createGroup(String connectId, String data) { // data는 friendId
+	public int createGroup(String connectId, String data[]) { // data는 friendId
 		Date today = new Date();
 		System.out.println(today);
 		String groupid = ("daou" + connectId + today);
@@ -216,25 +216,41 @@ public class ServerDAO {
 					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('q','asdf') group by groupid having cnt =2) a) group by groupid) b
 					where b.ccnt = 2;
             	 */
-            	String query1 = "insert into chatgroup(groupid, userid) select ?, ? from dual where NOT EXISTS (select b.groupid from \r\n" + 
-            			"					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?,?) group by groupid having cnt =?) a) group by groupid) b\r\n" + 
-            			"					where b.ccnt = 2)";
+//            	String query1 = "insert into chatgroup(groupid, userid) select ?, ? from dual where NOT EXISTS (select b.groupid from \r\n" + 
+//            			"					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?,?) group by groupid having cnt =?) a) group by groupid) b\r\n" + 
+//            			"					where b.ccnt = 2)";
+            	
             	//개설자와 초대자를 가진 채팅방을 찾고 채팅방의 사람수가 개설자+초대자 수와 같은방이 존재하지 않으면 인서트
-            	
-            	String query2 = "insert into chatmember(groupid,userid) values(?,?)";
-            	
-				pstmt = con.prepareStatement(query1);
-				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(3, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(4, new String(data.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setInt(5, 2);
+            	StringBuffer query = new StringBuffer();
+            	query.append("insert into chatgroup(groupid, userid) select ?, ? from dual where NOT EXISTS (select b.groupid from ");
+            	query.append("(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?");
+            	for (int i = 0; i < data.length; i++) {
+            		query.append(",?");
+				}
+            	query.append(") group by groupid having cnt =?) a) group by groupid) b where b.ccnt = ?)");
+
+            	// chatgroup insert문
+				pstmt = con.prepareStatement(query.toString());
+				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8")); // 생성할 groupid
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
+				
+				// 채팅 참여자
+				pstmt.setString(3, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
+				for (int i = 0; i < data.length; i++) { // 각 참여자
+					pstmt.setString(4+i, new String(data[0].getBytes("UTF-8"),"UTF-8")); 
+				}
+				
+				pstmt.setInt(4+data.length, data.length + 1 ); // 개설자 + 참여자 수 
+				pstmt.setInt(4+data.length + 1, data.length + 1 ); // 개설자 + 참여자 수 
 		        chk = pstmt.executeUpdate();
 		        pstmt.close();
 		        
 		        if(chk == 0) { // 이미있다면
 		        	return 0;
 		        }
+		        
+            	String query2 = "insert into chatmember(groupid,userid) values(?,?)";
+            	// groupmember insert문
 		        
 		        // chatmember에 개설자 아이디 추가
 		        pstmt = con.prepareStatement(query2);
@@ -245,27 +261,68 @@ public class ServerDAO {
 
 		        
 		        // chatmember에 초대한 아이디 추가
-				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String(data.getBytes("UTF-8"),"UTF-8"));
-		        chk = pstmt.executeUpdate(); 
+				for (int i = 0; i < data.length; i++) {
+					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+					pstmt.setString(2, new String(data[0].getBytes("UTF-8"),"UTF-8"));
+					pstmt.executeUpdate();
+				}
 		        pstmt.close();
 		        
-		        if(chk >0) {
-		        	con.commit();
-		        	System.out.println("채팅방개설 성공");
-		        }
-		        else {
-		        	System.out.println("채팅방개설 실패");
-		        	con.rollback();
-		        }
+		        con.commit();
+		        System.out.println("채팅방개설 성공");
 		        
 			} catch (SQLException e) {
+				// sql 에러발생시 여기서 rollback????
+				try {
+		        	System.out.println("채팅방개설 실패");
+					con.rollback();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				return -1;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
         }
         return chk;
+	}
+
+	public String selectGroupid(String connectId, String[] data) {
+		String groupid = "";
+		if(con != null) {
+			StringBuffer query = new StringBuffer();
+			query.append("select b.groupid from (select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?");
+        	for (int i = 0; i < data.length; i++) {
+        		query.append(",?");
+			}
+        	query.append(") group by groupid having cnt =?) a) group by groupid) b");
+			try {
+				pstmt = con.prepareStatement(query.toString());
+				// 채팅 참여자
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
+				for (int i = 0; i < data.length; i++) { // 각 참여자
+					pstmt.setString(2+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+				}
+				
+				pstmt.setInt(2+data.length, data.length + 1 ); // 개설자 + 참여자 수 
+				
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					System.out.println("도ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄹ");
+					groupid = rs.getString(1);
+				}
+				pstmt.close();
+				
+				return groupid;
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return groupid;
 	}
 	
 	

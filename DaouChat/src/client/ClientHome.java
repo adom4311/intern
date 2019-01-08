@@ -259,7 +259,6 @@ public class ClientHome extends JFrame {
 						//그룹 채팅방 생성
 						clientback.createGroup(friendid);
 						
-						new ClientChat().start(clientback);
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}
 				}
@@ -278,6 +277,10 @@ public class ClientHome extends JFrame {
 			System.out.println("안해");
 		}
 
+	}
+	
+	public void newClientChat(ClientBack clientback, String groupid) {
+		new ClientChat().start(clientback, groupid);
 	}
 	
 	

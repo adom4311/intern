@@ -24,16 +24,17 @@ public class ClientChat extends JFrame implements ActionListener{
 	private JTextField textField;
 	private ClientBack clientback;
 	private JTextArea textArea;
+	private String groupid;
 
 
 	/**
 	 * Launch the application.
 	 */
-	public void start(ClientBack clientback) {
+	public void start(ClientBack clientback, String groupid) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientChat frame = new ClientChat(clientback);
+					ClientChat frame = new ClientChat(clientback,groupid);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -72,7 +73,7 @@ public class ClientChat extends JFrame implements ActionListener{
 		
 	}
 	
-	public ClientChat(ClientBack clientback) {
+	public ClientChat(ClientBack clientback, String groupid) {
 		
 		this.addKeyListener(new KeyAdapter() {
 			@Override
@@ -91,6 +92,7 @@ public class ClientChat extends JFrame implements ActionListener{
 		
 		System.out.println("chat½ÇÇà2");
 		this.clientback = clientback;
+		this.groupid = groupid;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(400, 100, 370, 650);
 		contentPane = new JPanel();

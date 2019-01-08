@@ -83,7 +83,7 @@ public class ClientBack {
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
-			System.out.println("보낼 데이터 : " + new String(body,"UTF-8") + sendData.length);
+			System.out.println("보낼 데이터 : " + new String(body,"UTF-8"));
 
 			os.write(sendData);
 			os.flush();
@@ -125,7 +125,7 @@ public class ClientBack {
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
-			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+			System.out.println("보낼 데이터 : " + new String(body,"UTF-8"));
 
 			os.write(sendData);
 			os.flush();
@@ -269,7 +269,7 @@ public class ClientBack {
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
-			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+			System.out.println("보낼 데이터 : " + new String(body,"UTF-8"));
 
 			os.write(sendData);
 			os.flush();
@@ -449,20 +449,58 @@ public class ClientBack {
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			
-			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
+			System.out.println("보낼 데이터 : " + new String(body,"UTF-8"));
 
 			os.write(sendData);
 			os.flush();
 			
 			while(is!=null) {
-				int chk = is.readInt();
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+				
+				int datalength = 4; // int + groupid( 80byte )
+				byte[] temp = new byte[datalength];
+				
+				int read;
+				while((read = is.read(temp, 0, datalength))!= -1) {
+					buffer.write(temp,0,read);
+					datalength -= read;
+					if(datalength <= 0) {
+						break;
+					}
+				}
+				System.out.println(read);
+				
+				byte[] chk = buffer.toByteArray(); // 데이터길이
+				buffer.flush();
+				chk[0] = temp[0];
+				chk[1] = temp[1];
+				chk[2] = temp[2];
+				chk[3] = temp[3]; 
+				int chknum = byteArrayToInt(chk);
+				
+				datalength = 80;
+				temp = new byte[datalength];
+				while((read = is.read(temp, 0, datalength))!= -1) {
+					buffer.write(temp,0,read);
+					datalength -= read;
+					if(datalength <= 0) {
+						break;
+					}
+				}
+				System.out.println(read);
+				
+				
+				String groupid = new String(temp,"UTF-8");
+				System.out.println("groupid : " + groupid);
 				//채팅방 groupid도 받아오기 -- 해야할것
 				//받아온 groupid를 채팅방에 보내서 채팅할시에 groupid 사용가능하게.
-				if(chk > 0) {
+				if(chknum > 0) {
 					gui.Alert("채티방 개설 성공!");
+					home.newClientChat(this, groupid);
 					break;
-				}else if(chk == 0) {
+				}else if(chknum == 0) {
 					gui.Alert("있는 채팅방 불러오기");
+					home.newClientChat(this, groupid);
 					break;
 				}
 				else {

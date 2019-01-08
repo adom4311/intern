@@ -361,11 +361,22 @@ public class ServerBack {
 						}
 						
 						System.out.println(buffer.toString("UTF-8"));
-						String data = buffer.toString("UTF-8");
+						String data[] = buffer.toString("UTF-8").split(",");
 						
 						buffer.flush();
 						int chk = sDao.createGroup(connectId,data); // 채팅방 개설
-						// 채팅방 groupid를 받아와야할듯?
+						String groupid = sDao.selectGroupid(connectId,data); // groupid 가져오기
+						System.out.println("groupid = " + groupid);
+						
+						int groupidlength = groupid.getBytes("UTF-8").length;
+						byte[] sendData = new byte[Integer.BYTES + 80];
+						byte[] result = intToByteArray(chk);
+						for (int i = 0; i < result.length; i++) {
+							sendData[i] = (byte)result[i];
+						}
+						System.arraycopy(groupid.getBytes("UTF-8"), 0, sendData, Integer.BYTES , groupidlength);
+						System.arraycopy(new byte[80 - groupidlength], 0, sendData, Integer.BYTES + groupidlength, 80 - groupidlength);
+								
 						if(chk > 0) {
 							System.out.println("채팅방 개설 성공");
 						}else if(chk == 0){
@@ -374,7 +385,8 @@ public class ServerBack {
 						else {
 							System.out.println("채팅방 개설 실패");
 						}
-						os.writeInt(chk);
+						
+						os.write(sendData);
 					}// 채팅방개설 END
 					
 				}
