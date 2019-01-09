@@ -27,6 +27,7 @@ public class ServerBack {
 	public static final byte FRILIST = 0x09; // 친구목록
 	public static final byte MESSAGE = 0x07; // 메시지만
 	public static final byte CREATEGROUP = 0x08; // 그룹생성
+	public static final byte OPENCHAT = 0x10; // 그룹생성
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private ServerSocket fileserverSocket;
@@ -435,7 +436,7 @@ public class ServerBack {
 					
 					/* 채티방 개설 */
 					else if(headerBuffer[1] == CREATEGROUP) {
-System.out.println("채팅방 개설");
+						System.out.println("채팅방 개설");
 						
 						byte[] lengthChk = new byte[4]; // 데이터길이
 						lengthChk[0] = headerBuffer[2];
@@ -598,6 +599,70 @@ System.out.println("채팅방 개설");
 						new ServerFileThread(connectId).start();
 					}// 파일메세지 END
 					
+					/* openCHAT */
+					else if(headerBuffer[1] == OPENCHAT) {
+						System.out.println("채팅방 오픈");
+						
+						byte[] lengthChk = new byte[4]; // 데이터길이
+						lengthChk[0] = headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+						
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength]; 
+						
+						// 파일 받을때까지 계속
+						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+							buffer.write(reciveData,0,read);
+							datalength -= read;
+							if(datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						
+						System.out.println(buffer.toString("UTF-8"));
+						reciveData = buffer.toByteArray();
+						buffer.flush();
+						
+						
+						List<String> chatcontent = sDao.selectchatcontent(new String(reciveData,"UTF-8"));
+						int bodylength = 0;
+						if(chatcontent.size() > 0 ) {
+							for (int i = 0; i < chatcontent.size(); i++) {
+								System.out.println(chatcontent.get(i));
+								bodylength += chatcontent.get(i).getBytes("UTF-8").length;
+							}
+							bodylength += (chatcontent.size() -1); // 구분자 
+						}
+						// 보낼데이터 제작
+						byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
+						sendData[0] = STX; // 시작?
+						sendData[1] = OPENCHAT; // 로그인
+						byte[] bodySize = intToByteArray(bodylength);
+						System.out.println("보낼 데이터의 크기 : " + bodylength);
+						for (int i = 0; i < bodySize.length; i++) {
+							sendData[2+i] = (byte)bodySize[i];
+						} // 보낼 데이터 크기
+
+						byte body[] = new byte[bodylength];
+
+						if(chatcontent.size() > 0 ) {
+							int cursor = 6;
+							int i = 0;
+							for (; i < chatcontent.size() -1; i++) {
+								byte[] str = (chatcontent.get(i) + "&").getBytes("UTF-8");
+								System.arraycopy(str, 0, sendData, cursor, str.length);
+								cursor += str.length;
+							}		
+							byte[] str = (chatcontent.get(i)).getBytes("UTF-8");
+							System.arraycopy(str, 0, sendData, cursor, str.length);
+						}
+						os.write(sendData);
+					}// openCHAT END
 				}
 			}catch (SocketException e) {
 				currentClientMap.remove(connectId);

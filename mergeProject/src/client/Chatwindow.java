@@ -48,6 +48,8 @@ public class Chatwindow {
 	
 	private ClientBack clientback;
 	private Socket filesocket;
+	
+	String[] oldchatcontent;
 
 
 	public Chatwindow(String id, String groupid, ClientBack clientback, Socket filesocket) {
@@ -61,6 +63,7 @@ public class Chatwindow {
 		textArea = new TextArea(30, 80);
 		this.clientback = clientback;
 		this.filesocket=filesocket;
+		clientback.openChat(groupid);
 
 //		new ChatClientReceiveThread(clientback.getSocket(),filesocket).start();
 	}
