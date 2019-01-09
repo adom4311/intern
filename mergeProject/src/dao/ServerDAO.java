@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ServerDAO {
 	String driver = "org.mariadb.jdbc.Driver";
@@ -349,10 +351,30 @@ public class ServerDAO {
 		return chk;
 	}
 
-	public String selectGroupmember(String sendGroupid) {
+	public List<String> selectGroupmember(String sendGroupid) {
+		List<String> groupmemberList = new ArrayList<String>();
 		
+		if(con != null) {
+			String query = "select userid from chatmember where groupid = ?";
+			try {
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(sendGroupid.getBytes("UTF-8"),"UTF-8"));
+
+		        rs = pstmt.executeQuery();
+		        
+		        while(rs.next()) {
+		        	groupmemberList.add(rs.getString(1));
+		        }		        
+		        
+		        pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 		
-		return null;
+		return groupmemberList;
 	}
 	
 	

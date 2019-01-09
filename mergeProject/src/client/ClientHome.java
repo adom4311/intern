@@ -264,7 +264,8 @@ public class ClientHome extends JFrame {
 						System.out.println("친구 목록 더블클릭"); 
 //						
 //						//그룹 채팅방 생성
-						clientback.createGroup(friendid);
+						String[] str = {friendid};
+						clientback.createGroup(str);
 						
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}

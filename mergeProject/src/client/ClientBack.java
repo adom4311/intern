@@ -110,8 +110,8 @@ public class ClientBack {
 				this.clientback = clientback; 
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
-//				fis = new DataInputStream(filesocket.getInputStream());
-//				fos = new DataOutputStream(filesocket.getOutputStream());
+				fis = new DataInputStream(filesocket.getInputStream());
+				fos = new DataOutputStream(filesocket.getOutputStream());
 				System.out.println("클라이언트 리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -403,31 +403,44 @@ public class ClientBack {
 					
 					/* message */
 					else if (headerBuffer[1] == MSG) {
-//						System.out.println("메세지");
-//						byte[] lengthChk = new byte[4];
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("데이터길이 : " + datalength);
-//
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength];
-//
-//						// 파일 받을때까지 계속
-//						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
-//							buffer.write(reciveData, 0, read);
-//							datalength -= read;
-//							if (datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						System.out.println(buffer.toString("UTF-8"));
-//						String data[] = buffer.toString("UTF-8").split(",");
-//						buffer.flush();
-//						System.out.println("data1의 크기는 : " + data[0].length());
+						System.out.println("메세지");
+						byte[] lengthChk = new byte[4];
+						lengthChk[0] = headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength];
+
+						// 파일 받을때까지 계속
+						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
+							buffer.write(reciveData, 0, read);
+							datalength -= read;
+							if (datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						System.out.println(buffer.toString("UTF-8"));
+						String data[] = buffer.toString("UTF-8").split(",");
+						buffer.flush();
+						System.out.println("data1의 크기는 : " + data[0].length());
+						String userid = data[0];
+						String groupid = data[1];
+						String msg = data[2];
+
+						if(chatMap.get(groupid) == null) {
+							chatwindow = new Chatwindow(id, groupid, clientback, filesocket );
+							chatMap.put(groupid, chatwindow);
+							chatwindow.show();
+						}
+						chatMap.get(groupid).appendMSG(data[0] + ":" + data[2] + "\n");
+						
+//						textArea.append(data[0] + ":" + data[2]);
+//						textArea.append("\n");
 					}
 					/* 파일 받기 */
 					else if(headerBuffer[1]==FMSG) {
@@ -668,9 +681,14 @@ public class ClientBack {
 		}
 	}
 
-	public void createGroup(String friendid) { // 채팅방 생성
+	public void createGroup(String[] friendids) { // 채팅방 생성
 		try {
-			int bodylength = friendid.getBytes("UTF-8").length; // 아이디
+			int bodylength = 0;
+			for (int i = 0; i < friendids.length; i++) {
+				bodylength += friendids[i].getBytes("UTF-8").length; 
+			}
+			System.out.println();
+			bodylength += (friendids.length - 1);
 			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
 			
 			sendData[0] = STX; // 시작?
@@ -681,9 +699,17 @@ public class ClientBack {
 				sendData[2+i] = (byte)bodySize[i];
 			} // 보낼 데이터 크기
 			byte body[] = new byte[bodylength];
-			body = friendid.getBytes("UTF-8");
+			StringBuffer str = new StringBuffer();
+			int i;
+			for (i = 0; i < friendids.length - 1; i++) {
+				str.append(friendids[i]);
+				str.append(",");
+			}
+			str.append(friendids[i]);
 			
 			System.out.println("body length" + body.length);
+			
+			body = str.toString().getBytes("UTF-8");
 			
 			System.arraycopy(body, 0, sendData, 6, body.length);
 			

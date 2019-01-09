@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.rowset.spi.SyncResolver;
@@ -64,35 +65,36 @@ public class ServerBack {
 				(((int)bytes[3] & 0xff)));
 	}
 
-	private void broadcast(String data) {
+	private void broadcast(String data, List<String> groupmember) {
 		synchronized (currentClientMap) {
-			System.out.println("접속 클라이언트 개수 :ㅣ " + currentClientMap.size());
-			DataOutputStream os;
-			for (Object key : currentClientMap.keySet()) {
-				System.out.println(key);
-				os = currentClientMap.get(key);
-				try {
-					int bodylength = data.getBytes("UTF-8").length;
-					byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터(broad cast)
-					// 헤더
+			try {
+				int bodylength = data.getBytes("UTF-8").length;
+				byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터(broad cast)
+				// 헤더
 
-					sendData[0] = STX;
-					sendData[1] = MSG;
-					byte[] bodySize = intToByteArray(bodylength);
-					System.out.println("보낼 데이터 크기 : " + bodylength);
-					for (int i = 0; i < bodySize.length; i++) {
-						sendData[2 + i] = (byte) bodySize[i];
-					}
-					byte body[] = new byte[bodylength];
-					body = data.getBytes("UTF-8");
-					System.arraycopy(body, 0, sendData, 6, body.length);
-
-					os.write(sendData);
-					os.flush();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				sendData[0] = STX;
+				sendData[1] = MSG;
+				byte[] bodySize = intToByteArray(bodylength);
+				System.out.println("보낼 데이터 크기 : " + bodylength);
+				for (int i = 0; i < bodySize.length; i++) {
+					sendData[2 + i] = (byte) bodySize[i];
 				}
+				byte body[] = new byte[bodylength];
+				body = data.getBytes("UTF-8");
+				System.arraycopy(body, 0, sendData, 6, body.length);
+				
+				DataOutputStream os;
+				for (int i = 0; i < groupmember.size(); i++) {
+					os = currentClientMap.get(groupmember.get(i));
+					System.out.println(os);
+					if(os != null) {
+						os.write(sendData);
+						os.flush();
+					}
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
@@ -462,7 +464,10 @@ public class ServerBack {
 						buffer.flush();
 						int chk = sDao.createGroup(connectId,data); // 채팅방 개설
 						String groupid = sDao.selectGroupid(connectId,data); // groupid 가져오기
-						System.out.println("groupid = " + groupid);
+						
+						//이전채팅내용 가져오기
+						
+						
 						
 						// 보낼데이터 제작
 						int bodylength = 84; // result(4byte) + groupid(80byte)
@@ -534,11 +539,14 @@ public class ServerBack {
 						// 채팅내용 서버에 저장
 						int chk = sDao.insertMSG(sendUserid,sendGroupid,sendMsg);
 						// groupid로 보낼사람들 조회
-						String groupmember = sDao.selectGroupmember(sendGroupid);
+						List<String> groupmember = sDao.selectGroupmember(sendGroupid);
+						for (int i = 0; i < groupmember.size(); i++) {
+							System.out.println(groupmember.get(i));
+						}
 						// currentMap에서 일치되는 사람 조회
 						// 클라이언트에 전송
 						
-//						broadcast(data[0] + "," + data[1] + "," + data[2]);
+						broadcast(data[0] + "," + data[1] + "," + data[2] , groupmember);
 
 					}// 메세지 받기 END
 					
