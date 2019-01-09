@@ -435,7 +435,7 @@ public class ServerBack {
 					
 					/* 채티방 개설 */
 					else if(headerBuffer[1] == CREATEGROUP) {
-						System.out.println("채팅방 개설");
+System.out.println("채팅방 개설");
 						
 						byte[] lengthChk = new byte[4]; // 데이터길이
 						lengthChk[0] = headerBuffer[2];
@@ -465,17 +465,25 @@ public class ServerBack {
 						int chk = sDao.createGroup(connectId,data); // 채팅방 개설
 						String groupid = sDao.selectGroupid(connectId,data); // groupid 가져오기
 						
+						
 						//이전채팅내용 가져오기
 						
-						
-						
+						List<String> chatcontent = sDao.selectchatcontent(groupid);
+						int Listsize = 0;
+						if(chatcontent.size() > 0 ) {
+							for (int i = 0; i < chatcontent.size(); i++) {
+								System.out.println(chatcontent.get(i));
+								Listsize += chatcontent.get(i).getBytes("UTF-8").length;
+							}
+							Listsize += (chatcontent.size() -1); // 구분자 
+						}
 						// 보낼데이터 제작
 						int bodylength = 84; // result(4byte) + groupid(80byte)
-						byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
+						byte sendData[] = new byte[6+ bodylength + Listsize]; // 전체 보낼 데이터
 						sendData[0] = STX; // 시작?
 						sendData[1] = CREATEGROUP; // 채팅방 개설
-						byte[] bodySize = intToByteArray(bodylength);
-						System.out.println("보낼 데이터의 크기 : " + bodylength);
+						byte[] bodySize = intToByteArray((bodylength + Listsize));
+						System.out.println("채팅방 개설시 보낼 데이터의 크기 : " + (bodylength + Listsize));
 						for (int i = 0; i < bodySize.length; i++) {
 							sendData[2+i] = (byte)bodySize[i];
 						} // 보낼 데이터 크기
@@ -491,7 +499,19 @@ public class ServerBack {
 						System.arraycopy(groupid.getBytes("UTF-8"), 0, body, 4, groupidlength);
 						System.arraycopy(new byte[80 - groupidlength], 0, body, 4 + groupidlength, 80 - groupidlength);
 						System.arraycopy(body, 0, sendData, 6, bodylength);
-								
+						
+						if(chatcontent.size() > 0 ) {
+							int cursor = 6 + bodylength; // 90
+							int i = 0;
+							for (; i < chatcontent.size() -1; i++) {
+								byte[] str = (chatcontent.get(i) + "&").getBytes("UTF-8");
+								System.arraycopy(str, 0, sendData, cursor, str.length);
+								cursor += str.length;
+							}		
+							byte[] str = (chatcontent.get(i)).getBytes("UTF-8");
+							System.arraycopy(str, 0, sendData, cursor, str.length);
+						}
+						
 						if(chk > 0) {
 							System.out.println("채팅방 개설 성공");
 						}else if(chk == 0){

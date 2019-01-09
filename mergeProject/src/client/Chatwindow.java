@@ -146,7 +146,7 @@ public class Chatwindow {
 		String msg = textField.getText();
 		clientback.sendMessage(msg,groupid);
 		textField.setText("");
-//		textField.requestFocus();
+		textField.requestFocus();
 	}
 
 	// file transfer
@@ -239,6 +239,5 @@ public class Chatwindow {
 
 	public void appendMSG(String msg) {
 		textArea.append(msg);
-		
 	}
 }

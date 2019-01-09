@@ -376,6 +376,37 @@ public class ServerDAO {
 		
 		return groupmemberList;
 	}
+
+	public List<String> selectchatcontent(String groupid) {
+		List<String> chatcontent = new ArrayList<String>();
+		
+		if(con != null) {
+			String query = "select * from chatcontent where groupid = ?";
+			try {
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+
+		        rs = pstmt.executeQuery();
+		        
+		        while(rs.next()) {
+		        	String str;
+		        	str = rs.getString("userid") + "," 
+		        			+ rs.getString("groupid") + ","
+		        			+ rs.getString("content") + ","
+		        			+ rs.getDate("sendtime"); // À¯Àú
+		        	chatcontent.add(str);
+		        }		        
+		        
+		        pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return chatcontent;
+	}
 	
 	
    

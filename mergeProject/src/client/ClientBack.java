@@ -349,11 +349,12 @@ public class ClientBack {
 						lengthChk[2] = headerBuffer[4];
 						lengthChk[3] = headerBuffer[5];
 						int datalength = byteArrayToInt(lengthChk);
-						System.out.println("데이터길이 : " + datalength);
+						System.out.println("채팅방 개설시 받은 데이터길이 : " + datalength);
 						
 						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 						int read;
 						reciveData = new byte[datalength]; 
+						int temp = datalength;
 						
 						// 파일 받을때까지 계속 
 						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
@@ -364,26 +365,35 @@ public class ClientBack {
 							}
 						}
 						
+						
+						reciveData = buffer.toByteArray();
+						
 						byte chkByte[] = new byte[4];
 						byte groupidByte[] = new byte[80];
+						byte chatcontent[] = new byte[temp - 84];
 						
-						System.arraycopy(reciveData, 0, chkByte, 0, chkByte.length);
-						System.arraycopy(reciveData, chkByte.length, groupidByte, 0, groupidByte.length);
+						System.arraycopy(reciveData, 0, chkByte, 0, chkByte.length); // chk 짜르고
+						System.arraycopy(reciveData, chkByte.length, groupidByte, 0, 80); //groupid 짜르고
+						System.arraycopy(reciveData, 84, chatcontent, 0, temp - 84); //groupid 짜르고
+						
 						
 						System.out.println("채팅방개설쪽  chk : " + byteArrayToInt(chkByte));
 						System.out.println("채팅방개설쪽  chk : " + new String(groupidByte,"UTF-8"));
 						
 						int chknum = byteArrayToInt(chkByte);
 						String groupid = new String(groupidByte,"UTF-8").trim();
-						System.out.println("groupid : " + groupid);
-						System.out.println("groupid : " + groupid.length());
-						//채팅방 groupid도 받아오기 -- 해야할것
-						//받아온 groupid를 채팅방에 보내서 채팅할시에 groupid 사용가능하게.
+						
+						String[] strcontent = new String(chatcontent,"UTF-8").split("&");
+						for (int j = 0; j < strcontent.length; j++) {
+							System.out.println(strcontent[j]);
+						}
+						
+						
 						if(chknum > 0) {
 							gui.Alert("채티방 개설 성공!");
 							if(chatMap.get(groupid) == null) {
 								System.out.println("채티방 개설");
-								chatwindow = new Chatwindow(id, groupid, clientback, filesocket );
+								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
 								chatMap.put(groupid, chatwindow);
 								chatwindow.show();
 							}
@@ -394,6 +404,7 @@ public class ClientBack {
 								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
 								chatMap.put(groupid, chatwindow);
 								chatwindow.show();
+								oldcontentView(chatwindow, strcontent);
 							}
 						}
 						else {
@@ -489,6 +500,15 @@ public class ClientBack {
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			}
+		}
+
+		private void oldcontentView(Chatwindow chatwindow, String[] strcontent) {
+			for (int i = 0; i < strcontent.length; i++) {
+				System.out.println(strcontent[i]);
+				String[] data = strcontent[i].split(",");
+				if( data.length > 0)
+					chatwindow.appendMSG(data[0] + ":" + data[2] + "\n");
 			}
 		}
 	}
