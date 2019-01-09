@@ -7,18 +7,19 @@ groupname varchar(45),
 primary key (groupid)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 insert into chatgroup(userid,groupname) values('1','1');
 
 
 -chatcontent-
 
-create table chatcontent(
-userid varchar(20),
-groupid varchar(45),
-content varchar(1000),
-attach MEDIUMBLOB,
-sendtime date
-)
+CREATE TABLE chatcontent
+(
+    `userid`    varchar2(20)     NOT NULL    COMMENT '보낸사람', 
+    `groupid`   varchar2(80)           NOT NULL    COMMENT '채팅방 아이디', 
+    `content`   VARCHAR2(1000)    NULL        COMMENT '채팅내용', 
+    `sendtime`  datetime      NOT NULL    COMMENT '보낸시간', 
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -user-
 create table user(

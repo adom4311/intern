@@ -28,9 +28,15 @@ public class ServerBack {
 	public static final byte CREATEGROUP = 0x08; // 그룹생성
 	
 	private ServerSocket serverSocket; // 서버소켓
+	private ServerSocket fileserverSocket;
+
 	private Socket socket; // 받아올 소켓
+	private Socket filesocket;
+
 	/* 현재 접속중인 사용자들의 정보 */
 	private Map<String, DataOutputStream> currentClientMap = new HashMap<String, DataOutputStream>();
+	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
+
 	private int non_login_increment = 0;
     ServerDAO sDao;
 	
@@ -96,9 +102,14 @@ public class ServerBack {
 		try {
 			sDao = new ServerDAO();
 			serverSocket = new ServerSocket(1993); // 서버 소켓 생성
+			fileserverSocket = new ServerSocket(1994);
+
 			System.out.println("---서버 오픈---");
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
+				filesocket=fileserverSocket.accept();
+
+				
 				System.out.println(socket.getInetAddress() + "에서 접속"); // IP
 				
 				Receiver receiver = new Receiver(socket);
@@ -489,6 +500,7 @@ public class ServerBack {
 					
 					// 메세지 받기
 					else if (headerBuffer[1] == MSG) {
+						System.out.println("메세지");
 						System.out.println(connectId + "가 메세지를 보냅니다.");
 						byte[] lengthChk = new byte[4];
 						lengthChk[0] = headerBuffer[2];
@@ -496,7 +508,7 @@ public class ServerBack {
 						lengthChk[2] = headerBuffer[4];
 						lengthChk[3] = headerBuffer[5];
 						int datalength = byteArrayToInt(lengthChk);
-						System.out.println("서버 데이터 길이: " + datalength);
+						System.out.println("데이터길이 : " + datalength);		
 						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 						int read;
 						reciveData = new byte[datalength];
@@ -512,9 +524,21 @@ public class ServerBack {
 
 						System.out.println(buffer.toString("UTF-8"));
 						String data[] = buffer.toString("UTF-8").split(",");
+						
+						String sendUserid = data[0]; // 아이디
+						String sendGroupid = data[1]; // 그룹아이디
+						String sendMsg = data[2]; // msg // msg가 "" 일때 에러
 
 						buffer.flush();
-						broadcast(data[0] + "," + data[1] + "," + data[2]);
+						
+						// 채팅내용 서버에 저장
+						int chk = sDao.insertMSG(sendUserid,sendGroupid,sendMsg);
+						// groupid로 보낼사람들 조회
+						String groupmember = sDao.selectGroupmember(sendGroupid);
+						// currentMap에서 일치되는 사람 조회
+						// 클라이언트에 전송
+						
+//						broadcast(data[0] + "," + data[1] + "," + data[2]);
 
 					}// 메세지 받기 END
 					
@@ -548,6 +572,7 @@ public class ServerBack {
 					
 				}
 			}catch (SocketException e) {
+				currentClientMap.remove(connectId);
 				System.out.println(connectId + "님이 클라이언트 종료");
 			}catch (Exception e) {
 				e.printStackTrace();

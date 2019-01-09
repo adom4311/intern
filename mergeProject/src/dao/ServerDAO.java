@@ -323,6 +323,37 @@ public class ServerDAO {
 		}
 		return groupid;
 	}
+
+	public int insertMSG(String sendUserid, String sendGroupid, String sendMsg) {
+		int chk = 0 ;
+		if(con != null) {
+			String query = "insert into chatcontent values(?,?,?,now())";
+			try {
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(sendUserid.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(sendGroupid.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(3, new String(sendMsg.getBytes("UTF-8"),"UTF-8"));
+
+		        chk = pstmt.executeUpdate();
+		        pstmt.close();
+		        if(chk >=0) {
+		        	con.commit();
+		        }else
+		        	con.rollback();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return chk;
+	}
+
+	public String selectGroupmember(String sendGroupid) {
+		
+		
+		return null;
+	}
 	
 	
    

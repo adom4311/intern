@@ -3,8 +3,14 @@ package client;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientBack {
 	public static final byte STX = 0x02; // 통신 시작
@@ -22,12 +28,18 @@ public class ClientBack {
 	private String id;
 	private String pw;
 	private Socket socket;
+	private Socket filesocket;
 	private ClientGUI gui;
 	private ClientHome home;
+	private Chatwindow chatwindow;
+	private Map<String,Chatwindow> chatMap = new HashMap<String, Chatwindow>();
 	private DataInputStream is;
 	private DataOutputStream os;
+	private DataInputStream fis;
+	private DataOutputStream fos;
 	private String SERVER_ADDR = "127.0.0.1";
 	private int PORT = 1993;
+	private int FILE_PORT = 1994;
 	
 	
 	public void setId(String i) {
@@ -58,6 +70,10 @@ public class ClientBack {
 		return this.socket;
 	}
 	
+	public Socket getfilesocket(){
+		return this.filesocket;
+	}
+	
 	
 	
 	
@@ -69,16 +85,33 @@ public class ClientBack {
 		connect();
 	}
 	
+	
+	//long to byte for file transfer
+	public byte[] longToBytes(long x) {
+	    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+	    buffer.putLong(x);
+	    return buffer.array();
+	}
+
+	public long bytesToLong(byte[] bytes) {
+	    ByteBuffer buffer = ByteBuffer.wrap(bytes);
+	   
+	    return buffer.getLong();
+	}
+	
+	
 	// 받기만 하는 쓰레드
 	class ClientReceiver extends Thread{
 		private DataInputStream is;
 		private DataOutputStream os;
 		private ClientBack clientback;
-		public ClientReceiver(Socket socket, ClientBack clientback) {
+		public ClientReceiver(Socket socket, Socket filesocket, ClientBack clientback) {
 			try {
 				this.clientback = clientback; 
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
+//				fis = new DataInputStream(filesocket.getInputStream());
+//				fos = new DataOutputStream(filesocket.getOutputStream());
 				System.out.println("클라이언트 리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -341,21 +374,104 @@ public class ClientBack {
 						System.out.println("채팅방개설쪽  chk : " + new String(groupidByte,"UTF-8"));
 						
 						int chknum = byteArrayToInt(chkByte);
-						String groupid = new String(groupidByte,"UTF-8");
+						String groupid = new String(groupidByte,"UTF-8").trim();
 						System.out.println("groupid : " + groupid);
+						System.out.println("groupid : " + groupid.length());
 						//채팅방 groupid도 받아오기 -- 해야할것
 						//받아온 groupid를 채팅방에 보내서 채팅할시에 groupid 사용가능하게.
 						if(chknum > 0) {
 							gui.Alert("채티방 개설 성공!");
-							home.newClientChat(clientback, groupid);
+							if(chatMap.get(groupid) == null) {
+								System.out.println("채티방 개설");
+								chatwindow = new Chatwindow(id, groupid, clientback, filesocket );
+								chatMap.put(groupid, chatwindow);
+								chatwindow.show();
+							}
 						}else if(chknum == 0) {
 							gui.Alert("있는 채팅방 불러오기");
-							home.newClientChat(clientback, groupid);
+							if(chatMap.get(groupid) == null) {
+								System.out.println("있는 채팅방");
+								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
+								chatMap.put(groupid, chatwindow);
+								chatwindow.show();
+							}
 						}
 						else {
 							gui.Alert("채티방 개설 실패");
 						}
 					}// 채팅방 개설 END
+					
+					/* message */
+					else if (headerBuffer[1] == MSG) {
+//						System.out.println("메세지");
+//						byte[] lengthChk = new byte[4];
+//						lengthChk[0] = headerBuffer[2];
+//						lengthChk[1] = headerBuffer[3];
+//						lengthChk[2] = headerBuffer[4];
+//						lengthChk[3] = headerBuffer[5];
+//						int datalength = byteArrayToInt(lengthChk);
+//						System.out.println("데이터길이 : " + datalength);
+//
+//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+//						int read;
+//						reciveData = new byte[datalength];
+//
+//						// 파일 받을때까지 계속
+//						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
+//							buffer.write(reciveData, 0, read);
+//							datalength -= read;
+//							if (datalength <= 0) { // 다 받으면 break
+//								break;
+//							}
+//						}
+//						System.out.println(buffer.toString("UTF-8"));
+//						String data[] = buffer.toString("UTF-8").split(",");
+//						buffer.flush();
+//						System.out.println("data1의 크기는 : " + data[0].length());
+					}
+					/* 파일 받기 */
+					else if(headerBuffer[1]==FMSG) {
+						System.out.println("파일");
+						byte[] lengthChk = new byte[4];
+						lengthChk[0]=headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength];
+
+						// 파일 받을때까지 계속
+						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
+							buffer.write(reciveData, 0, read);
+							datalength -= read;
+							if (datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						System.out.println(buffer.toString("UTF-8"));
+						String data[] = buffer.toString("UTF-8").split(",");
+						buffer.flush();
+						
+						InputStream in = filesocket.getInputStream();
+						OutputStream out = new FileOutputStream("C:\\Users\\user\\Desktop\\file\\client\\abc.jpg");//data[1];
+						byte[] bytes = new byte[16*1024];
+						byte[] sizebyte = new byte[8];
+						int count;
+						System.out.println("여기?");
+						int files=in.read(sizebyte);
+						System.out.println("클라이언트가 받는 파일 크기는 : "+files);
+						long length = bytesToLong(sizebyte);
+						while ((count = in.read(bytes)) > 0) {
+				            out.write(bytes, 0, count);
+				            length-=count;
+							System.out.println(length);
+							if(length<=0) break;
+				        }
+					}// 파일받기 END
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
@@ -385,13 +501,18 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
+			filesocket = new Socket(SERVER_ADDR,FILE_PORT);
+
 			System.out.println("서버와 연결됨");
 			
-			ClientReceiver receiver = new ClientReceiver(socket, this);
+			ClientReceiver receiver = new ClientReceiver(socket, filesocket, this);
 			receiver.start();
 			
 			is = new DataInputStream(socket.getInputStream());
 			os = new DataOutputStream(socket.getOutputStream());
+			
+//			fis = new DataInputStream(filesocket.getInputStream());
+//			fos = new DataOutputStream(filesocket.getOutputStream());
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -521,43 +642,30 @@ public class ClientBack {
 		}
 	}
 
-	public void sendMessage(String msg) { // 채팅 전송
-//		try {
-//			int bodylength = msg.getBytes("UTF-8").length; // 채팅 길이
-//			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
-//			
-//			sendData[0] = STX; // 시작?
-//			sendData[1] = MESSAGE; // 메시지만
-//			byte[] bodySize = intToByteArray(bodylength);
-//			System.out.println("보낼 데이터의 크기 : " + bodylength);
-//			for (int i = 0; i < bodySize.length; i++) {
-//				sendData[2+i] = (byte)bodySize[i];
-//			} // 보낼 데이터 크기
-//			byte body[] = new byte[bodylength];
-//			body = msg.getBytes("UTF-8");
-//			
-//			System.arraycopy(body, 0, sendData, 6, body.length);
-//			
-//			System.out.println("보낼 데이터 : " + new String(body) + sendData.length);
-//
-//			os.write(sendData);
-//			os.flush();
-//			
-//			while(is!=null) {
-//				int chk = is.readInt();
-//				if(chk > 0) {
-//					System.out.println("메시지 전송 성공");
-//					break;
-//				}else {
-//					System.out.println("메시지 전송 실패");
-//					break;
-//				}
-//			}
-//			
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+	public void sendMessage(String msg, String groupid) { // 채팅 전송
+		try {
+			int bodylength = id.getBytes("UTF-8").length + groupid.getBytes("UTF-8").length + msg.getBytes("UTF-8").length
+					+ 2;// ,포함
+			byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터
+			// 헤더생성(flag와 body의 크기)
+			sendData[0] = STX;
+			sendData[1] = MSG;
+			byte[] bodySize = intToByteArray(bodylength);
+			System.out.println("보낼 데이터 크기 : " + bodylength);
+			for (int i = 0; i < bodySize.length; i++) {
+				sendData[2 + i] = (byte) bodySize[i];
+			}
+			// body생성
+			byte body[] = new byte[bodylength];
+			body = (id + "," + groupid + "," + msg).getBytes("UTF-8");
+			System.arraycopy(body, 0, sendData, 6, body.length);
+
+			os.write(sendData);
+			os.flush();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void createGroup(String friendid) { // 채팅방 생성

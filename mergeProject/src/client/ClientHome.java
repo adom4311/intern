@@ -176,10 +176,6 @@ public class ClientHome extends JFrame {
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				menuInt = 4;
-				System.out.println(clientback.getId());
-				System.out.println(userid);
-				new Chatwindow(userid,"q",clientback.getSocket()).show();
-				
 				
 //				scrollPane.setViewportView(chatGrouptable);
 			}
@@ -289,12 +285,4 @@ public class ClientHome extends JFrame {
 		}
 
 	}
-	
-	public void newClientChat(ClientBack clientback, String groupid) {
-//		new Chatwindow(userid,"q",clientback.getSocket()).show();
-		new Chatwindow("q","password ют╥б",clientback.getSocket()).show();
-//		new ClientChat().start(clientback, groupid);
-	}
-	
-	
 }
