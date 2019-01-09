@@ -144,7 +144,8 @@ public class Chatwindow {
 
 	private void sendMessage() {
 		String msg = textField.getText();
-		clientback.sendMessage(msg,groupid);
+		if(!msg.equals(""))
+			clientback.sendMessage(msg,groupid);
 		textField.setText("");
 		textField.requestFocus();
 	}

@@ -390,7 +390,6 @@ public class ClientBack {
 						
 						
 						if(chknum > 0) {
-							gui.Alert("채티방 개설 성공!");
 							if(chatMap.get(groupid) == null) {
 								System.out.println("채티방 개설");
 								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
@@ -398,12 +397,12 @@ public class ClientBack {
 								chatwindow.show();
 							}
 						}else if(chknum == 0) {
-							gui.Alert("있는 채팅방 불러오기");
 							if(chatMap.get(groupid) == null) {
 								System.out.println("있는 채팅방");
 								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
 								chatMap.put(groupid, chatwindow);
 								chatwindow.show();
+								System.out.println("채팅들의 크기는" + strcontent.length);
 								oldcontentView(chatwindow, strcontent);
 							}
 						}
@@ -505,9 +504,9 @@ public class ClientBack {
 
 		private void oldcontentView(Chatwindow chatwindow, String[] strcontent) {
 			for (int i = 0; i < strcontent.length; i++) {
-				System.out.println(strcontent[i]);
+				System.out.println("append찍기 " + strcontent[i]);
 				String[] data = strcontent[i].split(",");
-				if( data.length > 0)
+				if( data.length > 1)
 					chatwindow.appendMSG(data[0] + ":" + data[2] + "\n");
 			}
 		}
