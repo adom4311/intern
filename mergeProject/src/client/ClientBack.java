@@ -404,7 +404,6 @@ public class ClientBack {
 								chatMap.put(groupid, chatwindow);
 								chatwindow.show();
 								System.out.println("채팅들의 크기는" + strcontent.length);
-//								oldcontentView(chatwindow, strcontent);
 							}
 						}
 						else {
@@ -450,9 +449,6 @@ public class ClientBack {
 						}else {
 							chatMap.get(groupid).appendMSG(data[0] + ":" + data[2] + "\n");
 						}
-						
-//						textArea.append(data[0] + ":" + data[2]);
-//						textArea.append("\n");
 					}
 					/* 파일 받기 */
 					else if(headerBuffer[1]==FMSG) {
@@ -531,8 +527,6 @@ public class ClientBack {
 							String data[] = strcontent[0].split(",");
 							oldcontentView(chatMap.get(data[1]), strcontent);
 						}
-						
-						
 					}// OPENCHAT END
 				}
 			} catch (IOException e1) {
@@ -549,7 +543,6 @@ public class ClientBack {
 			}
 		}
 	}
-	
 	
 	public  int byteArrayToInt(byte bytes[]) {
 		return ((((int)bytes[0] & 0xff) << 24) |
@@ -580,9 +573,8 @@ public class ClientBack {
 			
 			is = new DataInputStream(socket.getInputStream());
 			os = new DataOutputStream(socket.getOutputStream());
-			
-//			fis = new DataInputStream(filesocket.getInputStream());
-//			fos = new DataOutputStream(filesocket.getOutputStream());
+			fis = new DataInputStream(filesocket.getInputStream());
+			fos = new DataOutputStream(filesocket.getOutputStream());
 			
 		} catch (IOException e) {
 			e.printStackTrace();

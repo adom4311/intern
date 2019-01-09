@@ -39,10 +39,8 @@ public class ServerBack {
 	private Map<String, DataOutputStream> currentClientMap = new HashMap<String, DataOutputStream>();
 	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
 
-	private int non_login_increment = 0;
+	private int non_login_increment = 0; // 로그인 전 임시값
     ServerDAO sDao;
-	
-	
 	
 	public static void main(String[] args) {
 		ServerBack serverBack = new ServerBack();
@@ -111,10 +109,7 @@ public class ServerBack {
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
 				filesocket=fileserverSocket.accept();
-
-				
 				System.out.println(socket.getInetAddress() + "에서 접속"); // IP
-				
 				Receiver receiver = new Receiver(socket);
 				receiver.start();
 			}
@@ -397,43 +392,6 @@ public class ServerBack {
 						
 					}// 친구 목록 END
 					
-//					/* 메시지 전송 */
-//					else if(headerBuffer[1] == MESSAGE) {
-//						System.out.println("메시지 전송");
-//						
-//						byte[] lengthChk = new byte[4]; // 데이터길이
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("데이터길이 : " + datalength);
-//						
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength]; 
-//						
-//						// 파일 받을때까지 계속
-//						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
-//							buffer.write(reciveData,0,read);
-//							datalength -= read;
-//							if(datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						
-//						System.out.println(buffer.toString("UTF-8"));
-//						String data = buffer.toString("UTF-8");
-//						
-//						buffer.flush();
-//						int chk = sDao.message(data); // 메시지 DB저장
-//						// 메시지를 전송!
-//						if(chk > 0) {
-//							connectId = data[0];
-//						}
-//						os.writeInt(chk);
-//					}// 메시지 END
-					
 					/* 채티방 개설 */
 					else if(headerBuffer[1] == CREATEGROUP) {
 						System.out.println("채팅방 개설");
@@ -465,7 +423,6 @@ public class ServerBack {
 						buffer.flush();
 						int chk = sDao.createGroup(connectId,data); // 채팅방 개설
 						String groupid = sDao.selectGroupid(connectId,data); // groupid 가져오기
-						
 						
 						//이전채팅내용 가져오기
 						
@@ -623,11 +580,9 @@ public class ServerBack {
 								break;
 							}
 						}
-						
 						System.out.println(buffer.toString("UTF-8"));
 						reciveData = buffer.toByteArray();
 						buffer.flush();
-						
 						
 						List<String> chatcontent = sDao.selectchatcontent(new String(reciveData,"UTF-8"));
 						int bodylength = 0;
