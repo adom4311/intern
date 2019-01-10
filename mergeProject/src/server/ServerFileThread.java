@@ -119,7 +119,7 @@ public class ServerFileThread extends Thread {
 			else
 				System.out.println("실패*********");
 			System.out.println("성공여부");
-			filebroadcast(dir, id, groupid);
+			//filebroadcast(dir, id, groupid);
 
 			// 파일 브로드캐스팅 같은방 사람들에게..
 

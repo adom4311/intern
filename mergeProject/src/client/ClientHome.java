@@ -113,6 +113,7 @@ public class ClientHome extends JFrame {
 	public ClientHome(ClientBack clientBack, String userid) {
 		menuInt = 4;
 		this.clientback = clientBack;
+		
 		setTitle(userid);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 370, 650);
@@ -199,7 +200,7 @@ public class ClientHome extends JFrame {
 		
 
 		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
-		
+		fn_roomList(clientback);
 		scrollPane.setViewportView(chatGrouptable);
 		
 		
