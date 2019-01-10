@@ -28,6 +28,7 @@ public class ServerBack {
 	public static final byte MESSAGE = 0x07; // 메시지만
 	public static final byte CREATEGROUP = 0x08; // 그룹생성
 	public static final byte OPENCHAT = 0x10; // 그룹생성
+	public static final byte ROOM = 0x11; //채팅방목록
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private ServerSocket fileserverSocket;
@@ -132,9 +133,11 @@ public class ServerBack {
 	class Receiver extends Thread{
 		private DataInputStream is;
 		private DataOutputStream os;
+		private Socket socket;
 		String connectId = "GM" + increment();
 		public Receiver(Socket socket) {
 			try {
+				this.socket = socket;
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
 				addClient(connectId,os);
@@ -481,6 +484,42 @@ public class ServerBack {
 						os.write(sendData);
 					}// 채팅방개설 END
 					
+					//채팅방 목록 START
+					else if(headerBuffer[1]==ROOM) {
+						System.out.println(connectId + "가 들어가 있는 방목록 달래");
+						Object rowData[][] = sDao.roomList(connectId); // 친구목록 int , String(4+80) 84
+						int bodylength = rowData.length*84;
+						
+						byte sendData[] = new byte[6 + bodylength];
+						
+						sendData[0] = STX; // 시작?
+						sendData[1] = ROOM; // 채팅방 목록
+						byte[] bodySize = intToByteArray(bodylength);
+						for (int i = 0; i < bodySize.length; i++) {
+							sendData[2+i] = (byte)bodySize[i];
+						} // 보낼 데이터 크기 // 여기선 totalUserCnt
+						
+						byte body[] = new byte[bodylength];
+						int readcnt = 0;
+						for (int i = 0; i < rowData.length; i++) {
+							System.out.println("채팅방 : " + (String)rowData[i][1]);
+							byte roomname[] = String.valueOf(rowData[i][1]).getBytes("UTF-8");
+							int roomnamelength = roomname.length;
+							System.arraycopy(intToByteArray((int)rowData[i][0]), 0, body, readcnt, 4);
+							readcnt += 4;
+							System.arraycopy(roomname, 0, body, readcnt, roomnamelength);
+							readcnt += roomnamelength;
+							System.arraycopy(new byte[80 - roomnamelength], 0, body, readcnt, 80 - roomnamelength);
+							readcnt += 80 - roomnamelength;
+							
+							//총 84byte 씩 반복
+						}
+						
+						System.arraycopy(body, 0, sendData, 6, body.length);
+						
+						os.write(sendData);
+					}
+					
 					// 메세지 받기
 					else if (headerBuffer[1] == MSG) {
 						System.out.println("메세지");
@@ -621,6 +660,12 @@ public class ServerBack {
 				}
 			}catch (SocketException e) {
 				currentClientMap.remove(connectId);
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				System.out.println(connectId + "님이 클라이언트 종료");
 			}catch (Exception e) {
 				e.printStackTrace();

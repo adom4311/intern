@@ -25,6 +25,7 @@ public class ClientBack {
 	public static final byte MESSAGE = 0x07; // 메시지만
 	public static final byte CREATEGROUP = 0x08; // 그룹생성
 	public static final byte OPENCHAT = 0x10; // 그룹생성
+	public static final byte ROOM = 0x11;//채팅방 목록
 	
 	private String id;
 	private String pw;
@@ -528,7 +529,61 @@ public class ClientBack {
 							oldcontentView(chatMap.get(data[1]), strcontent);
 						}
 					}// OPENCHAT END
+					
+					/* ROOM  목록*/
+					else if(headerBuffer[1]==ROOM) {
+						Object rowData[][];
+						System.out.println("채팅방 목록");
+						byte[] lengthChk = new byte[4]; // 데이터길이
+						lengthChk[0] = headerBuffer[2];
+						lengthChk[1] = headerBuffer[3];
+						lengthChk[2] = headerBuffer[4];
+						lengthChk[3] = headerBuffer[5];
+						int datalength = byteArrayToInt(lengthChk);
+						System.out.println("데이터길이 : " + datalength);
+						
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						int read;
+						reciveData = new byte[datalength]; // 읽는 단위?
+						
+						int start = 0;
+						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
+							System.out.println("start : " + start);
+							System.out.println("read : " + read);
+							
+							buffer.write(reciveData,0,read); // buffer에 reciveData내용 저장 ..뭔가 뒤바뀜
+							start += read;
+							datalength -= read;
+							System.out.println(datalength);
+							if(datalength <= 0) { // 다 받으면 break
+								break;
+							}
+						}
+						reciveData = buffer.toByteArray(); // 버퍼(byte...stream)에 저장된 내용을 바이트 배열에!
+						buffer.flush(); // 버퍼(byte...stream) 비우기
+						
+						System.out.println("친구 목록 받기 성공");
+						System.out.println("총 갯수 : " + reciveData.length/84);
+						System.out.println("총개수*84 : " + reciveData.length);
+						byte num[] = new byte[4];
+						byte roomname[] = new byte[80];
+						rowData = new Object[reciveData.length/84][3];
+						
+						int cnt = 0;
+						for (int i = 0; i < reciveData.length/84; i++) {
+							System.arraycopy(reciveData, cnt, num, 0, 4);
+							cnt += 4;
+							System.arraycopy(reciveData, cnt, roomname, 0, 80);
+							cnt += 80;
+							rowData[i][0] = byteArrayToInt(num);
+							rowData[i][1] = new String(roomname,"UTF-8").trim();
+					
+						}
+						home.getFrame().fn_roomListView(rowData);
+					}
 				}
+				
+				
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -704,6 +759,24 @@ public class ClientBack {
 		}
 	}
 
+	public void roomList() {
+		try {
+			byte sendData[] = new byte[6];
+			sendData[0]=STX;
+			sendData[1]=ROOM;
+			byte[] bodySize = intToByteArray(0);
+			for(int i=0;i<bodySize.length;i++) {
+				sendData[2+i] = (byte)bodySize[i];
+			}
+			os.write(sendData);
+			os.flush();
+			
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public void sendMessage(String msg, String groupid) { // 채팅 전송
 		try {
 			int bodylength = id.getBytes("UTF-8").length + groupid.getBytes("UTF-8").length + msg.getBytes("UTF-8").length

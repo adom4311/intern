@@ -22,6 +22,7 @@ public class ClientHome extends JFrame {
 	private JPanel contentPane;
 	private ClientBack clientback;
 	private JTextField textField;
+	private JTable roomtable;
 	private JTable chatGrouptable;
 	private JTable findFritable; // 친구 찾기 테이블
 	private JTable friListtable; // 친구 목록 테이블
@@ -29,7 +30,7 @@ public class ClientHome extends JFrame {
 	JScrollPane scrollPane;
 	private int menuInt; // 검색버튼 메뉴 구분자
 	String findFricolumnNames[] = { "번호", "아이디", "상태메세지" };
-	String chatGroupcolumnNames[] = { "번호", "채팅방명", "최근 내용" };
+	String chatGroupcolumnNames[] = { "번호", "채팅방명"};
 
 	/**
 	 * Launch the application.
@@ -110,7 +111,7 @@ public class ClientHome extends JFrame {
 	}
 
 	public ClientHome(ClientBack clientBack, String userid) {
-		menuInt = 1;
+		menuInt = 4;
 		this.clientback = clientBack;
 		setTitle(userid);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -176,8 +177,7 @@ public class ClientHome extends JFrame {
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				menuInt = 4;
-				
-//				scrollPane.setViewportView(chatGrouptable);
+				fn_roomList(clientback);
 			}
 		}); 
 		button_2.setBounds(12, 542, 331, 43);
@@ -239,6 +239,23 @@ public class ClientHome extends JFrame {
         friListtable = new JTable(mod); // 친구 목록 테이블
         friListtable.addMouseListener(new MyMouseListener(2));
 		scrollPane.setViewportView(friListtable);
+	}
+	
+	public void fn_roomList(ClientBack clientback) {
+		menuInt=4;
+		clientback.roomList();
+	}
+	
+	public void fn_roomListView(Object[][] rowData) {
+		DefaultTableModel mod = new DefaultTableModel(rowData, chatGroupcolumnNames) {
+			public boolean isCellEditable(int rowIndex,int mColIndex) {
+				return false;
+			}
+		};
+		roomtable = new JTable(mod);
+		//roomtable.addMouseListener(new MyMouseListener(2));
+		scrollPane.setViewportView(roomtable);
+		
 	}
 	
 	/* 친구 찾기 테이블 클릭 이벤트 */

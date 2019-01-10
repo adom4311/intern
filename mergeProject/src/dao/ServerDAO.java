@@ -151,6 +151,26 @@ public class ServerDAO {
         }
         return chk;
 	}
+	
+	/* 방 목록을 위한 함수*/
+	public int totalRoomCnt(String tempId) {
+		int chk = 0;
+		if( con != null ) {
+            try {
+				pstmt = con.prepareStatement("select count(groupid) from chatgroup where userid = ?");
+				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	return rs.getInt(1);
+		        }
+			} catch (SQLException e) {
+				return -1;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return chk;
+	}
 
 	public int addfri(String connectId, String data) {
 		int chk = 0;
@@ -205,6 +225,32 @@ public class ServerDAO {
         return null;
 	}
 
+	public Object[][] roomList(String connectId){
+		if(con!=null) {
+			try {
+				System.out.println("연결 : "+connectId);
+				Object rowData[][] = new Object[totalRoomCnt(connectId)][2];
+				pstmt = con.prepareStatement("select groupname from chatgroup where userid = ?");
+//				pstmt = con.prepareStatement("select groupid from chatgroup where userid = ?");
+				//groupname  -> groupid 로 임시변경 
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();		        
+		        int i=0;
+		        while(rs.next()) {
+		        	rowData[i][0] = i + 1;
+		        	rowData[i++][1] = rs.getString(1);
+		        }
+		        return rowData;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
 	public int createGroup(String connectId, String data[]) { // data는 friendId
 		Date today = new Date();
 		System.out.println(today);
