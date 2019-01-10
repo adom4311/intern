@@ -86,7 +86,7 @@ public class ServerBack {
 				DataOutputStream os;
 				for (int i = 0; i < groupmember.size(); i++) {
 					os = currentClientMap.get(groupmember.get(i));
-					System.out.println(os);
+					System.out.println("현재접속자의 os " + os);
 					if(os != null) {
 						os.write(sendData);
 						os.flush();

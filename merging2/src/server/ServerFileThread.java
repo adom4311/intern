@@ -119,7 +119,7 @@ public class ServerFileThread extends Thread {
 			else
 				System.out.println("실패*********");
 			System.out.println("성공여부");
-			//filebroadcast(dir, id, groupid);
+			filebroadcast(dir, id, groupid);
 
 			// 파일 브로드캐스팅 같은방 사람들에게..
 
@@ -151,17 +151,24 @@ public class ServerFileThread extends Thread {
 				System.arraycopy(body, 0, sendData, 6, bodylength);
 				List<String> groupmember = sDao.selectGroupmember(groupid);
 				for (int i = 0; i < groupmember.size(); i++) {
-					os = currentClientMap.get(groupmember.get(i));
-					fos = currentClientfileMap.get(groupmember.get(i));
-					System.out.println(os);
-					System.out.println(fos);
-					if (os != null) {
-						os.write(sendData);
-						os.flush();
-					}
-					if (fos != null) {
+					if(currentClientMap.get(groupmember.get(i))!=null&&currentClientfileMap.get(groupmember.get(i))!=null) {
+						os = currentClientMap.get(groupmember.get(i));
+						fos = currentClientfileMap.get(groupmember.get(i));
+						System.out.println(os);
+						System.out.println(fos);
 						new FileTransferThread(groupmember.get(i).toString(), dir, fos).start();
 					}
+					else
+					{
+						continue;
+					}
+					/*
+					 * os = currentClientMap.get(groupmember.get(i)); fos =
+					 * currentClientfileMap.get(groupmember.get(i)); System.out.println(os);
+					 * System.out.println(fos); if (os != null) { os.write(sendData); os.flush(); }
+					 * if (fos != null) { new FileTransferThread(groupmember.get(i).toString(), dir,
+					 * fos).start(); }
+					 */
 				}
 
 			} catch (Exception e) {
