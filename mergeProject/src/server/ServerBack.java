@@ -592,7 +592,7 @@ public class ServerBack {
 
 						System.out.println(buffer.toString("UTF-8"));
 						String data[] = buffer.toString("UTF-8").split(",");
-						new ServerFileThread(connectId).start();
+						new ServerFileThread(connectId,data[1],data[2],sDao,currentClientMap,currentClientfileMap,filesocket).start();
 					}// 파일메세지 END
 					
 					/* openCHAT */

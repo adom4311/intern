@@ -336,6 +336,35 @@ public class ServerDAO {
         return chk;
 	}
 
+	public boolean insertFile(String userid, String roomid, String dir, String time) {
+		int chk=0;
+		if(con!=null) {
+			try {
+				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,?)");
+				pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String(roomid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
+				chk=pstmt.executeUpdate();
+				
+				if(chk >=0) {
+					System.out.println("메세지 전송 성공");
+		        	con.commit();
+		        }else {
+		        	con.rollback();
+		        	System.out.println("메세지 전송 실패");
+		        }
+				
+				
+			}catch(SQLException e){
+				return false;
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
+	}
+	
 	public String selectGroupid(String connectId, String[] data) {
 		String groupid = "";
 		if(con != null) {

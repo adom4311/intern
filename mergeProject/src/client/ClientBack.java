@@ -477,13 +477,13 @@ public class ClientBack {
 						System.out.println(buffer.toString("UTF-8"));
 						String data[] = buffer.toString("UTF-8").split(",");
 						buffer.flush();
-						
+						System.out.println(data[1]);
+						String recdir[]=data[1].split("\\\\");
 						InputStream in = filesocket.getInputStream();
-						OutputStream out = new FileOutputStream("C:\\Users\\user\\Desktop\\file\\client\\abc.jpg");//data[1];
+						OutputStream out = new FileOutputStream("C:\\Users\\user\\Desktop\\file\\client\\"+recdir[recdir.length-1]);//data[1];
 						byte[] bytes = new byte[16*1024];
 						byte[] sizebyte = new byte[8];
 						int count;
-						System.out.println("여기?");
 						int files=in.read(sizebyte);
 						System.out.println("클라이언트가 받는 파일 크기는 : "+files);
 						long length = bytesToLong(sizebyte);
@@ -493,6 +493,8 @@ public class ClientBack {
 							System.out.println(length);
 							if(length<=0) break;
 				        }
+						
+						out.close();
 					}// 파일받기 END
 					
 					/* OPENCHAT */
