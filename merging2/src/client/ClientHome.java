@@ -111,9 +111,8 @@ public class ClientHome extends JFrame {
 	}
 
 	public ClientHome(ClientBack clientBack, String userid) {
-		menuInt = 1;
+		menuInt = 4;
 		this.clientback = clientBack;
-		
 		setTitle(userid);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 370, 650);
@@ -179,6 +178,8 @@ public class ClientHome extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				menuInt = 4;
 				fn_roomList(clientback);
+
+//				scrollPane.setViewportView(chatGrouptable);
 			}
 		}); 
 		button_2.setBounds(12, 542, 331, 43);
@@ -200,7 +201,8 @@ public class ClientHome extends JFrame {
 		
 
 		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
-//		fn_roomList(clientback);
+		fn_roomList(clientback);
+
 		scrollPane.setViewportView(chatGrouptable);
 		
 		
