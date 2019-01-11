@@ -201,7 +201,7 @@ public class ClientHome extends JFrame {
 		
 
 		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
-		fn_roomList(clientback);
+//		fn_roomList(clientback);
 
 		scrollPane.setViewportView(chatGrouptable);
 		

@@ -454,8 +454,8 @@ public class ServerDAO {
 		return groupmemberList;
 	}
 
-	public List<String> selectchatcontent(String groupid) {
-		List<String> chatcontent = new ArrayList<String>();
+	public List<String[]> selectchatcontent(String groupid) {
+		List<String[]> chatcontent = new ArrayList<String[]>();
 		
 		if(con != null) {
 			String query = "select * from chatcontent where groupid = ?";
@@ -466,12 +466,9 @@ public class ServerDAO {
 		        rs = pstmt.executeQuery();
 		        
 		        while(rs.next()) {
-		        	String str;
-		        	str = rs.getString("userid") + "," 
-		        			+ rs.getString("groupid") + ","
-		        			+ rs.getString("content") + ","
-		        			+ rs.getDate("sendtime"); // À¯Àú
-		        	chatcontent.add(str);
+		        	String[] strs = {rs.getString("userid"),rs.getString("groupid"),
+		        			rs.getString("content"),rs.getDate("sendtime").toString()};
+		        	chatcontent.add(strs);
 		        }		        
 		        
 		        pstmt.close();
