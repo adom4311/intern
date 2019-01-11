@@ -122,7 +122,6 @@ public class ClientBack {
 				fos = new DataOutputStream(filesocket.getOutputStream());
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				ois = new ObjectInputStream(socket.getInputStream());
-				
 				System.out.println("클라이언트 리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -131,6 +130,9 @@ public class ClientBack {
 		
 		@Override
 		public void run() {
+			while(ois != null) {
+				
+			}
 //			try {
 //				while(is != null) {
 //					byte[] reciveData = null;
@@ -671,8 +673,8 @@ public class ClientBack {
 			User user = new User(id,pw);
 			Data data = new Data(header,user);
 
-//			oos.writeObject(data);
-//			oos.flush();
+			oos.writeObject(data);
+			oos.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
