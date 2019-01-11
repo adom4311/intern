@@ -582,6 +582,7 @@ public class ClientBack {
 							String data[] = strcontent[0].split(",");
 							oldcontentView(chatMap.get(data[1]), strcontent);
 						}
+						System.out.println("OPENCAT END");
 					}// OPENCHAT END
 				}
 			} catch (IOException e1) {

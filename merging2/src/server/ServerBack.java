@@ -190,7 +190,6 @@ public class ServerBack {
 						System.out.println("data1의 크기는 : " +data[0].length());
 						int chk = sDao.signUp(data[0],data[1]);
 						
-						
 						// 보낼데이터 제작
 						int bodylength = 6 + Integer.BYTES;
 						byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터

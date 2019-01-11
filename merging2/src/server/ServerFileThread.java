@@ -85,6 +85,7 @@ public class ServerFileThread extends Thread {
 	public void run() {
 
 		try {
+			System.out.println("서버파일 받기쓰레드  시작");
 			Date date = new Date();
 			SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
 			String time = transFormat.format(date);
@@ -100,7 +101,11 @@ public class ServerFileThread extends Thread {
 			byte[] bytes = new byte[16 * 1024];
 			byte[] sizebyte = new byte[8];
 			int count;
+			System.out.println("서버 - 팡ㄹ읽기 시작");
+
 			in.read(sizebyte);
+			System.out.println("서버 - 팡ㄹ읽기 진행");
+
 			long length = bytesToLong(sizebyte);
 			while ((count = in.read(bytes)) > 0) {
 				out.write(bytes, 0, count);
@@ -109,7 +114,7 @@ public class ServerFileThread extends Thread {
 				if (length <= 0)
 					break;
 			}
-			
+			System.out.println("서버 - 팡ㄹ읽기 끝");
 			out.close();
 			// sDao=new ServerDAO();
 
@@ -122,6 +127,7 @@ public class ServerFileThread extends Thread {
 			filebroadcast(dir, id, groupid);
 
 			// 파일 브로드캐스팅 같은방 사람들에게..
+			System.out.println("파일읽기 서버쓰레드 끗");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -156,6 +162,8 @@ public class ServerFileThread extends Thread {
 						fos = currentClientfileMap.get(groupmember.get(i));
 						System.out.println(os);
 						System.out.println(fos);
+						os.write(sendData);
+						os.flush();
 						new FileTransferThread(groupmember.get(i).toString(), dir, fos).start();
 					}
 					else
