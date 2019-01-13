@@ -41,7 +41,7 @@ public class Chatwindow {
 	public static final byte FMSG = 0x06;//파일, 이미지 전송
 
 	private String id;
-	private String groupid;
+	private Long groupid;
 	private Frame frame;
 	private Panel pannel;
 	private Button buttonSend;
@@ -55,7 +55,7 @@ public class Chatwindow {
 	String[] oldchatcontent;
 
 
-	public Chatwindow(String id, String groupid, ClientBack clientback, Socket filesocket) {
+	public Chatwindow(String id, Long groupid, ClientBack clientback, Socket filesocket) {
 		this.id = id;
 		this.groupid = groupid;
 		frame = new Frame(id);
@@ -158,43 +158,41 @@ public class Chatwindow {
 
 	// file transfer
 	private void sendfile() {
-		
-		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-		String filename = null;
-		OutputStream os;
-		FileInputStream in;
-		int returnValue = jfc.showOpenDialog(null);
-		
-		if(returnValue == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = jfc.getSelectedFile();
-			filename = selectedFile.getAbsolutePath();
-		}
-		
-		
-		
-		try {
-			int bodylength = id.getBytes("UTF-8").length+filename.getBytes("UTF-8").length+groupid.getBytes("UTF-8").length+2;//UTF-8생각
-			byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터
-			sendData[0]=STX;
-			sendData[1]=FMSG;
-			byte[] bodySize = intToByteArray(bodylength);
-			System.out.println("보낼 데이터 크기 : " + bodylength);
-			for (int i = 0; i < bodySize.length; i++) {
-				sendData[2 + i] = (byte) bodySize[i];
-			}
-			// body생성
-			byte body[] = new byte[bodylength];
-			body=(id+","+groupid+","+filename).getBytes("UTF-8");
-			System.arraycopy(body,0,sendData,6,body.length);
-			os = new DataOutputStream(clientback.getSocket().getOutputStream());
-			os.write(sendData);
-			os.flush();
-			//Thread.sleep(10);
-			new FileTransferThread(id,filename,filesocket).start();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		
+//		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+//		String filename = null;
+//		OutputStream os;
+//		FileInputStream in;
+//		int returnValue = jfc.showOpenDialog(null);
+//		
+//		if(returnValue == JFileChooser.APPROVE_OPTION) {
+//			File selectedFile = jfc.getSelectedFile();
+//			filename = selectedFile.getAbsolutePath();
+//		}
+//		
+//		try {
+//			int bodylength = id.getBytes("UTF-8").length+filename.getBytes("UTF-8").length+groupid.getBytes("UTF-8").length+2;//UTF-8생각
+//			byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터
+//			sendData[0]=STX;
+//			sendData[1]=FMSG;
+//			byte[] bodySize = intToByteArray(bodylength);
+//			System.out.println("보낼 데이터 크기 : " + bodylength);
+//			for (int i = 0; i < bodySize.length; i++) {
+//				sendData[2 + i] = (byte) bodySize[i];
+//			}
+//			// body생성
+//			byte body[] = new byte[bodylength];
+//			body=(id+","+groupid+","+filename).getBytes("UTF-8");
+//			System.arraycopy(body,0,sendData,6,body.length);
+//			os = new DataOutputStream(clientback.getSocket().getOutputStream());
+//			os.write(sendData);
+//			os.flush();
+//			//Thread.sleep(10);
+//			new FileTransferThread(id,filename,filesocket).start();
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	private class FileTransferThread extends Thread{

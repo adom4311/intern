@@ -7,15 +7,14 @@ import client.ClientBack;
 import model.vo.Data;
 import model.vo.Header;
 
-public class CreateGroupRequest {
+public class RoomListRequest {
 
-	public CreateGroupRequest(ClientBack clientBack, String[] friendids) {
+	public RoomListRequest(ClientBack clientBack) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();
 			int bodylength = 0; // 데이터 길이가 필요한가?
-			Header header = new Header(ClientBack.CREATEGROUP,bodylength);
-			System.out.println("친구 아이디 " + friendids);
-			Data sendData = new Data(header,friendids);
+			Header header = new Header(ClientBack.ROOM,bodylength);
+			Data sendData = new Data(header,null);
 			oos.writeObject(sendData);
 			oos.flush();
 		} catch (IOException e) {

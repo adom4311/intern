@@ -285,7 +285,7 @@ public class ClientHome extends JFrame {
 //						
 //						//그룹 채팅방 생성
 						String[] str = {friendid};
-						clientback.createGroup(str);
+						clientback.createRoom(str);
 						
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}

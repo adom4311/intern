@@ -33,16 +33,16 @@ public class ServerFileThread extends Thread {
 	String id;
 	String file;
 	String date;
-	String groupid;
+	Long groupid;
 	public static int PORT = 1994;
 	ServerSocket serverSocket = null;
 	ServerDAO sDao;
-	Map<String, DataOutputStream> currentClientMap;
-	Map<String, DataOutputStream> currentClientfileMap;
+	Map<Long, DataOutputStream> currentClientMap;
+	Map<Long, DataOutputStream> currentClientfileMap;
 	Socket filesocket;
 
-	public ServerFileThread(String id, String groupid, String file, ServerDAO sDao, Map<String, DataOutputStream> currentClientMap,
-			Map<String, DataOutputStream> currentClientfileMap, Socket filesocket) {
+	public ServerFileThread(String id, Long groupid, String file, ServerDAO sDao, Map<Long, DataOutputStream> currentClientMap,
+			Map<Long, DataOutputStream> currentClientfileMap, Socket filesocket) {
 		this.id = id;
 		this.file = file;
 		this.sDao = sDao;
@@ -136,7 +136,7 @@ public class ServerFileThread extends Thread {
 
 	}
 
-	private void filebroadcast(String dir, String id, String groupid) {
+	private void filebroadcast(String dir, String id, Long groupid) {
 		synchronized (currentClientMap) {
 			DataOutputStream os;
 			DataOutputStream fos;

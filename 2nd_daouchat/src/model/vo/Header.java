@@ -7,8 +7,8 @@ public class Header implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int menu;
-	int bodylength;
+	private int menu;
+	private int bodylength;
 	public Header(int menu, int bodylength) {
 		super();
 		this.menu = menu;

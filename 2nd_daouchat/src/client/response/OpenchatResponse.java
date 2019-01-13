@@ -5,21 +5,23 @@ import java.util.Map;
 
 import client.Chatwindow;
 import client.ClientBack;
-import client.ClientHome;
+import model.vo.Chat;
 import model.vo.Data;
 
 public class OpenchatResponse {
 
 	public OpenchatResponse(ClientBack clientback, Data data) {
-		Map<String,Chatwindow> chatMap = clientback.getChatMap();
+		Map<Long,Chatwindow> chatMap = clientback.getChatMap();
 		Chatwindow chatwindow;
-		List<String[]> chatcontent = (List<String[]>)data.getObject();
-		if(chatcontent.size()>0) {
-			chatwindow = chatMap.get(chatcontent.get(0)[1]);
-			for (int i = 0; i < chatcontent.size(); i++) {
-				chatwindow.appendMSG(chatcontent.get(0) + " : " + chatcontent.get(2));
+		List<Chat> chatcontent = (List<Chat>)data.getObject();
+		
+		System.out.println("openchat size : " + chatcontent.size());
+		if(chatcontent.size() > 0) {
+			Long groupid  = chatcontent.get(0).getGroupid();
+			chatwindow = chatMap.get(groupid);
+			for(Chat content : chatcontent) {
+				chatwindow.appendMSG(content.getUserid() + " : " + content.getContent() + "\n");
 			}
 		}
 	}
-
 }

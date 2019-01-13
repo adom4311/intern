@@ -8,13 +8,12 @@ import client.ClientGUI;
 import client.ClientHome;
 import model.vo.Data;
 
-public class CreategroupResponse {
+public class CreateRoomResponse {
 
-	public CreategroupResponse(ClientBack clientback, Data data) {
+	public CreateRoomResponse(ClientBack clientback, Data data) {
 		ClientGUI gui = clientback.getGui();
-		ClientHome home = clientback.getHome();
-		String groupid = (String)data.getObject();
-		Map<String, Chatwindow> chatMap = clientback.getChatMap();
+		Long groupid = (Long)data.getObject();
+		Map<Long, Chatwindow> chatMap = clientback.getChatMap();
 		
 		if(!groupid.equals("")) {
 			if(chatMap.get(groupid) == null) {

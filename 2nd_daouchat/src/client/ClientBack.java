@@ -11,14 +11,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import client.request.AddFriendRequest;
-import client.request.CreateGroupRequest;
+import client.request.CreateRoomRequest;
 import client.request.FindfriendRequest;
 import client.request.FriListRequest;
 import client.request.LoginRequest;
 import client.request.OpenChatRequest;
+import client.request.RoomListRequest;
+import client.request.SendMessageRequest;
 import client.request.SignupRequest;
 import client.response.AddfriResponse;
-import client.response.CreategroupResponse;
+import client.response.CreateRoomResponse;
 import client.response.FmsgResponse;
 import client.response.FrifindResponse;
 import client.response.FrilistResponse;
@@ -36,10 +38,13 @@ public class ClientBack {
 	public static final int FRIFIND = 4; // 친구찾기
 	public static final int ADDFRI = 5; // 친구추가
 	public static final int FMSG = 6;// 파일, 이미지 전송
-	public static final int CREATEGROUP = 7; // 그룹생성
+	public static final int CREATEROOM = 7; // 그룹생성
 	public static final int FRILIST = 8; // 친구목록
 	public static final int OPENCHAT = 9; // 그룹생성
 	public static final int ROOM = 10; //채팅방목록
+
+    public static final byte ONEROOM= 0x01;
+    public static final byte GROUPROOM = 0x02;
 	
 	private String id;
 	private String pw;
@@ -48,7 +53,7 @@ public class ClientBack {
 	private ClientGUI gui;
 	private ClientHome home;
 	private Chatwindow chatwindow;
-	private Map<String,Chatwindow> chatMap = new HashMap<String, Chatwindow>();
+	private Map<Long,Chatwindow> chatMap = new HashMap<Long, Chatwindow>();
 	private DataInputStream is;
 	private DataOutputStream os;
 	private DataInputStream fis;
@@ -75,14 +80,6 @@ public class ClientBack {
 	
 	public String getId() {
 		return this.id;
-	}
-	
-	public void setPw(String p) {
-		this.pw=p;
-	}
-	
-	public String getPw() {
-		return this.pw;
 	}
 	
 	public DataInputStream getDataInputstream() {
@@ -113,10 +110,10 @@ public class ClientBack {
 		this.gui = clientGUI;
 	}
 	
-	public Map<String, Chatwindow> getChatMap() {
+	public Map<Long, Chatwindow> getChatMap() {
 		return chatMap;
 	}
-	public void setChatMap(Map<String, Chatwindow> chatMap) {
+	public void setChatMap(Map<Long, Chatwindow> chatMap) {
 		this.chatMap = chatMap;
 	}
 	
@@ -170,8 +167,8 @@ public class ClientBack {
 						new AddfriResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == FRILIST) {
 						new FrilistResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == CREATEGROUP) {
-						new CreategroupResponse(clientback,data);
+					}else if(data.getHeader().getMenu() == CREATEROOM) {
+						new CreateRoomResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == ROOM) {
 						new RoomResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == MSG) {
@@ -190,167 +187,6 @@ public class ClientBack {
 				e.printStackTrace();
 			}
 			
-//					/* 채팅방 개설 */
-//					else if (headerBuffer[1] == CREATEGROUP) {
-//						System.out.println("--채팅방 개설 시작--");
-//						byte[] lengthChk = new byte[4]; // 데이터길이
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("채팅방 개설시 받은 데이터길이 : " + datalength);
-//						
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength]; 
-//						int temp = datalength;
-//						
-//						// 파일 받을때까지 계속 
-//						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
-//							buffer.write(reciveData,0,read);
-//							datalength -= read;
-//							if(datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						
-//						
-//						reciveData = buffer.toByteArray();
-//						
-//						byte chkByte[] = new byte[4];
-//						byte groupidByte[] = new byte[80];
-//						byte chatcontent[] = new byte[temp - 84];
-//						
-//						System.arraycopy(reciveData, 0, chkByte, 0, chkByte.length); // chk 짜르고
-//						System.arraycopy(reciveData, chkByte.length, groupidByte, 0, 80); //groupid 짜르고
-//						System.arraycopy(reciveData, 84, chatcontent, 0, temp - 84); //groupid 짜르고
-//						
-//						
-//						System.out.println("채팅방개설쪽  chk : " + byteArrayToInt(chkByte));
-//						System.out.println("채팅방개설쪽  chk : " + new String(groupidByte,"UTF-8"));
-//						
-//						int chknum = byteArrayToInt(chkByte);
-//						String groupid = new String(groupidByte,"UTF-8").trim();
-//						
-//						String[] strcontent = new String(chatcontent,"UTF-8").split("&");
-//						for (int j = 0; j < strcontent.length; j++) {
-//							System.out.println(strcontent[j]);
-//						}
-//						
-//						
-//						if(chknum > 0) {
-//							if(chatMap.get(groupid) == null) {
-//								System.out.println("채티방 개설");
-//								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
-//								chatMap.put(groupid, chatwindow);
-//								chatwindow.show();
-//							}
-//						}else if(chknum == 0) {
-//							if(chatMap.get(groupid) == null) {
-//								System.out.println("있는 채팅방");
-//								chatwindow = new Chatwindow(id, groupid, clientback, filesocket);
-//								chatMap.put(groupid, chatwindow);
-//								chatwindow.show();
-//								System.out.println("채팅들의 크기는" + strcontent.length);
-//							}
-//						}
-//						else {
-//							gui.Alert("채티방 개설 실패");
-//						}
-//					}// 채팅방 개설 END
-//					
-//					/* ROOM  목록*/
-//					else if(headerBuffer[1]==ROOM) {
-//						Object rowData[][];
-//						System.out.println("채팅방 목록");
-//						byte[] lengthChk = new byte[4]; // 데이터길이
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("데이터길이 : " + datalength);
-//						
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength]; // 읽는 단위?
-//						
-//						int start = 0;
-//						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
-//							System.out.println("start : " + start);
-//							System.out.println("read : " + read);
-//							
-//							buffer.write(reciveData,0,read); // buffer에 reciveData내용 저장 ..뭔가 뒤바뀜
-//							start += read;
-//							datalength -= read;
-//							System.out.println(datalength);
-//							if(datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						reciveData = buffer.toByteArray(); // 버퍼(byte...stream)에 저장된 내용을 바이트 배열에!
-//						buffer.flush(); // 버퍼(byte...stream) 비우기
-//						
-//						System.out.println("친구 목록 받기 성공");
-//						System.out.println("총 갯수 : " + reciveData.length/84);
-//						System.out.println("총개수*84 : " + reciveData.length);
-//						byte num[] = new byte[4];
-//						byte roomname[] = new byte[80];
-//						rowData = new Object[reciveData.length/84][3];
-//						
-//						int cnt = 0;
-//						for (int i = 0; i < reciveData.length/84; i++) {
-//							System.arraycopy(reciveData, cnt, num, 0, 4);
-//							cnt += 4;
-//							System.arraycopy(reciveData, cnt, roomname, 0, 80);
-//							cnt += 80;
-//							rowData[i][0] = byteArrayToInt(num);
-//							rowData[i][1] = new String(roomname,"UTF-8").trim();
-//					
-//						}
-//						home.getFrame().fn_roomListView(rowData);
-//					}
-//					
-//					/* message */
-//					else if (headerBuffer[1] == MSG) {
-//						System.out.println("메세지");
-//						byte[] lengthChk = new byte[4];
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("데이터길이 : " + datalength);
-//
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength];
-//
-//						// 파일 받을때까지 계속
-//						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
-//							buffer.write(reciveData, 0, read);
-//							datalength -= read;
-//							if (datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						System.out.println(buffer.toString("UTF-8"));
-//						String data[] = buffer.toString("UTF-8").split(",");
-//						buffer.flush();
-//						System.out.println("data1의 크기는 : " + data[0].length());
-//						String userid = data[0];
-//						String groupid = data[1];
-//						String msg = data[2];
-//
-//						if(chatMap.get(groupid) == null) {
-//							chatwindow = new Chatwindow(id, groupid, clientback, filesocket );
-//							chatMap.put(groupid, chatwindow);
-//							chatwindow.show();
-//						}else {
-//							chatMap.get(groupid).appendMSG(data[0] + ":" + data[2] + "\n");
-//						}
-//					}
 //					/* 파일 받기 */
 //					else if(headerBuffer[1]==FMSG) {
 //						System.out.println("파일");
@@ -396,75 +232,8 @@ public class ClientBack {
 //						
 //						out.close();
 //					}// 파일받기 END
-//					
-//					/* OPENCHAT */
-//					if(headerBuffer[1] == OPENCHAT) {
-//						System.out.println("OPENCHAT 시작");
-//						byte[] lengthChk = new byte[4]; // 데이터길이
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("openchat시 데이터길이 : " + datalength);
-//						
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength]; 
-//						
-//						// 파일 받을때까지 계속 
-//						while((read = is.read(reciveData, 0, reciveData.length))!= -1) {
-//							buffer.write(reciveData,0,read);
-//							datalength -= read;
-//							if(datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						
-//						reciveData = buffer.toByteArray();
-//						if(reciveData.length > 0) {
-//							String[] strcontent = new String(reciveData,"UTF-8").split("&");
-//							for (int j = 0; j < strcontent.length; j++) {
-//								System.out.println("대화내용 " + strcontent[j]);
-//							}
-//							String data[] = strcontent[0].split(",");
-//							oldcontentView(chatMap.get(data[1]), strcontent);
-//						}
-//						System.out.println("OPENCAT END");
-//					}// OPENCHAT END
-//				}
-//			} catch (IOException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-		}
-
-		private void oldcontentView(Chatwindow chatwindow, String[] strcontent) {
-			for (int i = 0; i < strcontent.length; i++) {
-				String[] data = strcontent[i].split(",");
-				if( data.length > 1)
-					chatwindow.appendMSG(data[0] + ":" + data[2] + "\n");
-			}
 		}
 	}
-	
-	public  int byteArrayToInt(byte bytes[]) {
-		return ((((int)bytes[0] & 0xff) << 24) |
-				(((int)bytes[1] & 0xff) << 16) |
-				(((int)bytes[2] & 0xff) << 8) |
-				(((int)bytes[3] & 0xff)));
-	}
-	
-	// intToByte
-	public  byte[] intToByteArray(int value) {
-		byte[] byteArray = new byte[4];
-		byteArray[0] = (byte)(value >> 24);
-		byteArray[1] = (byte)(value >> 16);
-		byteArray[2] = (byte)(value >> 8);
-		byteArray[3] = (byte)(value);
-		return byteArray;
-	}
-
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
@@ -499,80 +268,19 @@ public class ClientBack {
 	}
 	
 	public void roomList() {
-		try {
-			byte sendData[] = new byte[6];
-			sendData[1]=ROOM;
-			byte[] bodySize = intToByteArray(0);
-			for(int i=0;i<bodySize.length;i++) {
-				sendData[2+i] = (byte)bodySize[i];
-			}
-			os.write(sendData);
-			os.flush();
-			
-		}catch(IOException e)
-		{
-			e.printStackTrace();
-		}
+		new RoomListRequest(this);
 	}
 
-	public void sendMessage(String msg, String groupid) { // 채팅 전송
-		try {
-			int bodylength = id.getBytes("UTF-8").length + groupid.getBytes("UTF-8").length + msg.getBytes("UTF-8").length
-					+ 2;// ,포함
-			byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터
-			// 헤더생성(flag와 body의 크기)
-			sendData[1] = MSG;
-			byte[] bodySize = intToByteArray(bodylength);
-			System.out.println("보낼 데이터 크기 : " + bodylength);
-			for (int i = 0; i < bodySize.length; i++) {
-				sendData[2 + i] = (byte) bodySize[i];
-			}
-			// body생성
-			byte body[] = new byte[bodylength];
-			body = (id + "," + groupid + "," + msg).getBytes("UTF-8");
-			System.arraycopy(body, 0, sendData, 6, body.length);
-
-			os.write(sendData);
-			os.flush();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void sendMessage(String msg, Long groupid) { // 채팅 전송
+		new SendMessageRequest(this,msg,groupid);
 	}
 
-	public void createGroup(String[] friendids) { // 채팅방 생성
-		new CreateGroupRequest(this, friendids);
+	public void createRoom(String[] friendids) { // 채팅방 생성
+		new CreateRoomRequest(this, friendids);
 	}
 
 	//채팅방 개설시 채팅내용을 가져오는 메서드
-	public void openChat(String groupid) {
+	public void openChat(Long groupid) {
 		new OpenChatRequest(this,groupid);
-//		try {
-//			int bodylength = groupid.getBytes("UTF-8").length; 
-//			byte sendData[] = new byte[6+bodylength]; // 전체 보낼 데이터
-//			
-//			sendData[1] = OPENCHAT; // 채팅방 오픈
-//			byte[] bodySize = intToByteArray(bodylength);
-//			System.out.println("보낼 데이터의 크기 : " + bodylength);
-//			for (int i = 0; i < bodySize.length; i++) {
-//				sendData[2+i] = (byte)bodySize[i];
-//			} // 보낼 데이터 크기
-//			byte body[] = new byte[bodylength];
-//			
-//			System.out.println("body length" + body.length);
-//			
-//			body = groupid.getBytes("UTF-8");
-//			
-//			System.arraycopy(body, 0, sendData, 6, body.length);
-//			
-//			System.out.println("보낼 데이터 : " + new String(body,"UTF-8"));
-//
-//			os.write(sendData);
-//			os.flush();
-//			
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 }

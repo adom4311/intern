@@ -22,7 +22,6 @@ public class ClientGUI extends JFrame {
 	private ClientBack clientback;
 	JDialog signUpdialog; 
 	JDialog logindialog; 
-	
 
 	/**
 	 * Launch the application.

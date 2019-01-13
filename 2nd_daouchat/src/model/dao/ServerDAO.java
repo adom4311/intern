@@ -10,11 +10,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import model.vo.Chat;
+import model.vo.Message;
+
 public class ServerDAO {
 	String driver = "org.mariadb.jdbc.Driver";
     Connection con;
     PreparedStatement pstmt;
     ResultSet rs;
+    public static final byte ONEROOM= 0x01;
+    public static final byte GROUPROOM = 0x02;
  
     public ServerDAO() {
         try {
@@ -251,76 +256,58 @@ public class ServerDAO {
 		return null;
 	}
 	
-	public int createGroup(String connectId, String data[]) { // data는 friendId
+	public int createRoom(String connectId, String data[]) { // data는 friendId
 		Date today = new Date();
 		System.out.println(today);
-		String groupid = ("daou" + connectId + today);
 		int chk = 0;
 
         if( con != null ) {
             try {
-            	/*
-            	 * select b.groupid from 
-					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in ('q','asdf') group by groupid having cnt =2) a) group by groupid) b
-					where b.ccnt = 2;
-            	 */
-//            	String query1 = "insert into chatgroup(groupid, userid) select ?, ? from dual where NOT EXISTS (select b.groupid from \r\n" + 
-//            			"					(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?,?) group by groupid having cnt =?) a) group by groupid) b\r\n" + 
-//            			"					where b.ccnt = 2)";
+            	// 이미 1:1채팅방이 있으면 0을 리턴
+            	if(selectRoom(connectId,data,ONEROOM) != 0L) {
+            		return 0;
+            	}
             	
-            	//개설자와 초대자를 가진 채팅방을 찾고 채팅방의 사람수가 개설자+초대자 수와 같은방이 존재하지 않으면 인서트
-            	StringBuffer query = new StringBuffer();
-            	query.append("insert into chatgroup(groupid, userid, groupname) select ?, ?, ? from dual where NOT EXISTS (select b.groupid from ");
-            	query.append("(select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?");
-            	for (int i = 0; i < data.length; i++) {
-            		query.append(",?");
-				}
-            	query.append(") group by groupid having cnt =?) a) group by groupid) b where b.ccnt = ?)");
-
-            	// chatgroup insert문
-				pstmt = con.prepareStatement(query.toString());
-				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8")); // 생성할 groupid
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
-				//pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
-				pstmt.setString(3, new String(groupid.getBytes("UTF-8"),"UTF-8")); // 임시로 groupid
-				
-				// 채팅 참여자
-				pstmt.setString(4, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
-				for (int i = 0; i < data.length; i++) { // 각 참여자
-					pstmt.setString(5+i, new String(data[0].getBytes("UTF-8"),"UTF-8")); 
-				}
-				
-				pstmt.setInt(5+data.length, data.length + 1 ); // 개설자 + 참여자 수 
-				pstmt.setInt(5+data.length + 1, data.length + 1 ); // 개설자 + 참여자 수 
+            	/* 채팅방 개설 */
+            	String query = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
+				pstmt.setByte(3, ONEROOM); // 채팅 방명
 		        chk = pstmt.executeUpdate();
 		        pstmt.close();
 		        
-		        if(chk == 0) { // 이미있다면
-		        	return 0;
+		        /* groupid 가져오기 */
+		        String query2 = "select LAST_INSERT_ID()";
+		        pstmt = con.prepareStatement(query2);
+		        rs = pstmt.executeQuery();
+		        Long groupid = 0L;
+		        while(rs.next()) {
+		        	groupid = rs.getLong(1);
 		        }
+		        pstmt.close();
+		        System.out.println("서버 db 저장시 groupid : " + groupid);
 		        
-            	String query2 = "insert into chatmember(groupid,userid) values(?,?)";
-            	// groupmember insert문
+		        /* 채팅방 참여자 추가 */
+            	String query3 = "insert into chatmember(groupid,userid) values(?,?)";
 		        
 		        // chatmember에 개설자 아이디 추가
-		        pstmt = con.prepareStatement(query2);
-				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+		        pstmt = con.prepareStatement(query3);
+				pstmt.setLong(1, groupid);
 				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-		        chk = pstmt.executeUpdate();   
-				System.out.println("추가되는지:::::"+chk);
-
+				chk = pstmt.executeUpdate(); 
 		        
 		        // chatmember에 초대한 아이디 추가
 				for (int i = 0; i < data.length; i++) {
-					pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
-					pstmt.setString(2, new String(data[0].getBytes("UTF-8"),"UTF-8"));
+					pstmt.setLong(1, groupid);
+					pstmt.setString(2, new String(data[i].getBytes("UTF-8"),"UTF-8"));
 					pstmt.executeUpdate();
-				}
+				}  
 		        pstmt.close();
 		        
 		        con.commit();
 		        System.out.println("채팅방개설 성공");
-		        
+//		        
 			} catch (SQLException e) {
 				// sql 에러발생시 여기서 rollback????
 				try {
@@ -338,28 +325,26 @@ public class ServerDAO {
         return chk;
 	}
 
-	public String selectGroupid(String connectId, String[] data) {
-		String groupid = "";
+	public Long selectRoom(String connectId, String[] data, byte type) {
+		Long groupid = 0L;
 		if(con != null) {
 			StringBuffer query = new StringBuffer();
-			query.append("select b.groupid from (select groupid, count(*) ccnt from chatmember where groupid in (select a.groupid from (select groupid, count(groupid) cnt from chatmember where userid in (?");
+			query.append("select groupid, count(groupid) cnt from chatmember where groupid in (select groupid from chatgroup where type =?) and userid in (?");
         	for (int i = 0; i < data.length; i++) {
         		query.append(",?");
 			}
-        	query.append(") group by groupid having cnt =?) a) group by groupid) b");
+        	query.append(") group by groupid having cnt = 2");
 			try {
 				pstmt = con.prepareStatement(query.toString());
-				// 채팅 참여자
-				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8")); // 채팅 개설자
+				pstmt.setByte(1, type); // 채팅타입
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
 				for (int i = 0; i < data.length; i++) { // 각 참여자
-					pstmt.setString(2+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
 				}
-				
-				pstmt.setInt(2+data.length, data.length + 1 ); // 개설자 + 참여자 수 
 				
 				rs = pstmt.executeQuery();
 				while(rs.next()) {
-					groupid = rs.getString(1);
+					groupid = rs.getLong(1);
 				}
 				pstmt.close();
 				
@@ -374,15 +359,15 @@ public class ServerDAO {
 		return groupid;
 	}
 
-	public int insertMSG(String sendUserid, String sendGroupid, String sendMsg) {
+	public int insertMSG(Message message) {
 		int chk = 0 ;
 		if(con != null) {
 			String query = "insert into chatcontent values(?,?,?,now())";
 			try {
 				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, new String(sendUserid.getBytes("UTF-8"),"UTF-8"));
-		        pstmt.setString(2, new String(sendGroupid.getBytes("UTF-8"),"UTF-8"));
-		        pstmt.setString(3, new String(sendMsg.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(1, new String(message.getSenduserid().getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setLong(2, message.getGroupid());
+		        pstmt.setString(3, new String(message.getMsg().getBytes("UTF-8"),"UTF-8"));
 
 		        chk = pstmt.executeUpdate();
 		        pstmt.close();
@@ -399,13 +384,13 @@ public class ServerDAO {
 		return chk;
 	}
 	
-	public boolean insertFile(String userid, String roomid, String dir, String time) {
+	public boolean insertFile(String userid, Long roomid, String dir, String time) {
 		int chk=0;
 		if(con!=null) {
 			try {
 				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,?)");
 				pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String(roomid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setLong(2, roomid);
 				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
 				pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
 				chk=pstmt.executeUpdate();
@@ -428,14 +413,14 @@ public class ServerDAO {
 		return true;
 	}
 
-	public List<String> selectGroupmember(String sendGroupid) {
+	public List<String> selectGroupmember(Long sendGroupid) {
 		List<String> groupmemberList = new ArrayList<String>();
 		
 		if(con != null) {
 			String query = "select userid from chatmember where groupid = ?";
 			try {
 				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, new String(sendGroupid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setLong(1, sendGroupid);
 
 		        rs = pstmt.executeQuery();
 		        
@@ -446,35 +431,30 @@ public class ServerDAO {
 		        pstmt.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
 			}
 		}
 		
 		return groupmemberList;
 	}
 
-	public List<String[]> selectchatcontent(String groupid) {
-		List<String[]> chatcontent = new ArrayList<String[]>();
+	public List<Chat> selectchatcontent(Long groupid) {
+		List<Chat> chatcontent = new ArrayList<Chat>();
 		
 		if(con != null) {
 			String query = "select * from chatcontent where groupid = ?";
 			try {
 				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, new String(groupid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setLong(1, groupid);
 
 		        rs = pstmt.executeQuery();
-		        
+		        Chat chat;
 		        while(rs.next()) {
-		        	String[] strs = {rs.getString("userid"),rs.getString("groupid"),
-		        			rs.getString("content"),rs.getDate("sendtime").toString()};
-		        	chatcontent.add(strs);
+		        	chat = new Chat(0L,rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getDate("sendtime"),0);
+		        	chatcontent.add(chat);
 		        }		        
 		        
 		        pstmt.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 		}

@@ -7,8 +7,8 @@ public class Data implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	Header header;
-	Object object;
+	private Header header;
+	private Object object;
 	public Header getHeader() {
 		return header;
 	}
