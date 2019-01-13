@@ -15,6 +15,9 @@ public class OpenchatResponse {
 		Chatwindow chatwindow;
 		List<Chat> chatcontent = (List<Chat>)data.getObject();
 		
+		// 파일에서 읽어오기
+		
+		// 서버채팅 
 		System.out.println("openchat size : " + chatcontent.size());
 		if(chatcontent.size() > 0) {
 			Long groupid  = chatcontent.get(0).getGroupid();

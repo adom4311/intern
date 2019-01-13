@@ -260,7 +260,6 @@ public class ClientBack {
 
 	public void addFriend(String friendId) {
 		new AddFriendRequest(this,friendId);
-		
 	}
 
 	public void friList() {
