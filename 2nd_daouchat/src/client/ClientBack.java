@@ -54,6 +54,8 @@ public class ClientBack {
 	private ClientHome home;
 	private Chatwindow chatwindow;
 	private Map<Long,Chatwindow> chatMap = new HashMap<Long, Chatwindow>();
+	private Map<Long,ObjectOutputStream> chatFileMap = new HashMap<Long, ObjectOutputStream>();
+	
 	private DataInputStream is;
 	private DataOutputStream os;
 	private DataInputStream fis;
@@ -119,6 +121,13 @@ public class ClientBack {
 	
 	public ClientBack() {
 		connect();
+	}
+	
+	public Map<Long, ObjectOutputStream> getChatFileMap() {
+		return chatFileMap;
+	}
+	public void setChatFileMap(Map<Long, ObjectOutputStream> chatFileMap) {
+		this.chatFileMap = chatFileMap;
 	}
 	
 	
@@ -281,5 +290,8 @@ public class ClientBack {
 	//채팅방 개설시 채팅내용을 가져오는 메서드
 	public void openChat(Long groupid) {
 		new OpenChatRequest(this,groupid);
+	}
+	public void readchatFile(Long groupid) {
+		new ReadchatFile(this,groupid);
 	}
 }

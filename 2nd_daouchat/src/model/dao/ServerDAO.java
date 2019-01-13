@@ -362,7 +362,7 @@ public class ServerDAO {
 	public int insertMSG(Message message) {
 		int chk = 0 ;
 		if(con != null) {
-			String query = "insert into chatcontent values(?,?,?,now())";
+			String query = "insert into chatcontent values(?,?,?,now(6))";
 			try {
 				pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(message.getSenduserid().getBytes("UTF-8"),"UTF-8"));

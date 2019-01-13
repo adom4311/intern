@@ -66,7 +66,7 @@ public class Chatwindow {
 		textArea = new TextArea(30, 80);
 		this.clientback = clientback;
 		this.filesocket=filesocket;
-		clientback.openChat(groupid);
+//		clientback.openChat(groupid);
 
 //		new ChatClientReceiveThread(clientback.getSocket(),filesocket).start();
 	}
@@ -256,4 +256,20 @@ public class Chatwindow {
 	public void appendMSG(String msg) {
 		textArea.append(msg);
 	}
+	
+	public void readchatFile() {
+		clientback.readchatFile(groupid);
+	}
+	
+	 public void finalize() {
+	    try {
+	    	System.out.println("객체의 마지막 유언... ");
+			clientback.getChatFileMap().get(groupid).close();
+			clientback.getChatFileMap().remove(groupid);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 }
+	
 }

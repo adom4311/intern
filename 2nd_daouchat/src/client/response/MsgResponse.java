@@ -26,9 +26,11 @@ public class MsgResponse {
 		try {
 			Map<Long,Chatwindow> chatMap = clientback.getChatMap();
 			Message message = (Message)data.getObject();
+			Long groupid = message.getGroupid();
 			if(chatMap.get(message.getGroupid()) == null) {
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(),message.getGroupid(), clientback, clientback.getfilesocket());
 				chatMap.put(message.getGroupid(), chatwindow);
+				chatMap.get(groupid).readchatFile();
 				chatwindow.show();
 			}else {
 				String line = message.getSenduserid() + " : " + message.getMsg() + "\n";
@@ -46,51 +48,10 @@ public class MsgResponse {
 					file.createNewFile();
 				}
 				
-				JSONObject json = new JSONObject();
-				json.put("userid", message.getSenduserid());
-				json.put("groupid", message.getGroupid());
-				json.put("msg", message.getMsg());
-				json.put("date", message.getSendtime());
-				
-				BufferedWriter bufferwriter = new BufferedWriter(new FileWriter(file,true));
-				bufferwriter.write(json.toJSONString());
-				bufferwriter.close();
-				
-				
-				System.out.println("파싱전");
-				JSONParser parser = new JSONParser();
-				Object obj = parser.parse(new FileReader(file));
-				
-				JSONObject jsonobject = (JSONObject) obj;
-				
-				System.out.println(jsonobject.get("userid"));
-				
-				System.out.println("파싱후");
-				
-				
-				
-//				
-//				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file,true));
-//				for(int i=0;i<300;i++) {
-//					oos.writeObject(message);
-//				}
-//				oos.flush();
-//				oos.close();
-//				
-//				FileInputStream fis = new FileInputStream(file);
-//				ObjectInputStream ois = new ObjectInputStream(fis);
-//				Message msg;
-//				System.out.println("에이블1 : " +fis.available());
-//				while(fis.available() > 0){
-//					msg = (Message)ois.readObject();
-//					System.out.println("대화내용 :" + msg.getMsg());
-//				}
-//				ois.close();
+				ObjectOutputStream oos = clientback.getChatFileMap().get(groupid);
+				oos.writeObject(message);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -20,6 +20,7 @@ public class CreateRoomResponse {
 				System.out.println("채티방 개설");
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback, clientback.getfilesocket());
 				chatMap.put(groupid, chatwindow);
+				chatMap.get(groupid).readchatFile();
 				chatwindow.show();
 			}
 		}else {
