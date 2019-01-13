@@ -88,6 +88,17 @@ public class Chatwindow {
 
 	public void show() {
 		// Button
+		//int 형 변수에 jTextArea 객체의 텍스트의 총 길이를 저장
+
+		int pos = textArea.getText().length();
+		//caret 포지션을 가장 마지막으로 맞춤
+		textArea.setCaretPosition(pos);
+		//갱신
+		textArea.requestFocus();
+		//예제2
+		//JScrollPane의 바를 최 하단으로 맞춤
+//		jScrollPane.getVerticalScrollBar().setValue(jScrollPane.getVerticalScrollBar().getMaximum());
+		
 		buttonSend.setBackground(Color.GRAY);
 		buttonSend.setForeground(Color.WHITE);
 		buttonfile.setForeground(Color.WHITE);
