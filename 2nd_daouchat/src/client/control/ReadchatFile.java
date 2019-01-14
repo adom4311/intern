@@ -54,6 +54,7 @@ public class ReadchatFile {
 			}
 			
 			// db에 저장된 채팅 불러오기
+			System.out.println("db데이터 요청하기");
 			clientback.openChat(groupid);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

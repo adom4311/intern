@@ -79,8 +79,6 @@ public class ServerBack {
 				for (String member : groupmember) {
 					oos = currentClientMap.get(member);
 					if(oos != null) {
-						System.out.println("브로드캐스트 중");
-						System.out.println(message.getGroupid());
 						oos.writeObject(sendData);
 						oos.flush();
 					}

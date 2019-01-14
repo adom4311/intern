@@ -14,7 +14,7 @@ import java.util.List;
 
 import model.vo.Chat;
 import model.vo.ChatMember;
-
+import static common.JDBCTemplate.*;
 public class ServerDAO {
 	String driver = "org.mariadb.jdbc.Driver";
     Connection con;
@@ -24,24 +24,25 @@ public class ServerDAO {
     public static final byte GROUPROOM = 0x02;
  
     public ServerDAO() {
-        try {
-        	Class.forName(driver); // 마리아db driver
-        	con = DriverManager.getConnection(
-                    "jdbc:mariadb://127.0.0.1:3306/sw_test",
-                    "root",
-                    "daou");
-        	con.setAutoCommit(false);
-            
-			System.out.println("DB 접속 서엉공");
-		} catch (SQLException e) {
-			System.out.println("DB 접속 실패");
-	        e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로드 실패");
-		}
+//        try {
+//        	Class.forName(driver); // 마리아db driver
+//        	con = DriverManager.getConnection(
+//                    "jdbc:mariadb://127.0.0.1:3306/sw_test",
+//                    "root",
+//                    "daou");
+//        	con.setAutoCommit(false);
+//            
+//			System.out.println("DB 접속 서엉공");
+//		} catch (SQLException e) {
+//			System.out.println("DB 접속 실패");
+//	        e.printStackTrace();
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("드라이버 로드 실패");
+//		}
     }
 
 	public int signUp(String id, String pw) {
+		con = getConnection();
 		int chk = 0;
 
         if( con != null ) {
@@ -73,6 +74,7 @@ public class ServerDAO {
 	}
 
 	public int login(String id, String pw) {
+		con = getConnection();
 		int chk = 0;
 		System.out.println("login 함수");
 		if( con != null ) {
@@ -101,6 +103,7 @@ public class ServerDAO {
 	} 
 
 	public Object[][] friFind(String tempId) {
+		con = getConnection();
 		if( con != null ) {
             try {
             	System.out.println("됨 : " + tempId);
@@ -131,6 +134,7 @@ public class ServerDAO {
 	
 	/* 친구 찾기 용 */
 	public int totalUserCnt(String tempId) {
+		con = getConnection();
 		int chk = 0;
 		if( con != null ) {
             try {
@@ -155,6 +159,7 @@ public class ServerDAO {
 	
 	/* 친구 목록 용 */
 	public int totalFriCnt(String tempId) {
+		con = getConnection();
 		int chk = 0;
 		if( con != null ) {
             try {
@@ -177,6 +182,7 @@ public class ServerDAO {
 	
 	/* 방 목록을 위한 함수*/
 	public int totalRoomCnt(String tempId) {
+		con = getConnection();
 		int chk = 0;
 		if( con != null ) {
             try {
@@ -196,6 +202,7 @@ public class ServerDAO {
 	}
 
 	public int addfri(String connectId, String data) {
+		con = getConnection();
 		int chk = 0;
 
         if( con != null ) {
@@ -224,6 +231,7 @@ public class ServerDAO {
 	}
 
 	public Object[][] friList(String connectId) {
+		con = getConnection();
 		if( con != null ) {
             try {
             	System.out.println("됨 : " + connectId);
@@ -249,6 +257,7 @@ public class ServerDAO {
 	}
 
 	public Object[][] roomList(String connectId){
+		con = getConnection();
 		if(con!=null) {
 			try {
 				System.out.println("연결 : "+connectId);
@@ -275,6 +284,7 @@ public class ServerDAO {
 	}
 	
 	public int createRoom(String connectId, String data[]) { // data는 friendId
+		con = getConnection();
 		Date today = new Date();
 		System.out.println(today);
 		int chk = 0;
@@ -344,6 +354,7 @@ public class ServerDAO {
 	}
 
 	public Long selectRoom(String connectId, String[] data, byte type) {
+		con = getConnection();
 		Long groupid = 0L;
 		if(con != null) {
 			StringBuffer query = new StringBuffer();
@@ -378,6 +389,7 @@ public class ServerDAO {
 	}
 
 	public Chat insertMSG(Chat message) {
+		con = getConnection();
 		int chk = 0 ;
 		Chat chat = null;
 		if(con != null) {
@@ -429,6 +441,7 @@ public class ServerDAO {
 	}
 	
 	public boolean insertFile(String userid, Long roomid, String dir, String time) {
+		con = getConnection();
 		int chk=0;
 		if(con!=null) {
 			try {
@@ -458,6 +471,7 @@ public class ServerDAO {
 	}
 
 	public List<String> selectGroupmember(Long sendGroupid) {
+		con = getConnection();
 		List<String> groupmemberList = new ArrayList<String>();
 		
 		if(con != null) {
@@ -482,10 +496,12 @@ public class ServerDAO {
 	}
 
 	public List<Chat> selectchatcontent(ChatMember chatmember) {
+		con = getConnection();
 		List<Chat> chatcontent = new ArrayList<Chat>();
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss.SSS");
 		Long groupid = chatmember.getGroupid();
 		String userid = chatmember.getUserid();
+		System.out.println("groupid : "+ groupid);
+		System.out.println("userid : "+ userid);
 		if(con != null) {
 			// 해당하는 채팅방의 채팅정보를 로그인한 사용자의 마지막읽은 시간보다 늦는데이터 가져오기
 			String query = "select * from chatcontent where groupid = ? "
@@ -506,7 +522,9 @@ public class ServerDAO {
 		        rs = pstmt.executeQuery();
 		        
 		        Chat chat;
+		        System.out.println("데이터 가져오기");
 		        while(rs.next()) {
+		        	System.out.println("행이 몇개일까요");
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
 		        	chatcontent.add(chat);
 		        }		 
@@ -541,6 +559,7 @@ public class ServerDAO {
 	}
 
 	public int updatereadtime(String member, Chat message) {
+		con = getConnection();
 		int result = 0;
 		// 카운트감소 
 		String query = "update chatcontent set count = count-1 where groupid = ? "
@@ -579,6 +598,7 @@ public class ServerDAO {
 	}
 
 	public void deleteolddata() {
+		con = getConnection();
 		String query = "delete from chatcontent where count = 0";
 		try {
 			pstmt = con.prepareStatement(query);

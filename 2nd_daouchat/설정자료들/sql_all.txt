@@ -1,0 +1,78 @@
+-- 테이블 순서는 관계를 고려하여 한 번에 실행해도 에러가 발생하지 않게 정렬되었습니다.
+
+-- user Table Create SQL
+CREATE TABLE user
+(
+    `userid`    varchar(20)    NOT NULL    COMMENT '유저 아이디', 
+    `password`  VARCHAR(45)    NOT NULL    COMMENT '패스워드', 
+    PRIMARY KEY (userid)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE user COMMENT '사용자';
+
+
+-- chatgroup Table Create SQL
+CREATE TABLE chatgroup
+(
+    `groupid`    BIGINT         NOT NULL    AUTO_INCREMENT COMMENT '채팅방 아이디', 
+    `userid`     varchar(20)    NOT NULL    COMMENT '채팅방개설자', 
+    `groupname`  VARCHAR(45)    NULL        COMMENT '채팅방 이름', 
+    `type`       TINYINT        NOT NULL    COMMENT '채팅방 종류', 
+    PRIMARY KEY (groupid)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE chatgroup COMMENT '채팅방';
+
+-- friend Table Create SQL
+CREATE TABLE friend
+(
+    `userid`    varchar(20)    NOT NULL    COMMENT '유저 아이디', 
+    `friendid`  varchar(20)    NOT NULL    COMMENT '친구 아이디'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE friend COMMENT '친구목록';
+
+-- chatcontent Table Create SQL
+CREATE TABLE chatcontent
+(
+    `chatid`    BIGINT           NOT NULL    AUTO_INCREMENT COMMENT '메시지아이디', 
+    `userid`    varchar(20)      NOT NULL    COMMENT '보낸사람', 
+    `groupid`   BIGINT           NOT NULL    COMMENT '채팅방 아이디', 
+    `content`   VARCHAR(1000)    NULL        COMMENT '채팅내용', 
+    `sendtime`  DATETIME(6)      NOT NULL    COMMENT '보낸시간', 
+    `count`     INT              NOT NULL    COMMENT '읽지않은사람수', 
+    PRIMARY KEY (chatid)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE chatcontent COMMENT '채팅내용';
+
+-- usergroupname Table Create SQL
+CREATE TABLE usergroupname
+(
+    `userid`     varchar(20)    NOT NULL    COMMENT '유저 아이디', 
+    `groupid`    BIGINT         NOT NULL    COMMENT '채팅방 아이디', 
+    `groupname`  VARCHAR(45)    NULL        COMMENT '채팅방 명'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE usergroupname COMMENT '유저별 채팅방명';
+
+-- chatmember Table Create SQL
+CREATE TABLE chatmember
+(
+    `groupid`       BIGINT         NOT NULL    COMMENT '채팅방아이디', 
+    `userid`        VARCHAR(20)    NOT NULL    COMMENT '참여자', 
+    `lastreadtime`  DATETIME(6)    NOT NULL    COMMENT '최종읽은시간'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE chatmember COMMENT '채팅멤버';
+
+-- filecontent Table Create SQL
+CREATE TABLE filecontent
+(
+    `userid`    varchar(20)     NOT NULL    COMMENT '보낸사람', 
+    `groupid`   BIGINT          NOT NULL    COMMENT '채팅방 아이디', 
+    `file_dir`  VARCHAR(200)    NOT NULL    COMMENT '파일디렉토리', 
+    `sendtime`  VARCHAR(20)     NOT NULL    COMMENT '보낸시간'
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE filecontent COMMENT '파일디렉토리';
