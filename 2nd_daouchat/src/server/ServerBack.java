@@ -31,6 +31,8 @@ public class ServerBack {
 	public static final int FRILIST = 8; // 친구목록
 	public static final int OPENCHAT = 9; // 그룹생성
 	public static final int ROOM = 10; //채팅방목록
+	public static final int GROUPROOMLIST = 11; // 채팅방 개설시 친구목록
+	public static final int UPDATELASTREAD = 12; // 읽은시간 변경
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -48,11 +50,6 @@ public class ServerBack {
 	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
 
 	private int non_login_increment = 0; // 로그인 전 임시값
-    private ServerDAO sDao;
-	
-	public ServerDAO getsDao() {
-		return sDao;
-	}
 		
 	public Map<String, ObjectOutputStream> getCurrentClientMap() {
 		return currentClientMap;
@@ -82,7 +79,6 @@ public class ServerBack {
 				for (String member : groupmember) {
 					oos = currentClientMap.get(member);
 					if(oos != null) {
-						int result = sDao.updatereadtime(member,message);
 						System.out.println("브로드캐스트 중");
 						oos.writeObject(sendData);
 						oos.flush();
@@ -98,7 +94,6 @@ public class ServerBack {
 	
 	public void setting() {
 		try {
-			sDao = new ServerDAO();
 			serverSocket = new ServerSocket(1993); // 서버 소켓 생성
 			fileserverSocket = new ServerSocket(1994);
 
@@ -106,7 +101,7 @@ public class ServerBack {
 
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
-			scheduler.scheduleAtFixedRate(odd, 60000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+			scheduler.scheduleAtFixedRate(odd, 6000000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
 			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
@@ -132,6 +127,7 @@ public class ServerBack {
 	
 	/* 서버는 연결된 클라이언트의 데이터 수신 대기 */
 	class Receiver extends Thread{
+		private ServerDAO sDao;
 		private DataInputStream is;
 		private DataOutputStream os;
 		private ObjectInputStream ois;
@@ -144,6 +140,7 @@ public class ServerBack {
 		
 		public Receiver(Socket socket) {
 			try {
+				sDao = new ServerDAO();
 				this.socket = socket;
 				is = new DataInputStream(socket.getInputStream());
 				os = new DataOutputStream(socket.getOutputStream());
@@ -246,7 +243,19 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					else if(data.getHeader().getMenu() == GROUPROOMLIST) {
+						Object rowData[][] = sDao.friList(connectId);
+						Header header = new Header(GROUPROOMLIST,0);
+						Data sendData = new Data(header,rowData);
+						oos.writeObject(sendData);
+						oos.flush();
+					}
+					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
+						Chat message = (Chat)data.getObject();
+						int result = sDao.updatereadtime(connectId,message);
+					}
 				}
+				
 //					//파일 메세지
 //					else if(headerBuffer[1]==FMSG) {
 //						System.out.println(connectId + "가 파일을 보냅니다");

@@ -399,7 +399,7 @@ public class ServerDAO {
 		        pstmt.setLong(2, message.getGroupid());
 		        pstmt.setString(3, new String(message.getContent().getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setLong(4, message.getGroupid());
-		        chk = pstmt.executeUpdate();
+				chk = pstmt.executeUpdate();
 		        
 //		        pstmt = con.prepareStatement(query3);
 //		        pstmt.setLong(1, message.getGroupid());
@@ -494,8 +494,9 @@ public class ServerDAO {
 				pstmt.setLong(1, groupid);
 				pstmt.setLong(2, groupid);
 				pstmt.setString(3, userid);
-
+				
 		        rs = pstmt.executeQuery();
+		        
 		        Chat chat;
 		        while(rs.next()) {
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getDate("sendtime"),rs.getInt("count"));

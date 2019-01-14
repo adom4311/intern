@@ -12,6 +12,7 @@ import java.util.Map;
 
 import client.control.ReadchatFile;
 import client.request.AddFriendRequest;
+import client.request.CreateGroupRoomListRequest;
 import client.request.CreateRoomRequest;
 import client.request.FindfriendRequest;
 import client.request.FriListRequest;
@@ -21,6 +22,7 @@ import client.request.RoomListRequest;
 import client.request.SendMessageRequest;
 import client.request.SignupRequest;
 import client.response.AddfriResponse;
+import client.response.CreateGroupRoomListResponse;
 import client.response.CreateRoomResponse;
 import client.response.FmsgResponse;
 import client.response.FrifindResponse;
@@ -43,6 +45,8 @@ public class ClientBack {
 	public static final int FRILIST = 8; // 模备格废
 	public static final int OPENCHAT = 9; // 弊缝积己
 	public static final int ROOM = 10; //盲泼规格废
+	public static final int GROUPROOMLIST = 11; // 盲泼规 俺汲矫 模备格废
+	public static final int UPDATELASTREAD = 12; 
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -187,6 +191,8 @@ public class ClientBack {
 						new FmsgResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == OPENCHAT) {
 						new OpenchatResponse(clientback,data);
+					}else if(data.getHeader().getMenu() == GROUPROOMLIST) {
+						new CreateGroupRoomListResponse(clientback,data);
 					}
 				}
 			} catch (ClassNotFoundException e) {
@@ -294,5 +300,8 @@ public class ClientBack {
 	}
 	public void readchatFile(Long groupid) {
 		new ReadchatFile(this,groupid);
+	}
+	public void createGroupRoom() {
+		new CreateGroupRoomListRequest(this);
 	}
 }

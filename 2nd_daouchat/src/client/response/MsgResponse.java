@@ -9,6 +9,7 @@ import client.Chatwindow;
 import client.ClientBack;
 import model.vo.Chat;
 import model.vo.Data;
+import model.vo.Header;
 
 public class MsgResponse {
 
@@ -19,29 +20,35 @@ public class MsgResponse {
 			Long groupid = message.getGroupid();
 			if(chatMap.get(message.getGroupid()) == null) {
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(),message.getGroupid(), clientback, clientback.getfilesocket());
-				chatMap.put(message.getGroupid(), chatwindow);
+				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
 				chatwindow.show();
-			}
-			String line = message.getUserid() + " : " + message.getContent() + "\n";
-			chatMap.get(message.getGroupid()).appendMSG(line);
-			//파일에 저장
-			String fileFolder = "chatcontent" + File.separator + clientback.getId(); // 한 컴퓨터에서 유저별 데이터를 나누기 위하여
-			String fileName = message.getGroupid() + ".txt";
-			String filePATH = fileFolder + File.separator + fileName;
-			File file = new File(fileFolder);
-			if(!file.exists()) { // 폴더가 없는 경우
-				file.mkdirs();
-			}
-			file = new File(filePATH);
-			if(!file.exists()) { // 파일 없는 경우
-				file.createNewFile();
+			}else {
+				String line = message.getUserid() + " : " + message.getContent() + "\n";
+				chatMap.get(message.getGroupid()).appendMSG(line);
+				//파일에 저장
+				String fileFolder = "chatcontent" + File.separator + clientback.getId(); // 한 컴퓨터에서 유저별 데이터를 나누기 위하여
+				String fileName = message.getGroupid() + ".txt";
+				String filePATH = fileFolder + File.separator + fileName;
+				File file = new File(fileFolder);
+				if(!file.exists()) { // 폴더가 없는 경우
+					file.mkdirs();
+				}
+				file = new File(filePATH);
+				if(!file.exists()) { // 파일 없는 경우
+					file.createNewFile();
+				}
+				
+				ObjectOutputStream oos = clientback.getChatFileMap().get(groupid);
+				if(oos !=null) {
+					oos.writeObject(message);
+				}
 			}
 			
-			ObjectOutputStream oos = clientback.getChatFileMap().get(groupid);
-			if(oos !=null) {
-				oos.writeObject(message);
-			}
+			Header header = new Header(clientback.UPDATELASTREAD,0);
+			Data senddata = new Data(header,message);
+			ObjectOutputStream oos = clientback.getOos();
+			oos.writeObject(senddata);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

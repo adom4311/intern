@@ -26,6 +26,7 @@ public class ClientHome extends JFrame {
 	private JTable chatGrouptable;
 	private JTable findFritable; // 친구 찾기 테이블
 	private JTable friListtable; // 친구 목록 테이블
+	private JTable createGroupRoomListtable; // 그룹방 개설시 필요한 리스트 테이블
 	ClientHome frame;
 	JScrollPane scrollPane;
 	private int menuInt; // 검색버튼 메뉴 구분자
@@ -164,10 +165,10 @@ public class ClientHome extends JFrame {
 		getContentPane().add(button);
 		
 		JButton button_1 = new JButton("채팅방 개설");
-		button.addActionListener(new ActionListener() {
+		button_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				menuInt = 3;
-				
+				fn_createGroupRoom(clientback);
 			}
 		});
 		button_1.setBounds(12, 489, 331, 43);
@@ -258,8 +259,25 @@ public class ClientHome extends JFrame {
 		roomtable = new JTable(mod);
 		//roomtable.addMouseListener(new MyMouseListener(2));
 		scrollPane.setViewportView(roomtable);
-		
 	}
+	
+	public void fn_createGroupRoom(ClientBack clientback) {
+		menuInt=3;
+		clientback.createGroupRoom();
+	}
+	
+	public void fn_CreateGroupRoomListView(Object[][] rowData) {
+		// 내용 수정 불가 시작 //
+        DefaultTableModel mod = new DefaultTableModel(rowData, findFricolumnNames) {
+        public boolean isCellEditable(int rowIndex, int mColIndex) {
+                return false;
+            }
+        };
+        createGroupRoomListtable = new JTable(mod); // 친구 목록 테이블
+        createGroupRoomListtable.addMouseListener(new MyMouseListener(3));
+		scrollPane.setViewportView(createGroupRoomListtable);
+	}
+	
 	
 	/* 친구 찾기 테이블 클릭 이벤트 */
 	private class MyMouseListener extends MouseAdapter{
@@ -288,6 +306,8 @@ public class ClientHome extends JFrame {
 						clientback.createRoom(str);
 						
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
+					}else if (menu == 3) { // 친구 목록 테이블 클릭 이벤트
+						System.out.println("채팅방 개설시"); 
 					}
 				}
 			}

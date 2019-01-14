@@ -17,13 +17,10 @@ public class OpenchatResponse {
 			Map<Long,Chatwindow> chatMap = clientback.getChatMap();
 			Chatwindow chatwindow;
 			ObjectOutputStream oos;
+			// 서버 파일
 			List<Chat> chatcontent = (List<Chat>)data.getObject();
 			
-			// 파일에서 읽어오기
-			
-			// 서버채팅 
-			System.out.println("openchat size : " + chatcontent.size());
-			
+			System.out.println("서버데이터 사이즈 " + chatcontent.size()); 
 			if(chatcontent.size() > 0) {
 				Long groupid  = chatcontent.get(0).getGroupid();
 				oos = clientback.getChatFileMap().get(groupid);

@@ -7,7 +7,7 @@ import model.dao.ServerDAO;
 public class OldDataDelete extends TimerTask {
 	private ServerDAO sDao;
 	public OldDataDelete(ServerBack serverBack) {
-		sDao = serverBack.getsDao();
+		sDao = new ServerDAO();
 	}
 
 	@Override
