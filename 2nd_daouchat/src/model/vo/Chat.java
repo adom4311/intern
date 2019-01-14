@@ -1,7 +1,7 @@
 package model.vo;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Chat implements Serializable {
 	/**
@@ -12,7 +12,7 @@ public class Chat implements Serializable {
 	private String userid;
 	private Long groupid;
 	private String content;
-	private Date sendtime;
+	private Timestamp sendtime;
 	private int count;
 	
 	public Long getChatid() {
@@ -39,10 +39,10 @@ public class Chat implements Serializable {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public Date getSendtime() {
+	public Timestamp getSendtime() {
 		return sendtime;
 	}
-	public void setSendtime(Date sendtime) {
+	public void setSendtime(Timestamp sendtime) {
 		this.sendtime = sendtime;
 	}
 	public int getCount() {
@@ -51,7 +51,7 @@ public class Chat implements Serializable {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	public Chat(Long chatid, String userid, Long groupid, String content, Date sendtime, int count) {
+	public Chat(Long chatid, String userid, Long groupid, String content, Timestamp sendtime, int count) {
 		super();
 		this.chatid = chatid;
 		this.userid = userid;

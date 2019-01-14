@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -376,15 +377,16 @@ public class ServerDAO {
 		return groupid;
 	}
 
-	public int insertMSG(Chat message) {
+	public Chat insertMSG(Chat message) {
 		int chk = 0 ;
+		Chat chat = null;
 		if(con != null) {
 //			String query = "select count(*) from chatmember where groupid = ?";
+	        String query = "select * from chatcontent where chatid = (select LAST_INSERT_ID())";
 			String query2 = "insert into chatcontent(userid,groupid,content,sendtime,count) values(?,?,?,now(6),(select count(*) from chatmember where groupid = ?))";
 			// 메시지를 db에 저장후 보낸사람의 읽은시간을 변경
 			//String query3 = "update chatmember set lastreadtime = now(6) where groupid = ? and userid = ?";
 			
-			int totalcount = 0;
 			try {
 //				pstmt = con.prepareStatement(query);
 //				pstmt.setLong(1, message.getGroupid());
@@ -400,6 +402,12 @@ public class ServerDAO {
 		        pstmt.setString(3, new String(message.getContent().getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setLong(4, message.getGroupid());
 				chk = pstmt.executeUpdate();
+				
+				pstmt = con.prepareStatement(query);
+				rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
+		        }
 		        
 //		        pstmt = con.prepareStatement(query3);
 //		        pstmt.setLong(1, message.getGroupid());
@@ -417,7 +425,7 @@ public class ServerDAO {
 				e.printStackTrace();
 			}
 		}
-		return chk;
+		return chat;
 	}
 	
 	public boolean insertFile(String userid, Long roomid, String dir, String time) {
@@ -499,7 +507,7 @@ public class ServerDAO {
 		        
 		        Chat chat;
 		        while(rs.next()) {
-		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getDate("sendtime"),rs.getInt("count"));
+		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
 		        	chatcontent.add(chat);
 		        }		 
 		        pstmt = con.prepareStatement(query2);
@@ -536,23 +544,25 @@ public class ServerDAO {
 		int result = 0;
 		// 카운트감소 
 		String query = "update chatcontent set count = count-1 where groupid = ? "
-				+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";
+				+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?) "
+				+ "and sendtime <= ?";
 		// 마지막 읽은시간 수정
-		String query2 = "update chatmember set lastreadtime = now(6) where groupid = ? and userid = ?";
+		String query2 = "update chatmember set lastreadtime = ? where groupid = ? and userid = ?";
 		
 		Long groupid = message.getGroupid();
-		Date date = message.getSendtime();
+		Timestamp date = message.getSendtime();
 		try {
 			pstmt = con.prepareStatement(query);
 			pstmt.setLong(1, groupid);
 			pstmt.setLong(2, groupid);
 			pstmt.setString(3, member);
+			pstmt.setTimestamp(4, date);
 			result = pstmt.executeUpdate();
 			
 			pstmt = con.prepareStatement(query2);
-//			pstmt.setDate(1, (java.sql.Date) date);
-			pstmt.setLong(1, groupid);
-			pstmt.setString(2, member);
+			pstmt.setTimestamp(1, date);
+			pstmt.setLong(2, groupid);
+			pstmt.setString(3, member);
 			int result2 = pstmt.executeUpdate();
 			
 			if(result >=0 && result2 >=0) {
@@ -587,9 +597,6 @@ public class ServerDAO {
 			e.printStackTrace();
 		}
 	}
-	
-	
-   
 }
     
    

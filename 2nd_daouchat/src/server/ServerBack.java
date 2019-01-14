@@ -80,6 +80,7 @@ public class ServerBack {
 					oos = currentClientMap.get(member);
 					if(oos != null) {
 						System.out.println("브로드캐스트 중");
+						System.out.println(message.getGroupid());
 						oos.writeObject(sendData);
 						oos.flush();
 					}
@@ -226,12 +227,9 @@ public class ServerBack {
 					}
 					else if(data.getHeader().getMenu() == MSG) {
 						Chat message = (Chat)data.getObject();
-						int result = sDao.insertMSG(message);
-						List<String> groupmember = sDao.selectGroupmember(message.getGroupid());
-						for (String member : groupmember) {
-							System.out.println(member);
-						}
-						broadcast(message, groupmember);
+						Chat chat = sDao.insertMSG(message);
+						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
+						broadcast(chat, groupmember);
 					}
 					else if(data.getHeader().getMenu() == FMSG) {
 					}
