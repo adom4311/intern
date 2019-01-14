@@ -227,6 +227,11 @@ public class ServerBack {
 						Chat message = (Chat)data.getObject();
 						Chat chat = sDao.insertMSG(message);
 						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
+						for(String str : groupmember) {
+							if(currentClientMap.get(str) != null) {
+//								sDao.updatereadtime(str, chat);
+							}
+						}
 						broadcast(chat, groupmember);
 					}
 					else if(data.getHeader().getMenu() == FMSG) {

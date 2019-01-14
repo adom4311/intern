@@ -53,7 +53,6 @@ public class ServerDAO {
 		        pstmt.setString(2, new String(pw.getBytes("UTF-8"),"UTF-8"));
 		        chk = pstmt.executeUpdate();
 		        
-		        pstmt.close();
 		        if(chk >0) {
 		        	System.out.println("회원가입 성공");
 		        	con.commit();
@@ -62,8 +61,9 @@ public class ServerDAO {
 		        	System.out.println("회원가입 실패");
 		        	con.rollback();
 		        }
-		     
 		        
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -88,10 +88,11 @@ public class ServerDAO {
 		        	pstmt.close();
 		        	return 1;
 		        }
-		        pstmt.close();
 		        System.out.println("로그인 실패");
 		        
-		       
+
+		        close(pstmt);
+		        close(con);
 
 			} catch (SQLException e) {
 				return -1;
@@ -119,7 +120,9 @@ public class ServerDAO {
 		        	rowData[i++][2] = "";
 		        }
 		        
-		        pstmt.close();
+
+		        close(pstmt);
+		        close(con);
 
 		        
 		        return rowData;
@@ -146,8 +149,9 @@ public class ServerDAO {
 		        while(rs.next()) {
 		        	return rs.getInt(1);
 		        }
-		        
-		        pstmt.close();
+
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -170,7 +174,8 @@ public class ServerDAO {
 		        	return rs.getInt(1);
 		        }
 
-		        pstmt.close();
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -192,6 +197,8 @@ public class ServerDAO {
 		        while(rs.next()) {
 		        	return rs.getInt(1);
 		        }
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -220,6 +227,8 @@ public class ServerDAO {
 		        	System.out.println("친구추가 실패");
 		        	con.rollback();
 		        }
+		        close(pstmt);
+		        close(con);
 		        
 			} catch (SQLException e) {
 				return -1;
@@ -245,6 +254,8 @@ public class ServerDAO {
 		        	rowData[i][1] = rs.getString(1);
 		        	rowData[i++][2] = "";
 		        }
+		        close(pstmt);
+		        close(con);
 		        return rowData;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -272,6 +283,8 @@ public class ServerDAO {
 		        	rowData[i][0] = i + 1;
 		        	rowData[i++][1] = rs.getString(1);
 		        }
+		        close(pstmt);
+		        close(con);
 		        return rowData;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -331,10 +344,11 @@ public class ServerDAO {
 					pstmt.setString(2, new String(data[i].getBytes("UTF-8"),"UTF-8"));
 					pstmt.executeUpdate();
 				}  
-		        pstmt.close();
 		        
 		        con.commit();
 		        System.out.println("채팅방개설 성공");
+		        close(pstmt);
+		        close(con);
 //		        
 			} catch (SQLException e) {
 				// sql 에러발생시 여기서 rollback????
@@ -375,8 +389,9 @@ public class ServerDAO {
 				while(rs.next()) {
 					groupid = rs.getLong(1);
 				}
-				pstmt.close();
-				
+
+		        close(pstmt);
+		        close(con);				
 				return groupid;
 				
 			} catch (SQLException e) {
@@ -426,11 +441,12 @@ public class ServerDAO {
 //		        pstmt.setString(2, new String(message.getUserid().getBytes("UTF-8"),"UTF-8"));
 //		        pstmt.executeUpdate();
 		        
-		        pstmt.close();
 		        if(chk >=0) {
 		        	con.commit();
 		        }else
 		        	con.rollback();
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
@@ -451,7 +467,6 @@ public class ServerDAO {
 				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
 				pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
 				chk=pstmt.executeUpdate();
-				pstmt.close();
 				if(chk >=0) {
 					System.out.println("메세지 전송 성공");
 		        	con.commit();
@@ -459,7 +474,9 @@ public class ServerDAO {
 		        	con.rollback();
 		        	System.out.println("메세지 전송 실패");
 		        }
-				
+
+		        close(pstmt);
+		        close(con);
 				
 			}catch(SQLException e){
 				return false;
@@ -485,8 +502,9 @@ public class ServerDAO {
 		        while(rs.next()) {
 		        	groupmemberList.add(rs.getString(1));
 		        }		        
-		        
-		        pstmt.close();
+
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -520,7 +538,7 @@ public class ServerDAO {
 				pstmt.setString(3, userid);
 				
 		        rs = pstmt.executeQuery();
-		        
+		        close(pstmt);
 		        Chat chat;
 		        System.out.println("데이터 가져오기");
 		        while(rs.next()) {
@@ -533,6 +551,7 @@ public class ServerDAO {
 				pstmt.setLong(2, groupid);
 				pstmt.setString(3, userid);
 				int result = pstmt.executeUpdate();
+				close(pstmt);
 				
 				pstmt = con.prepareStatement(query3);
 				pstmt.setLong(1, groupid);
@@ -542,14 +561,15 @@ public class ServerDAO {
 //				pstmt = con.prepareStatement(query4);
 //				int result3 = pstmt.executeUpdate();
 				
-		        pstmt.close();
 
+		        
 		        if(result >= 0 && result2 >=0/* && result3 >=0 */) {
 					con.commit();
 				}else {
 					con.rollback();
 				}
-		        
+		        close(pstmt);
+		        close(con);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -577,6 +597,7 @@ public class ServerDAO {
 			pstmt.setString(3, member);
 			pstmt.setTimestamp(4, date);
 			result = pstmt.executeUpdate();
+			close(pstmt);
 			
 			pstmt = con.prepareStatement(query2);
 			pstmt.setTimestamp(1, date);
@@ -589,7 +610,9 @@ public class ServerDAO {
 			}else {
 				con.rollback();
 			}
-			pstmt.close();
+
+	        close(pstmt);
+	        close(con);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -611,7 +634,9 @@ public class ServerDAO {
 				con.rollback();
 			}
 			
-			pstmt.close();
+
+	        close(pstmt);
+	        close(con);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -48,11 +48,11 @@ public class MsgResponse {
 					oos.writeObject(message);
 				}
 				
-				Header header = new Header(clientback.UPDATELASTREAD,0);
-				Data senddata = new Data(header,message);
-				ObjectOutputStream foos = clientback.getOos();
-				foos.writeObject(senddata);
-				foos.flush();
+//				Header header = new Header(clientback.UPDATELASTREAD,0);
+//				Data senddata = new Data(header,message);
+//				ObjectOutputStream foos = clientback.getOos();
+//				foos.writeObject(senddata);
+//				foos.flush();
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
