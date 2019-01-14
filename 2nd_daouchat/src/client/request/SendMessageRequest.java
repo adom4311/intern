@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import client.ClientBack;
+import model.vo.Chat;
 import model.vo.Data;
 import model.vo.Header;
-import model.vo.Message;
 
 public class SendMessageRequest {
 
@@ -15,7 +15,7 @@ public class SendMessageRequest {
 			ObjectOutputStream oos = clientBack.getOos();
 			int bodylength = 0; // 데이터 길이가 필요한가?
 			Header header = new Header(ClientBack.MSG,bodylength);
-			Message message = new Message(clientBack.getId(),groupid,msg,null);
+			Chat message = new Chat(0L,clientBack.getId(),groupid,msg,null,0);
 			Data sendData = new Data(header,message);
 			oos.writeObject(sendData);
 			oos.flush();

@@ -1,4 +1,4 @@
-package client;
+package client.control;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import model.vo.Message;
+import client.ClientBack;
+import model.vo.Chat;
 
 public class ReadchatFile {
 
@@ -24,26 +25,26 @@ public class ReadchatFile {
 			file = new File(filePATH);
 			if(!file.exists()) { // 파일 없는 경우
 				file.createNewFile();
-				return;
 			}
+			
 			FileInputStream fis = new FileInputStream(file);
 			if(fis.available() > 0) {
 				ObjectInputStream ois = new ObjectInputStream(fis);
 				
-				ArrayList<Message> list = new ArrayList<Message>();
-				Message msg;
+				ArrayList<Chat> list = new ArrayList<Chat>();
+				Chat msg;
 				System.out.println("에이블1 : " +fis.available());
 				while(fis.available() > 0){
-					msg = (Message)ois.readObject();
+					msg = (Chat)ois.readObject();
 					list.add(msg);
-					clientback.getChatMap().get(groupid).appendMSG(msg.getSenduserid() + " : " + msg.getMsg() + "\n");
-					System.out.println(msg.getSenduserid() + " : " + msg.getMsg() + "\n");
+					clientback.getChatMap().get(groupid).appendMSG(msg.getUserid() + " : " + msg.getContent() + "\n");
+					System.out.println(msg.getUserid() + " : " + msg.getContent() + "\n");
 				}
 				
 				FileOutputStream fos = new FileOutputStream(file);
 				ObjectOutputStream oos = new ObjectOutputStream(fos);
 				clientback.getChatFileMap().put(groupid, oos);
-				for(Message writemsg : list) {
+				for(Chat writemsg : list) {
 					oos.writeObject(writemsg);
 				}
 				ois.close();
@@ -52,6 +53,9 @@ public class ReadchatFile {
 				ObjectOutputStream oos = new ObjectOutputStream(fos);
 				clientback.getChatFileMap().put(groupid, oos);
 			}
+			
+			// db에 저장된 채팅 불러오기
+			clientback.openChat(groupid);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

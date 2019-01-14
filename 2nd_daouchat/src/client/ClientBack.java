@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import client.control.ReadchatFile;
 import client.request.AddFriendRequest;
 import client.request.CreateRoomRequest;
 import client.request.FindfriendRequest;

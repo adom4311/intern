@@ -11,12 +11,13 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import model.dao.ServerDAO;
 import model.vo.Chat;
+import model.vo.ChatMember;
 import model.vo.Data;
 import model.vo.Header;
-import model.vo.Message;
 import model.vo.User;
 
 public class ServerBack {
@@ -72,7 +73,7 @@ public class ServerBack {
 		serverBack.setting();
 	}
 
-	private void broadcast(Message message, List<String> groupmember) {
+	private void broadcast(Chat message, List<String> groupmember) {
 		synchronized (currentClientMap) {
 			try {
 				Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
@@ -81,6 +82,7 @@ public class ServerBack {
 				for (String member : groupmember) {
 					oos = currentClientMap.get(member);
 					if(oos != null) {
+						int result = sDao.updatereadtime(member,message);
 						System.out.println("브로드캐스트 중");
 						oos.writeObject(sendData);
 						oos.flush();
@@ -101,6 +103,11 @@ public class ServerBack {
 			fileserverSocket = new ServerSocket(1994);
 
 			System.out.println("---서버 오픈---");
+
+			OldDataDelete odd = new OldDataDelete(this);
+			Timer scheduler = new Timer();
+			scheduler.scheduleAtFixedRate(odd, 60000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
 				filesocket=fileserverSocket.accept();
@@ -221,7 +228,7 @@ public class ServerBack {
 						oos.flush();
 					}
 					else if(data.getHeader().getMenu() == MSG) {
-						Message message = (Message)data.getObject();
+						Chat message = (Chat)data.getObject();
 						int result = sDao.insertMSG(message);
 						List<String> groupmember = sDao.selectGroupmember(message.getGroupid());
 						for (String member : groupmember) {
@@ -232,8 +239,8 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == FMSG) {
 					}
 					else if(data.getHeader().getMenu() == OPENCHAT) {
-						Long groupid = (Long)data.getObject();
-						List<Chat> chatcontent = sDao.selectchatcontent(groupid);
+						ChatMember chatmember = (ChatMember)data.getObject();
+						List<Chat> chatcontent = sDao.selectchatcontent(chatmember);
 						Header header = new Header(OPENCHAT,0);
 						Data sendData = new Data(header,chatcontent);
 						oos.writeObject(sendData);

@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import client.ClientBack;
+import model.vo.ChatMember;
 import model.vo.Data;
 import model.vo.Header;
 
 public class OpenChatRequest {
 
-	public OpenChatRequest(ClientBack clientBack, Long groupid) {
+	public OpenChatRequest(ClientBack clientback, Long groupid) {
 		try {
-			ObjectOutputStream oos = clientBack.getOos();
+			ObjectOutputStream oos = clientback.getOos();
 			int bodylength = 0; // 데이터 길이가 필요한가?
 			Header header = new Header(ClientBack.OPENCHAT,bodylength);
-			Data sendData = new Data(header,groupid);
+			ChatMember chatmember = new ChatMember(clientback.getId(), groupid);
+			Data sendData = new Data(header,chatmember);
 			oos.writeObject(sendData);
 			oos.flush();
 		} catch (IOException e) {
