@@ -32,8 +32,9 @@ public class ServerBack {
 	public static final int OPENCHAT = 9; // 그룹생성
 	public static final int ROOM = 10; //채팅방목록
 	public static final int GROUPROOMLIST = 11; // 채팅방 개설시 친구목록
-	public static final int UPDATELASTREAD = 12; // 읽은시간 변경
-	public static final int CREATEGROUPROOM = 13; 
+	public static final int UPDATELASTREAD = 12; // 읽음처리용
+	public static final int CREATEGROUPROOM = 13;  // 그룹채팅방
+	public static final int ROOMOPEN = 14; // 채팅방 오픈
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -259,6 +260,8 @@ public class ServerBack {
 						Data sendData = new Data(header,groupid);
 						oos.writeObject(sendData);
 						oos.flush();
+					}
+					else if(data.getHeader().getMenu() == ROOMOPEN) {
 					}
 				}
 				

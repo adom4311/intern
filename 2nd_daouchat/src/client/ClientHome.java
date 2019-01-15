@@ -31,7 +31,7 @@ public class ClientHome extends JFrame {
 	JScrollPane scrollPane;
 	private int menuInt; // 검색버튼 메뉴 구분자
 	String findFricolumnNames[] = { "번호", "아이디", "상태메세지" };
-	String chatGroupcolumnNames[] = { "번호", "채팅방명"};
+	String chatGroupcolumnNames[] = { "채팅방id", "채팅방명"};
 	
 	CreateGroupRoomGUI cgrgui;
 
@@ -259,7 +259,7 @@ public class ClientHome extends JFrame {
 			}
 		};
 		roomtable = new JTable(mod);
-		//roomtable.addMouseListener(new MyMouseListener(2));
+		roomtable.addMouseListener(new MyMouseListener(4,frame));
 		scrollPane.setViewportView(roomtable);
 	}
 	
@@ -276,7 +276,6 @@ public class ClientHome extends JFrame {
             }
         };
         createGroupRoomListtable = new JTable(mod); // 친구 목록 테이블
-        System.out.println("채팅방개설 목록 클릭시 프레임 " + frame);
         createGroupRoomListtable.addMouseListener(new MyMouseListener(3,frame));
 		scrollPane.setViewportView(createGroupRoomListtable);
 	}
@@ -320,6 +319,10 @@ public class ClientHome extends JFrame {
 							System.out.println("오브젝트의 값 " + o[0].toString());
 							frame.cgrgui.addrow(o);
 						}
+					}else if(menu == 4) {
+						System.out.println("채팅방 목록!!");
+						Long groupid = Long.parseLong(roomtable.getValueAt(roomtable.getSelectedRow(), 0).toString());
+						clientback.readchatFile(groupid);
 					}
 				}
 			}

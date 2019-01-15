@@ -19,12 +19,12 @@ public class MsgResponse {
 			Chat message = (Chat)data.getObject();
 			Long groupid = message.getGroupid();
 			//채팅전송이 오면 채팅창이 켜지는건 따로 기능을 제작해야함
-			if(chatMap.get(message.getGroupid()) == null) {
-				Chatwindow chatwindow = new Chatwindow(clientback.getId(),message.getGroupid(), clientback, clientback.getfilesocket());
-				chatMap.put(groupid, chatwindow);
-				chatMap.get(groupid).readchatFile();
-				chatwindow.show();
-			} 
+//			if(chatMap.get(message.getGroupid()) == null) {
+//				Chatwindow chatwindow = new Chatwindow(clientback.getId(),message.getGroupid(), clientback, clientback.getfilesocket());
+//				chatMap.put(groupid, chatwindow);
+//				chatMap.get(groupid).readchatFile();
+//				chatwindow.show();
+//			} 
 			// 채팅방이 켜져 있을 경우
 			if(chatMap.get(message.getGroupid()) != null) {
 				String line = message.getUserid() + " : " + message.getContent() + "\n";

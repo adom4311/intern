@@ -243,7 +243,7 @@ public class ServerDAO {
 			try {
 				int totalcount = 0;
 				System.out.println("연결 : "+connectId);
-				pstmt = con.prepareStatement("select count(groupid) from chatgroup where userid = ?");
+				pstmt = con.prepareStatement("select count(*) from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
@@ -251,15 +251,15 @@ public class ServerDAO {
 		        }
 				
 				Object rowData[][] = new Object[totalcount][2];
-				pstmt = con.prepareStatement("select groupname from chatgroup where userid = ?");
+				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
 //				pstmt = con.prepareStatement("select groupid from chatgroup where userid = ?");
 				//groupname  -> groupid 로 임시변경 
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();		        
 		        int i=0;
 		        while(rs.next()) {
-		        	rowData[i][0] = i + 1;
-		        	rowData[i++][1] = rs.getString(1);
+		        	rowData[i][0] = rs.getLong(1);
+		        	rowData[i++][1] = rs.getString(2);
 		        }
 		        close(pstmt);
 		        close(con);
