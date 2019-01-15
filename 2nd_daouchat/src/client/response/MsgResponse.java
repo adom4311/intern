@@ -27,6 +27,13 @@ public class MsgResponse {
 //			} 
 			// 채팅방이 켜져 있을 경우
 			if(chatMap.get(message.getGroupid()) != null) {
+				ObjectOutputStream foos = clientback.getOos();
+				Header header = new Header(clientback.UPDATELASTREAD,0);
+				Data senddata = new Data(header,message);
+				foos.writeObject(senddata);
+				foos.flush();
+				
+				
 				String line = message.getUserid() + " : " + message.getContent() + "\n";
 				chatMap.get(message.getGroupid()).appendMSG(line);
 				//파일에 저장
@@ -48,11 +55,7 @@ public class MsgResponse {
 				}
 				
 				// 읽음 처리
-//				Header header = new Header(clientback.UPDATELASTREAD,0);
-//				Data senddata = new Data(header,message);
-//				ObjectOutputStream foos = clientback.getOos();
-//				foos.writeObject(senddata);
-//				foos.flush();
+//				
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

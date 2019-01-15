@@ -508,7 +508,6 @@ public class ServerDAO {
 				rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
-		        	System.out.println(chat);
 		        }
 		        
 		        if(chk >=0) {
@@ -633,6 +632,7 @@ public class ServerDAO {
 					con.rollback();
 				}
 		        close(pstmt);
+		        System.out.println("Áö³­ µ¥ÀÌÅÍ °¡Á®¿À´Â Ä¿³Ø¼Ç ´ÝÈû");
 		        close(con);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -643,7 +643,10 @@ public class ServerDAO {
 	}
 
 	public int updatereadtime(String member, Chat message) {
+
+		System.out.println(member + "ÀÇ con°´Ã¼ ¼±¾ð Àü : " + con);
 		con = getConnection();
+		System.out.println(member + "ÀÇ con°´Ã¼ ¼±¾ð ÈÄ : " + con);
 		int result = 0;
 		// Ä«¿îÆ®°¨¼Ò 
 		String query = "update chatcontent set count = count-1 where groupid = ? "
@@ -655,18 +658,22 @@ public class ServerDAO {
 		Long groupid = message.getGroupid();
 		Timestamp date = message.getSendtime();
 		try {
+			System.out.println(member + "ÀÇ con°´Ã¼1 : " + con);
 			pstmt = con.prepareStatement(query);
 			pstmt.setLong(1, groupid);
 			pstmt.setLong(2, groupid);
 			pstmt.setString(3, member);
 			pstmt.setTimestamp(4, date);
+			System.out.println(member + "ÀÇ con°´Ã¼2 : " + con);
 			result = pstmt.executeUpdate();
 			close(pstmt);
-			
+
+			System.out.println(member + "ÀÇ con°´Ã¼3 : " + con);
 			pstmt = con.prepareStatement(query2);
 			pstmt.setTimestamp(1, date);
 			pstmt.setLong(2, groupid);
 			pstmt.setString(3, member);
+			System.out.println(member + "ÀÇ con°´Ã¼4 : " + con);
 			int result2 = pstmt.executeUpdate();
 			
 			if(result >=0 && result2 >=0) {
@@ -677,6 +684,7 @@ public class ServerDAO {
 
 	        close(pstmt);
 	        close(con);
+	        con = null;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

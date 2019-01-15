@@ -261,8 +261,6 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
-					else if(data.getHeader().getMenu() == ROOMOPEN) {
-					}
 				}
 				
 //					//파일 메세지
