@@ -60,4 +60,10 @@ public class Chat implements Serializable {
 		this.sendtime = sendtime;
 		this.count = count;
 	}
+	@Override
+	public String toString() {
+		return "Chat [chatid=" + chatid + ", userid=" + userid + ", groupid=" + groupid + ", content=" + content
+				+ ", sendtime=" + sendtime + ", count=" + count + "]";
+	}
+	
 }

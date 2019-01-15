@@ -13,6 +13,7 @@ import java.util.Map;
 import client.control.ReadchatFile;
 import client.request.AddFriendRequest;
 import client.request.CreateGroupRoomListRequest;
+import client.request.CreateGroupRoomRequest;
 import client.request.CreateRoomRequest;
 import client.request.FindfriendRequest;
 import client.request.FriListRequest;
@@ -23,6 +24,7 @@ import client.request.SendMessageRequest;
 import client.request.SignupRequest;
 import client.response.AddfriResponse;
 import client.response.CreateGroupRoomListResponse;
+import client.response.CreateGroupRoomResponse;
 import client.response.CreateRoomResponse;
 import client.response.FmsgResponse;
 import client.response.FrifindResponse;
@@ -47,6 +49,8 @@ public class ClientBack {
 	public static final int ROOM = 10; //채팅방목록
 	public static final int GROUPROOMLIST = 11; // 채팅방 개설시 친구목록
 	public static final int UPDATELASTREAD = 12; 
+	public static final int CREATEGROUPROOM = 13; 
+	
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -193,6 +197,8 @@ public class ClientBack {
 						new OpenchatResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == GROUPROOMLIST) {
 						new CreateGroupRoomListResponse(clientback,data);
+					}else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
+						new CreateGroupRoomResponse(clientback,data);
 					}
 				}
 			} catch (ClassNotFoundException e) {
@@ -292,6 +298,10 @@ public class ClientBack {
 
 	public void createRoom(String[] friendids) { // 채팅방 생성
 		new CreateRoomRequest(this, friendids);
+	}
+	
+	public void createGroupRoom(String[] friendids) { // 채팅방 생성
+		new CreateGroupRoomRequest(this, friendids);
 	}
 
 	//채팅방 개설시 채팅내용을 가져오는 메서드

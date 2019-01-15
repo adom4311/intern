@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -93,6 +92,7 @@ public class ServerDAO {
 
 		        close(pstmt);
 		        close(con);
+		        System.out.println("로그인 커넥션 닫힘");
 
 			} catch (SQLException e) {
 				return -1;
@@ -107,8 +107,16 @@ public class ServerDAO {
 		con = getConnection();
 		if( con != null ) {
             try {
-            	System.out.println("됨 : " + tempId);
-            	Object rowData[][] = new Object[totalUserCnt(tempId)][3];
+            	int totalcount = 0;
+            	pstmt = con.prepareStatement("select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
+				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalcount =  rs.getInt(1);
+		        }
+            	
+            	Object rowData[][] = new Object[totalcount][3];
 				pstmt = con.prepareStatement("select userid from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
 				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
@@ -123,6 +131,7 @@ public class ServerDAO {
 
 		        close(pstmt);
 		        close(con);
+		        System.out.println("전체 친구찾기 커넥션 닫힘");
 
 		        
 		        return rowData;
@@ -133,56 +142,6 @@ public class ServerDAO {
 			}
         }
         return null;
-	}
-	
-	/* 친구 찾기 용 */
-	public int totalUserCnt(String tempId) {
-		con = getConnection();
-		int chk = 0;
-		if( con != null ) {
-            try {
-				pstmt = con.prepareStatement("select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
-				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
-		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
-		        rs = pstmt.executeQuery();
-		        
-		        while(rs.next()) {
-		        	return rs.getInt(1);
-		        }
-
-		        close(pstmt);
-		        close(con);
-			} catch (SQLException e) {
-				return -1;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-        }
-        return chk;
-	}
-	
-	/* 친구 목록 용 */
-	public int totalFriCnt(String tempId) {
-		con = getConnection();
-		int chk = 0;
-		if( con != null ) {
-            try {
-				pstmt = con.prepareStatement("select count(friendid) from friend where userid = ?");
-				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
-		        rs = pstmt.executeQuery();
-		        while(rs.next()) {
-		        	return rs.getInt(1);
-		        }
-
-		        close(pstmt);
-		        close(con);
-			} catch (SQLException e) {
-				return -1;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-        }
-        return chk;
 	}
 	
 	/* 방 목록을 위한 함수*/
@@ -199,6 +158,7 @@ public class ServerDAO {
 		        }
 		        close(pstmt);
 		        close(con);
+		        System.out.println("방목록 커넥션 닫힘");
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -229,6 +189,7 @@ public class ServerDAO {
 		        }
 		        close(pstmt);
 		        close(con);
+		        System.out.println("친구추가 커넥션 닫힘");
 		        
 			} catch (SQLException e) {
 				return -1;
@@ -243,8 +204,16 @@ public class ServerDAO {
 		con = getConnection();
 		if( con != null ) {
             try {
-            	System.out.println("됨 : " + connectId);
-            	Object rowData[][] = new Object[totalFriCnt(connectId)][3];
+            	int totalcnt = 0;
+            	pstmt = con.prepareStatement("select count(friendid) from friend where userid = ?");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalcnt =  rs.getInt(1);
+		        }            	
+            	
+            	
+            	Object rowData[][] = new Object[totalcnt][3];
 				pstmt = con.prepareStatement("select friendid from friend where userid = ?");
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();		        
@@ -256,6 +225,7 @@ public class ServerDAO {
 		        }
 		        close(pstmt);
 		        close(con);
+		        System.out.println("친구목록 커넥션 닫힘");
 		        return rowData;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -271,8 +241,16 @@ public class ServerDAO {
 		con = getConnection();
 		if(con!=null) {
 			try {
+				int totalcount = 0;
 				System.out.println("연결 : "+connectId);
-				Object rowData[][] = new Object[totalRoomCnt(connectId)][2];
+				pstmt = con.prepareStatement("select count(groupid) from chatgroup where userid = ?");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalcount =  rs.getInt(1);
+		        }
+				
+				Object rowData[][] = new Object[totalcount][2];
 				pstmt = con.prepareStatement("select groupname from chatgroup where userid = ?");
 //				pstmt = con.prepareStatement("select groupid from chatgroup where userid = ?");
 				//groupname  -> groupid 로 임시변경 
@@ -285,6 +263,7 @@ public class ServerDAO {
 		        }
 		        close(pstmt);
 		        close(con);
+		        System.out.println("방 목록 커넥션 닫힘");
 		        return rowData;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -304,13 +283,37 @@ public class ServerDAO {
 
         if( con != null ) {
             try {
-            	// 이미 1:1채팅방이 있으면 0을 리턴
-            	if(selectRoom(connectId,data,ONEROOM) != 0L) {
-            		return 0;
+            	/* 1:1 있는지 검사 */
+            	long groupidbefore = 0L;
+            	StringBuffer query5 = new StringBuffer();
+    			query5.append("select groupid, count(groupid) cnt from chatmember where groupid in (select groupid from chatgroup where type =?) and userid in (?");
+            	for (int i = 0; i < data.length; i++) {
+            		query5.append(",?");
             	}
+            	query5.append(") group by groupid having cnt = 2");
+				pstmt = con.prepareStatement(query5.toString());
+				pstmt.setByte(1, ONEROOM); // 채팅타입
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
+				for (int i = 0; i < data.length; i++) { // 각 참여자
+					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+				}
+				
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					groupidbefore = rs.getLong(1);
+				}
+				close(pstmt);
+				
+				if(groupidbefore != 0L) {
+					con.close();
+					return 0;
+				}
+				/* 1:1 채팅방 있는지 검사 */
+            	
             	
             	/* 채팅방 개설 */
             	String query = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+            	long groupid3;
 				pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
@@ -349,6 +352,7 @@ public class ServerDAO {
 		        System.out.println("채팅방개설 성공");
 		        close(pstmt);
 		        close(con);
+		        System.out.println("채팅방개설 커넥션 닫힘");
 //		        
 			} catch (SQLException e) {
 				// sql 에러발생시 여기서 rollback????
@@ -366,6 +370,74 @@ public class ServerDAO {
         }
         return chk;
 	}
+	
+	public Long createGroupRoom(String connectId, String data[]) { // data는 friendId
+		con = getConnection();
+		Long groupid = 0L;
+		int chk = 0;
+
+        if( con != null ) {
+            try {
+            	/* 채팅방 개설 */
+            	String query = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
+				pstmt.setByte(3, GROUPROOM); // 채팅 방명
+		        chk = pstmt.executeUpdate();
+		        pstmt.close();
+		        
+		        /* groupid 가져오기 */
+		        String query2 = "select LAST_INSERT_ID()";
+		        pstmt = con.prepareStatement(query2);
+		        rs = pstmt.executeQuery();
+		        groupid = 0L;
+		        while(rs.next()) {
+		        	groupid = rs.getLong(1);
+		        }
+		        pstmt.close();
+		        System.out.println("서버 db 저장시 groupid : " + groupid);
+		        
+		        /* 채팅방 참여자 추가 */
+            	String query3 = "insert into chatmember(groupid,userid,lastreadtime) values(?,?,now(6))";
+		        
+		        // chatmember에 개설자 아이디 추가
+		        pstmt = con.prepareStatement(query3);
+				pstmt.setLong(1, groupid);
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				chk = pstmt.executeUpdate(); 
+		        
+		        // chatmember에 초대한 아이디 추가
+				for (int i = 0; i < data.length; i++) {
+					pstmt.setLong(1, groupid);
+					pstmt.setString(2, new String(data[i].getBytes("UTF-8"),"UTF-8"));
+					pstmt.executeUpdate();
+				}  
+		        
+		        con.commit();
+		        System.out.println("채팅방개설 성공");
+		        close(pstmt);
+		        close(con);
+		        System.out.println("채팅방개설 커넥션 닫힘");
+//		        
+			} catch (SQLException e) {
+				// sql 에러발생시 여기서 rollback????
+				try {
+		        	System.out.println("채팅방개설 실패");
+					con.rollback();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return -1L;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+        }
+        return groupid;
+	}
+	
+	
 
 	public Long selectRoom(String connectId, String[] data, byte type) {
 		con = getConnection();
@@ -391,7 +463,8 @@ public class ServerDAO {
 				}
 
 		        close(pstmt);
-		        close(con);				
+		        close(con);	
+		        System.out.println("selectroom 커넥션 닫힘");			
 				return groupid;
 				
 			} catch (SQLException e) {
@@ -429,17 +502,14 @@ public class ServerDAO {
 		        pstmt.setString(3, new String(message.getContent().getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setLong(4, message.getGroupid());
 				chk = pstmt.executeUpdate();
+				close(pstmt);
 				
 				pstmt = con.prepareStatement(query);
 				rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
+		        	System.out.println(chat);
 		        }
-		        
-//		        pstmt = con.prepareStatement(query3);
-//		        pstmt.setLong(1, message.getGroupid());
-//		        pstmt.setString(2, new String(message.getUserid().getBytes("UTF-8"),"UTF-8"));
-//		        pstmt.executeUpdate();
 		        
 		        if(chk >=0) {
 		        	con.commit();
@@ -542,7 +612,6 @@ public class ServerDAO {
 		        Chat chat;
 		        System.out.println("데이터 가져오기");
 		        while(rs.next()) {
-		        	System.out.println("행이 몇개일까요");
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
 		        	chatcontent.add(chat);
 		        }		 
@@ -558,11 +627,6 @@ public class ServerDAO {
 		        pstmt.setString(2, userid);				
 				int result2 = pstmt.executeUpdate();
 				
-//				pstmt = con.prepareStatement(query4);
-//				int result3 = pstmt.executeUpdate();
-				
-
-		        
 		        if(result >= 0 && result2 >=0/* && result3 >=0 */) {
 					con.commit();
 				}else {

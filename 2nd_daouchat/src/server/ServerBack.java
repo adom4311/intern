@@ -33,6 +33,7 @@ public class ServerBack {
 	public static final int ROOM = 10; //채팅방목록
 	public static final int GROUPROOMLIST = 11; // 채팅방 개설시 친구목록
 	public static final int UPDATELASTREAD = 12; // 읽은시간 변경
+	public static final int CREATEGROUPROOM = 13; 
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -227,11 +228,6 @@ public class ServerBack {
 						Chat message = (Chat)data.getObject();
 						Chat chat = sDao.insertMSG(message);
 						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
-						for(String str : groupmember) {
-							if(currentClientMap.get(str) != null) {
-//								sDao.updatereadtime(str, chat);
-							}
-						}
 						broadcast(chat, groupmember);
 					}
 					else if(data.getHeader().getMenu() == FMSG) {
@@ -254,6 +250,15 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
 						Chat message = (Chat)data.getObject();
 						int result = sDao.updatereadtime(connectId,message);
+					}
+					else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
+						String[] friendids = (String[])data.getObject();
+						Long groupid = sDao.createGroupRoom(connectId,friendids); // 채팅방 개설
+						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
+						Header header = new Header(CREATEGROUPROOM,0);
+						Data sendData = new Data(header,groupid);
+						oos.writeObject(sendData);
+						oos.flush();
 					}
 				}
 				

@@ -32,6 +32,8 @@ public class ClientHome extends JFrame {
 	private int menuInt; // 검색버튼 메뉴 구분자
 	String findFricolumnNames[] = { "번호", "아이디", "상태메세지" };
 	String chatGroupcolumnNames[] = { "번호", "채팅방명"};
+	
+	CreateGroupRoomGUI cgrgui;
 
 	/**
 	 * Launch the application.
@@ -223,7 +225,7 @@ public class ClientHome extends JFrame {
             }
         };
 		findFritable = new JTable(mod); // 친구 찾기 테이블
-		findFritable.addMouseListener(new MyMouseListener(1));
+		findFritable.addMouseListener(new MyMouseListener(1,frame));
 		scrollPane.setViewportView(findFritable);
 	}
 	
@@ -241,7 +243,7 @@ public class ClientHome extends JFrame {
             }
         };
         friListtable = new JTable(mod); // 친구 목록 테이블
-        friListtable.addMouseListener(new MyMouseListener(2));
+        friListtable.addMouseListener(new MyMouseListener(2,frame));
 		scrollPane.setViewportView(friListtable);
 	}
 	
@@ -266,7 +268,7 @@ public class ClientHome extends JFrame {
 		clientback.createGroupRoom();
 	}
 	
-	public void fn_CreateGroupRoomListView(Object[][] rowData) {
+	public void fn_CreateGroupRoomListView(Object[][] rowData, ClientHome frame) {
 		// 내용 수정 불가 시작 //
         DefaultTableModel mod = new DefaultTableModel(rowData, findFricolumnNames) {
         public boolean isCellEditable(int rowIndex, int mColIndex) {
@@ -274,7 +276,8 @@ public class ClientHome extends JFrame {
             }
         };
         createGroupRoomListtable = new JTable(mod); // 친구 목록 테이블
-        createGroupRoomListtable.addMouseListener(new MyMouseListener(3));
+        System.out.println("채팅방개설 목록 클릭시 프레임 " + frame);
+        createGroupRoomListtable.addMouseListener(new MyMouseListener(3,frame));
 		scrollPane.setViewportView(createGroupRoomListtable);
 	}
 	
@@ -282,9 +285,11 @@ public class ClientHome extends JFrame {
 	/* 친구 찾기 테이블 클릭 이벤트 */
 	private class MyMouseListener extends MouseAdapter{
 		int menu;
-		public MyMouseListener(int menu) {
+		ClientHome frame;
+		public MyMouseListener(int menu, ClientHome frame) {
 			super();
 			this.menu = menu;
+			this.frame = frame;
 		}
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -307,7 +312,14 @@ public class ClientHome extends JFrame {
 						
 						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}else if (menu == 3) { // 친구 목록 테이블 클릭 이벤트
-						System.out.println("채팅방 개설시"); 
+						if(frame.cgrgui == null) {
+							frame.cgrgui = new CreateGroupRoomGUI(frame,clientback);
+							frame.cgrgui.setVisible(true);
+						}else {
+							Object[] o = { createGroupRoomListtable.getValueAt(createGroupRoomListtable.getSelectedRow(),1) };
+							System.out.println("오브젝트의 값 " + o[0].toString());
+							frame.cgrgui.addrow(o);
+						}
 					}
 				}
 			}
