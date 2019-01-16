@@ -6,7 +6,10 @@ public class Header implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -8372821077359666554L;
+	/**
+	 * 
+	 */
 	private int menu;
 	private int bodylength;
 	public Header(int menu, int bodylength) {

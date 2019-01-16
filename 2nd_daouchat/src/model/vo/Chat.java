@@ -7,7 +7,10 @@ public class Chat implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -783294325949858457L;
+	/**
+	 * 
+	 */
 	private Long chatid;
 	private String userid;
 	private Long groupid;

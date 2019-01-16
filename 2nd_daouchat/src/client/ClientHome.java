@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -285,10 +286,12 @@ public class ClientHome extends JFrame {
 	private class MyMouseListener extends MouseAdapter{
 		int menu;
 		ClientHome frame;
+		Map<Long, Chatwindow> chatMap;
 		public MyMouseListener(int menu, ClientHome frame) {
 			super();
 			this.menu = menu;
 			this.frame = frame;
+			this.chatMap = clientback.getChatMap();
 		}
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -322,7 +325,8 @@ public class ClientHome extends JFrame {
 					}else if(menu == 4) {
 						System.out.println("채팅방 목록!!");
 						Long groupid = Long.parseLong(roomtable.getValueAt(roomtable.getSelectedRow(), 0).toString());
-						clientback.readchatFile(groupid);
+						if(chatMap.get(groupid) == null)
+							clientback.readchatFile(groupid);
 					}
 				}
 			}

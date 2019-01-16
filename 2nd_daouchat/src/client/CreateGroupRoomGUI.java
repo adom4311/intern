@@ -151,7 +151,7 @@ public class CreateGroupRoomGUI extends JFrame {
 		public void mouseClicked(MouseEvent e) {
 			if(e.getButton() == 1) {
 				if(e.getClickCount() == 2) {
-					String str = (String)findFritable.getValueAt(findFritable.getSelectedRow(),1);
+					String str = (String)findFritable.getValueAt(findFritable.getSelectedRow(),0);
 					mod.removeRow(findFritable.getSelectedRow());
 					map.remove(str);
 				}

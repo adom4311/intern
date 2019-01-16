@@ -102,7 +102,8 @@ public class ServerBack {
 
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
-			scheduler.scheduleAtFixedRate(odd, 6000000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+//			scheduler.scheduleAtFixedRate(odd, 60000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+			scheduler.scheduleAtFixedRate(odd, 1, 10000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
 			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장

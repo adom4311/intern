@@ -6,7 +6,10 @@ public class ChatMember implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 7571503592797314312L;
+	/**
+	 * 
+	 */
 	private String userid;
 	private Long groupid;
 	public String getUserid() {

@@ -6,7 +6,10 @@ public class Data implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 3139105879896288783L;
+	/**
+	 * 
+	 */
 	private Header header;
 	private Object object;
 	public Header getHeader() {
