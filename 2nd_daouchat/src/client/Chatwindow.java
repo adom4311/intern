@@ -6,29 +6,23 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Panel;
 import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileSystemView;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 public class Chatwindow {
 
@@ -47,7 +41,7 @@ public class Chatwindow {
 	private Panel pannel;
 	private Button buttonSend;
 	private Button buttonfile;
-	private TextField textField;
+	private JTextField textField;
 	private TextArea textArea;
 	
 	private Button btnfilerec;
@@ -65,7 +59,7 @@ public class Chatwindow {
 		buttonSend = new Button("Send");
 		buttonfile = new Button("File send");
 		btnfilerec = new Button("check received file");
-		textField = new TextField();
+		textField = new JTextField();
 		textArea = new TextArea(30, 80);
 		this.clientback = clientback;
 	}
@@ -126,7 +120,8 @@ public class Chatwindow {
 		});
 
 		// Textfield
-		textField.setColumns(80);
+		textField.setColumns(40);
+		textField.setDocument(new JTextFieldLimit(333));
 		textField.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				char keyCode = e.getKeyChar();
@@ -197,8 +192,6 @@ public class Chatwindow {
 	}
 	
 	public void readchatFile() {
-		System.out.println("¹¹°¡ ³Î? : " + clientback);
-		System.out.println("¹¹°¡ ³Î? : " + groupid);
 		clientback.readchatFile(groupid);
 	}
 	
@@ -212,5 +205,21 @@ public class Chatwindow {
 			e.printStackTrace();
 		}
 	 }
-	
+	public class JTextFieldLimit extends PlainDocument{
+		private int limit;
+		public JTextFieldLimit(int limit) {
+			super();
+			this.limit = limit;
+		}
+		@Override
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+			// TODO Auto-generated method stub
+			if (str == null)
+				return;
+			if(getLength() + str.length() <= limit)
+				super.insertString(offs, str, a);
+		}
+		
+		
+	}
 }

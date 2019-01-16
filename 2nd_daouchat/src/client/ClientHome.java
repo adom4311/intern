@@ -327,6 +327,9 @@ public class ClientHome extends JFrame {
 						Long groupid = Long.parseLong(roomtable.getValueAt(roomtable.getSelectedRow(), 0).toString());
 						if(chatMap.get(groupid) == null)
 							clientback.readchatFile(groupid);
+						else {
+							chatMap.get(groupid).getFrame().setVisible(true);
+						}
 					}
 				}
 			}
