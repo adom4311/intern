@@ -182,9 +182,9 @@ public class ServerBack {
 						Data sendData = new Data(header,result);
 						
 						if(result > 0) {
-							currentClientMap.put(user.getUserid(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
-							currentClientfileMap.put(user.getUserid(),currentClientfileMap.remove(connectId));
-							connectId = user.getUserid(); // serverBack의 connectId를 접속자로
+							currentClientMap.put(user.getUserid().toLowerCase(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
+							currentClientfileMap.put(user.getUserid().toLowerCase(),currentClientfileMap.remove(connectId));
+							connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
 							System.out.println("로그인후 접속자수 : " + currentClientMap.size());
 						}
 						
