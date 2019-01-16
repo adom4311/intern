@@ -17,6 +17,9 @@ import model.dao.ServerDAO;
 import model.vo.Chat;
 import model.vo.ChatMember;
 import model.vo.Data;
+import model.vo.Filedownmessage;
+import model.vo.Filelist;
+import model.vo.Filemessage;
 import model.vo.Header;
 import model.vo.User;
 
@@ -35,6 +38,8 @@ public class ServerBack {
 	public static final int UPDATELASTREAD = 12; // 읽음처리용
 	public static final int CREATEGROUPROOM = 13;  // 그룹채팅방
 	public static final int ROOMOPEN = 14; // 채팅방 오픈
+	public static final int FILIST = 15;//파일 목록
+	public static final int FIDOWN =16;//파일 다운 요청
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -103,13 +108,13 @@ public class ServerBack {
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
 //			scheduler.scheduleAtFixedRate(odd, 60000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
-			scheduler.scheduleAtFixedRate(odd, 1, 10000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+//			scheduler.scheduleAtFixedRate(odd, 1, 10000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
 			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
 				filesocket=fileserverSocket.accept();
 				System.out.println(socket.getInetAddress() + "에서 접속"); // IP
-				Receiver receiver = new Receiver(socket);
+				Receiver receiver = new Receiver(socket,filesocket);
 				receiver.start();
 			}
 		} catch (IOException e) {
@@ -130,22 +135,20 @@ public class ServerBack {
 	/* 서버는 연결된 클라이언트의 데이터 수신 대기 */
 	class Receiver extends Thread{
 		private ServerDAO sDao;
-		private DataInputStream is;
-		private DataOutputStream os;
 		private ObjectInputStream ois;
 		private ObjectOutputStream oos;
 		private DataInputStream fis;
 		private DataOutputStream fos;
 		private ServerBack serverback; 
 		private Socket socket;
+		private Socket filesocket;
 		String connectId = "GM" + increment();
 		
-		public Receiver(Socket socket) {
+		public Receiver(Socket socket,Socket filesocket) {
 			try {
 				sDao = new ServerDAO();
 				this.socket = socket;
-				is = new DataInputStream(socket.getInputStream());
-				os = new DataOutputStream(socket.getOutputStream());
+				this.filesocket=filesocket;
 				fis = new DataInputStream(filesocket.getInputStream());
 				fos = new DataOutputStream(filesocket.getOutputStream());
 				ois = new ObjectInputStream(socket.getInputStream());
@@ -163,6 +166,7 @@ public class ServerBack {
 			try {
 				while(ois != null){
 					Data data = (Data) ois.readObject();
+					System.out.println("서버 받은 메뉴 " + data.getHeader().getMenu());
 					if(data.getHeader().getMenu() == SIGNUP) {
 						User user = (User)data.getObject();
 						int result = sDao.signUp(user.getUserid(),user.getPassword());
@@ -233,6 +237,10 @@ public class ServerBack {
 						broadcast(chat, groupmember);
 					}
 					else if(data.getHeader().getMenu() == FMSG) {
+						Filemessage filemessage = (Filemessage) data.getObject();
+						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
+						new ServerFileThread(filemessage,filesocket).start();
+						//파일 받고 
 					}
 					else if(data.getHeader().getMenu() == OPENCHAT) {
 						ChatMember chatmember = (ChatMember)data.getObject();
@@ -262,35 +270,27 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					else if(data.getHeader().getMenu()==FILIST) {
+						Long groupid = (Long)data.getObject();
+						Object rowdata[][] = sDao.selectfilecontent(groupid);
+						Header header = new Header(FILIST,0);
+						Filelist filelist = new Filelist(groupid,rowdata);
+						Data sendData = new Data(header, filelist);
+						oos.writeObject(sendData);
+						oos.flush();
+					}
+					else if(data.getHeader().getMenu()==FIDOWN) {
+						Filedownmessage filedownmessage = (Filedownmessage)data.getObject();
+//						Long groupid = filedownmessage.getGroupid();
+						String filedir = filedownmessage.getFile_dir();
+						Header header = new Header(FIDOWN,0);
+						Data sendData = new Data(header,filedir);
+						oos.writeObject(sendData);
+						oos.flush();
+						new ServerFileTransferThread(filedownmessage,fos).start();
+						
+					}
 				}
-				
-//					//파일 메세지
-//					else if(headerBuffer[1]==FMSG) {
-//						System.out.println(connectId + "가 파일을 보냅니다");
-//						byte[] lengthChk = new byte[4];
-//						lengthChk[0] = headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("서버 데이터 길이: " + datalength);
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength];
-//
-//						// 파일 받을때까지 계속
-//						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
-//							buffer.write(reciveData, 0, read);
-//							datalength -= read;
-//							if (datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//
-//						System.out.println(buffer.toString("UTF-8"));
-//						String data[] = buffer.toString("UTF-8").split(",");
-//						new ServerFileThread(connectId,data[1],data[2],sDao,currentClientMap,currentClientfileMap,filesocket).start();
-//					}// 파일메세지 END
 			}catch (SocketException e) {
 				try {
 					currentClientMap.remove(connectId);

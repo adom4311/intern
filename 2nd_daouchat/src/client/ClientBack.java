@@ -15,17 +15,23 @@ import client.request.AddFriendRequest;
 import client.request.CreateGroupRoomListRequest;
 import client.request.CreateGroupRoomRequest;
 import client.request.CreateRoomRequest;
+import client.request.FileListRequest;
+import client.request.FiledownRequest;
 import client.request.FindfriendRequest;
 import client.request.FriListRequest;
 import client.request.LoginRequest;
 import client.request.OpenChatRequest;
 import client.request.RoomListRequest;
+import client.request.SendFileMessageRequest;
+import client.request.SendFileRequest;
 import client.request.SendMessageRequest;
 import client.request.SignupRequest;
 import client.response.AddfriResponse;
 import client.response.CreateGroupRoomListResponse;
 import client.response.CreateGroupRoomResponse;
 import client.response.CreateRoomResponse;
+import client.response.FileListResponse;
+import client.response.FileRecResponse;
 import client.response.FmsgResponse;
 import client.response.FrifindResponse;
 import client.response.FrilistResponse;
@@ -51,7 +57,8 @@ public class ClientBack {
 	public static final int UPDATELASTREAD = 12; // 읽음처리용
 	public static final int CREATEGROUPROOM = 13;  // 그룹채팅방
 	public static final int ROOMOPEN = 14; // 채팅방 오픈
-	
+	public static final int FILIST = 15;//파일 목록
+	public static final int FIDOWN =16;//파일 다운 요청
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -63,6 +70,7 @@ public class ClientBack {
 	private ClientGUI gui;
 	private ClientHome home;
 	private Chatwindow chatwindow;
+	private Object dirs[][];
 	private Map<Long,Chatwindow> chatMap = new HashMap<Long, Chatwindow>();
 	private Map<Long,ObjectOutputStream> chatFileMap = new HashMap<Long, ObjectOutputStream>();
 	
@@ -127,6 +135,12 @@ public class ClientBack {
 	}
 	public void setChatMap(Map<Long, Chatwindow> chatMap) {
 		this.chatMap = chatMap;
+	}
+	public Object[][] getdirs(){
+		return dirs;
+	}
+	public void setdirs(Object dirs[][]) {
+		this.dirs=dirs;
 	}
 	
 	public ClientBack() {
@@ -200,7 +214,12 @@ public class ClientBack {
 						new CreateGroupRoomListResponse(clientback,data);
 					}else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
 						new CreateGroupRoomResponse(clientback,data);
+					}else if(data.getHeader().getMenu()==FILIST) {
+						new FileListResponse(clientback,data);
+					}else if(data.getHeader().getMenu()==FIDOWN) {
+						new FileRecResponse(clientback,data).start();
 					}
+					
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -209,52 +228,6 @@ public class ClientBack {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-//					/* 파일 받기 */
-//					else if(headerBuffer[1]==FMSG) {
-//						System.out.println("파일");
-//						byte[] lengthChk = new byte[4];
-//						lengthChk[0]=headerBuffer[2];
-//						lengthChk[1] = headerBuffer[3];
-//						lengthChk[2] = headerBuffer[4];
-//						lengthChk[3] = headerBuffer[5];
-//						int datalength = byteArrayToInt(lengthChk);
-//						System.out.println("데이터길이 : " + datalength);
-//
-//						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//						int read;
-//						reciveData = new byte[datalength];
-//
-//						// 파일 받을때까지 계속
-//						while ((read = is.read(reciveData, 0, reciveData.length)) != -1) {
-//							buffer.write(reciveData, 0, read);
-//							datalength -= read;
-//							if (datalength <= 0) { // 다 받으면 break
-//								break;
-//							}
-//						}
-//						System.out.println(buffer.toString("UTF-8"));
-//						String data[] = buffer.toString("UTF-8").split(",");
-//						buffer.flush();
-//						System.out.println(data[1]);
-//						String recdir[]=data[1].split("\\\\");
-//						InputStream in = filesocket.getInputStream();
-//						OutputStream out = new FileOutputStream("C:\\Users\\user\\Desktop\\file\\client\\"+recdir[recdir.length-1]);//data[1];
-//						byte[] bytes = new byte[16*1024];
-//						byte[] sizebyte = new byte[8];
-//						int count;
-//						int files=in.read(sizebyte);
-//						System.out.println("클라이언트가 받는 파일 크기는 : "+files);
-//						long length = bytesToLong(sizebyte);
-//						while ((count = in.read(bytes)) > 0) {
-//				            out.write(bytes, 0, count);
-//				            length-=count;
-//							System.out.println(length);
-//							if(length<=0) break;
-//				        }
-//						
-//						out.close();
-//					}// 파일받기 END
 		}
 	}
 	public void connect() {
@@ -299,6 +272,19 @@ public class ClientBack {
 
 	public void createRoom(String[] friendids) { // 채팅방 생성
 		new CreateRoomRequest(this, friendids);
+	}
+	
+	public void fileList(Long groupid) {
+		new FileListRequest(this,groupid);
+	}
+	
+	public void sendFilemessage(String file_dir, Long groupid) {
+		new SendFileMessageRequest(this,file_dir,groupid);
+		new SendFileRequest(this,file_dir, groupid).start();
+	}
+	
+	public void filedownreq(Long groupid, String dir) {
+		new FiledownRequest(this,groupid,dir);
 	}
 	
 	public void createGroupRoom(String[] friendids) { // 채팅방 생성

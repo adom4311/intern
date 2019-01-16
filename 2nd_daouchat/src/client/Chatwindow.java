@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.filechooser.FileSystemView;
 
 public class Chatwindow {
@@ -49,41 +50,32 @@ public class Chatwindow {
 	private TextField textField;
 	private TextArea textArea;
 	
+	private Button btnfilerec;
 	private ClientBack clientback;
-	private Socket filesocket;
+	private ClientFileGUI clientfilegui;
 	
 	String[] oldchatcontent;
 
 
-	public Chatwindow(String id, Long groupid, ClientBack clientback, Socket filesocket) {
+	public Chatwindow(String id, Long groupid, ClientBack clientback) {
 		this.id = id;
 		this.groupid = groupid;
 		frame = new Frame(id);
 		pannel = new Panel();
 		buttonSend = new Button("Send");
 		buttonfile = new Button("File send");
+		btnfilerec = new Button("check received file");
 		textField = new TextField();
 		textArea = new TextArea(30, 80);
 		this.clientback = clientback;
-		this.filesocket=filesocket;
-//		clientback.openChat(groupid);
-
-//		new ChatClientReceiveThread(clientback.getSocket(),filesocket).start();
 	}
 
-	public int byteArrayToInt(byte bytes[]) {
-		return ((((int) bytes[0] & 0xff) << 24) | (((int) bytes[1] & 0xff) << 16) | (((int) bytes[2] & 0xff) << 8)
-				| (((int) bytes[3] & 0xff)));
+	public ClientFileGUI getCFG() {
+		return clientfilegui;
 	}
-
-	// intToByte
-	public byte[] intToByteArray(int value) {
-		byte[] byteArray = new byte[4];
-		byteArray[0] = (byte) (value >> 24);
-		byteArray[1] = (byte) (value >> 16);
-		byteArray[2] = (byte) (value >> 8);
-		byteArray[3] = (byte) (value);
-		return byteArray;
+	
+	public Frame getFrame() {
+		return frame;
 	}
 
 	public void show() {
@@ -102,6 +94,7 @@ public class Chatwindow {
 		buttonSend.setBackground(Color.GRAY);
 		buttonSend.setForeground(Color.WHITE);
 		buttonfile.setForeground(Color.WHITE);
+		btnfilerec.setForeground(Color.BLUE);
 		buttonSend.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
@@ -118,6 +111,19 @@ public class Chatwindow {
 			}
 
 		});
+		
+		btnfilerec.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				clientfilegui = new ClientFileGUI(id,groupid,clientback);
+				System.out.println("new gui start!");
+				clientback.fileList(groupid);
+				
+				
+			}
+			
+		});
 
 		// Textfield
 		textField.setColumns(80);
@@ -129,12 +135,15 @@ public class Chatwindow {
 				}
 			}
 		});
+		
+		
 
 		// Pannel
 		pannel.setBackground(Color.LIGHT_GRAY);
 		pannel.add(textField);
 		pannel.add(buttonSend);
 		pannel.add(buttonfile);
+		pannel.add(btnfilerec);
 		frame.add(BorderLayout.SOUTH, pannel);
 
 		// TextArea
@@ -144,15 +153,7 @@ public class Chatwindow {
 		// Frame
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				PrintWriter pw;
-				try {
-					pw = new PrintWriter(new OutputStreamWriter(clientback.getSocket().getOutputStream(), StandardCharsets.UTF_8),
-							true);
-
-					System.exit(0);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				frame.setVisible(false);
 			}
 		});
 		frame.setVisible(true);
@@ -169,99 +170,26 @@ public class Chatwindow {
 
 	// file transfer
 	private void sendfile() {
-//		
-//		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-//		String filename = null;
-//		OutputStream os;
-//		FileInputStream in;
-//		int returnValue = jfc.showOpenDialog(null);
-//		
-//		if(returnValue == JFileChooser.APPROVE_OPTION) {
-//			File selectedFile = jfc.getSelectedFile();
-//			filename = selectedFile.getAbsolutePath();
-//		}
-//		
-//		try {
-//			int bodylength = id.getBytes("UTF-8").length+filename.getBytes("UTF-8").length+groupid.getBytes("UTF-8").length+2;//UTF-8생각
-//			byte sendData[] = new byte[6 + bodylength];// 전체 보낼 데이터
-//			sendData[0]=STX;
-//			sendData[1]=FMSG;
-//			byte[] bodySize = intToByteArray(bodylength);
-//			System.out.println("보낼 데이터 크기 : " + bodylength);
-//			for (int i = 0; i < bodySize.length; i++) {
-//				sendData[2 + i] = (byte) bodySize[i];
-//			}
-//			// body생성
-//			byte body[] = new byte[bodylength];
-//			body=(id+","+groupid+","+filename).getBytes("UTF-8");
-//			System.arraycopy(body,0,sendData,6,body.length);
-//			os = new DataOutputStream(clientback.getSocket().getOutputStream());
-//			os.write(sendData);
-//			os.flush();
-//			//Thread.sleep(10);
-//			new FileTransferThread(id,filename,filesocket).start();
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-	}
-
-	private class FileTransferThread extends Thread{
-		String id;
+		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+		String filename = null;
+		OutputStream os;
+		FileInputStream in;
+		int returnValue = jfc.showOpenDialog(null);
 		
-		String filename;
-		Socket filesocket;
-		
-		
-		
-		FileTransferThread(String id, String filename, Socket filesocket)
-		{
-			this.id=id;
-			this.filename=filename;
-			this.filesocket=filesocket;
-			
+		if(returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			filename = selectedFile.getAbsolutePath();
 		}
-		
-		//long to byte for file transfer
-		public byte[] longToBytes(long x) {
-		    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-		    buffer.putLong(x);
-		    return buffer.array();
+		if(filename==null) {
+			System.out.println("파일을 다시 찾아주세요");
+			return ;
 		}
-
-		public long bytesToLong(byte[] bytes) {
-		    ByteBuffer buffer = ByteBuffer.wrap(bytes);
-		   
-		    return buffer.getLong();
+		String[] filetoken = filename.split("\\\\");
+		if(filetoken[filetoken.length-1].length()>=150||filename.length()>=199) {
+			System.out.println("파일 디렉토리 경로 또는 파일 이름이 너무 깁니다.");
+			return ;
 		}
-		
-		public void run() {
-			//다른 포트를 통해서 파일을 전송
-			//db에 id와 filename저장할것.
-			try {
-				
-				File file = new File(filename);
-				long length = file.length();
-				byte[] sizebyte = longToBytes(length);
-				byte[] bytes = new byte[16 * 1024];
-		        InputStream in = new FileInputStream(file);
-		        OutputStream out = filesocket.getOutputStream();
-		        out.write(sizebyte);
-		        int count;
-		        while ((count = in.read(bytes)) > 0) {
-		            out.write(bytes, 0, count);
-		            length-=count;
-		            if(length<=0) break;
-		        }
-		       
-	       
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
+		clientback.sendFilemessage(filename, groupid);
 	}
 
 	public void appendMSG(String msg) {
@@ -269,6 +197,8 @@ public class Chatwindow {
 	}
 	
 	public void readchatFile() {
+		System.out.println("뭐가 널? : " + clientback);
+		System.out.println("뭐가 널? : " + groupid);
 		clientback.readchatFile(groupid);
 	}
 	

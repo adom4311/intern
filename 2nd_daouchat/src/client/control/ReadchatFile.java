@@ -20,7 +20,7 @@ public class ReadchatFile {
 		try {
 			if(chatMap.get(groupid) == null) {
 				System.out.println("채티방 개설");
-				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback, clientback.getfilesocket());
+				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback);
 				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
 				chatwindow.show();

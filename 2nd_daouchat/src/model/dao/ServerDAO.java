@@ -831,6 +831,44 @@ public class ServerDAO {
 			e.printStackTrace();
 		}
 	}
+	
+	public Object[][] selectfilecontent(Long groupid){
+		con = dataSource.getConnection();
+		int totalfileCnt = 0;
+		if(con!=null) {
+			try {
+				String query = "select count(file_dir) from filecontent where groupid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setLong(1, groupid);
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalfileCnt = rs.getInt(1);
+		        }
+				dataSource.freeConnection(pstmt);
+				dataSource.freeConnection(rs);
+				
+				String query2 = "select * from filecontent where groupid = ? order by sendtime";
+				Object rowData[][] = new Object[totalfileCnt][1];
+			
+				pstmt = con.prepareStatement(query2);
+				pstmt.setLong(1, groupid);
+				
+				rs = pstmt.executeQuery();
+				int i=0;
+				while(rs.next()) {
+					rowData[i++][0]=rs.getString("file_dir");
+					System.out.println(rs.getString("file_dir"));
+				}
+				dataSource.freeConnection(con,pstmt,rs);
+				
+				return rowData;
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+		
+	}
 }
     
    
