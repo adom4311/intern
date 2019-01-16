@@ -69,13 +69,21 @@ public class DBCPTemplate {
 
         // Connection Pool 생성, 옵션세팅
         GenericObjectPool<DataSource> connectionPool = new GenericObjectPool<DataSource>();
-        connectionPool.setMaxActive(45);
-        connectionPool.setMinIdle(4);
+        // 최대 커넥션 개수 
+        connectionPool.setMaxActive(100);
+        // 풀에 저장될수 있는 커넥션 최대갯수 설정
+        connectionPool.setMaxIdle(100);
+        // 커넥션 최소갯수 설정
+        connectionPool.setMinIdle(4); 
+        // 커넥션이 비어있으면 기다리는 시간 밀리초
         connectionPool.setMaxWait(15000);
-        connectionPool.setTimeBetweenEvictionRunsMillis(3600000);
-        connectionPool.setMinEvictableIdleTimeMillis(1800000);
-        connectionPool.setMaxIdle(45);
-        connectionPool.setTestOnBorrow(true);
+        // 유효 커넥션 검사 주기
+        connectionPool.setTimeBetweenEvictionRunsMillis(60 * 60 * 1000);
+        //  사용되지 않는 커넥션을 추출할 때 이 속성에서 지정한 시간 이상 비활성화 상태인 객체만 추출
+        connectionPool.setMinEvictableIdleTimeMillis(30 * 60 * 1000);
+        
+        // 커넥션의 유효성 검사여부 true 시 약간의 성능저하
+        connectionPool.setTestOnBorrow(false);
 
         // 실제 DB와의 커넥션을 연결해주는 팩토리 생성
         ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(URL, USERNAME, PASSWORD);
@@ -84,9 +92,10 @@ public class DBCPTemplate {
                 connectionFactory,
                 connectionPool,
                 null, // statement pool
-                "SELECT 1", // 커넥션 테스트 쿼리: 커넥션이 유효한지 테스트할 때 사용되는 쿼리.
+//                "SELECT 1", // 커넥션 테스트 쿼리: 커넥션이 유효한지 테스트할 때 사용되는 쿼리.
+                null,
                 false, // read only 여부
-                false);
+                false); // auto commit;
 
         // Pooling을 위한 JDBC 드라이버 생성 및 등록
         PoolingDriver driver = new PoolingDriver();

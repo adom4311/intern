@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import common.DBCPTemplate;
 import model.dao.ServerDAO;
 import model.vo.Chat;
 import model.vo.ChatMember;
@@ -166,7 +167,6 @@ public class ServerBack {
 			try {
 				while(ois != null){
 					Data data = (Data) ois.readObject();
-					System.out.println("서버 받은 메뉴 " + data.getHeader().getMenu());
 					if(data.getHeader().getMenu() == SIGNUP) {
 						User user = (User)data.getObject();
 						int result = sDao.signUp(user.getUserid(),user.getPassword());
@@ -232,8 +232,9 @@ public class ServerBack {
 					}
 					else if(data.getHeader().getMenu() == MSG) {
 						Chat message = (Chat)data.getObject();
+						List<String> groupmember = sDao.selectGroupmember(message.getGroupid());
 						Chat chat = sDao.insertMSG(message);
-						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
+//						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
 						broadcast(chat, groupmember);
 					}
 					else if(data.getHeader().getMenu() == FMSG) {
