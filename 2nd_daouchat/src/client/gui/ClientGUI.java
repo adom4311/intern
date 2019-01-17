@@ -171,11 +171,13 @@ public class ClientGUI extends JFrame {
 		id_tf.setBounds(81, 7, 150, 21);
 		contentPane2.add(id_tf);
 		id_tf.setColumns(10);
+		id_tf.setDocument(new JTextFieldLimit(20));
 		
 		pw_tf = new JTextField("");
 		pw_tf.setBounds(81, 32, 150, 21);
 		contentPane2.add(pw_tf);
 		pw_tf.setColumns(10);
+		pw_tf.setDocument(new JTextFieldLimit(20));
 		
 		JButton okBtn = new JButton("»Æ¿Œ");
 		okBtn.addActionListener(new ActionListener() {
