@@ -31,14 +31,14 @@ public class ServerBack {
 	public static final int FRIFIND = 4; // 친구찾기
 	public static final int ADDFRI = 5; // 친구추가
 	public static final int FMSG = 6;// 파일, 이미지 전송
-	public static final int CREATEROOM = 7; // 그룹생성
+	public static final int CREATEROOM = 7; // 1:1 채팅방 개설
 	public static final int FRILIST = 8; // 친구목록
-	public static final int OPENCHAT = 9; // 그룹생성
+	public static final int OPENCHAT = 9; // 채팅방 오픈시 DB 채팅 데이터 가져오기
 	public static final int ROOM = 10; //채팅방목록
-	public static final int GROUPROOMLIST = 11; // 채팅방 개설시 친구목록
+	public static final int GROUPROOMLIST = 11; // 그룹 채팅방 용 친구목록
 	public static final int UPDATELASTREAD = 12; // 읽음처리용
-	public static final int CREATEGROUPROOM = 13;  // 그룹채팅방
-	public static final int ROOMOPEN = 14; // 채팅방 오픈
+	public static final int CREATEGROUPROOM = 13;  // 그룹채팅방  개설
+	public static final int ROOMOPEN = 14; // 선택된 채팅방 오픈
 	public static final int FILIST = 15;//파일 목록
 	public static final int FIDOWN =16;//파일 다운 요청
 

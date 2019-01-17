@@ -560,10 +560,11 @@ public class ServerDAO {
 			String query = "select * from chatcontent where groupid = ? "
 					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";
 			// 카운트감소 
-			String query2 = "update chatcontent set count = count-1 where groupid = ? "
-					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";
+//			String query2 = "update chatcontent set count = count-1 where groupid = ? "
+//					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";
+			String query2 = "update chatcontent set count = count-1 where chatid in (select chatid from chatcontent where groupid = ? and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?))";
 			// 마지막 읽은시간 수정
-			String query3 = "update chatmember set lastreadtime = now(6) where groupid = ? and userid = ?";
+			String query3 = "update chatmember set lastreadtime = ? where groupid = ? and userid = ?";
 			// count = 0 이면 제거
 //			String query4 = "delete from chatcontent where count = 0";
 			try {
@@ -573,35 +574,38 @@ public class ServerDAO {
 				pstmt.setString(3, userid);
 				
 		        rs = pstmt.executeQuery();
-//		        close(pstmt);
-		        Chat chat;
+		        Chat chat = null;
 		        System.out.println("데이터 가져오기");
 		        while(rs.next()) {
 		        	chat = new Chat(rs.getLong("chatid"),rs.getString("userid"),rs.getLong("groupid"),rs.getString("content"),rs.getTimestamp("sendtime"),rs.getInt("count"));
 		        	chatcontent.add(chat);
 		        }		 
+		        
 		        dataSource.freeConnection(pstmt);
 		        dataSource.freeConnection(rs);
-		        
-		        pstmt = con.prepareStatement(query2);
-		        pstmt.setLong(1, groupid);
-				pstmt.setLong(2, groupid);
-				pstmt.setString(3, userid);
-				int result = pstmt.executeUpdate();
-//				close(pstmt);
-				dataSource.freeConnection(pstmt);
-				
-				pstmt = con.prepareStatement(query3);
-				pstmt.setLong(1, groupid);
-		        pstmt.setString(2, userid);				
-				int result2 = pstmt.executeUpdate();
-				
-		        if(result >= 0 && result2 >=0/* && result3 >=0 */) {
-					con.commit();
-				}else {
-					con.rollback();
-				}
-		        dataSource.freeConnection(con,pstmt);
+			        
+			    if( chat != null) {   
+			        pstmt = con.prepareStatement(query2);
+			        pstmt.setLong(1, groupid);
+					pstmt.setLong(2, groupid);
+					pstmt.setString(3, userid);
+					int result = pstmt.executeUpdate();
+	//				close(pstmt);
+					dataSource.freeConnection(pstmt);
+					
+					pstmt = con.prepareStatement(query3);
+					pstmt.setTimestamp(1, chat.getSendtime());
+					pstmt.setLong(2, groupid);
+			        pstmt.setString(3, userid);				
+					int result2 = pstmt.executeUpdate();
+					
+			        if(result >= 0 && result2 >=0/* && result3 >=0 */) {
+						con.commit();
+					}else {
+						con.rollback();
+					}
+		        }
+			    dataSource.freeConnection(con,pstmt);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
