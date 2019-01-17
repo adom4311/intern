@@ -20,7 +20,7 @@ public class CreateGroupRoomResponse {
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback);
 				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
-				chatwindow.show();
+//				chatwindow.show();
 			}
 		}else {
 			gui.Alert("채티방 개설 실패");

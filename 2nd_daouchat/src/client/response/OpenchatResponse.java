@@ -8,6 +8,7 @@ import java.util.Map;
 import client.Chatwindow;
 import client.ClientBack;
 import model.vo.Chat;
+import model.vo.ChatcontentList;
 import model.vo.Data;
 
 public class OpenchatResponse {
@@ -18,11 +19,13 @@ public class OpenchatResponse {
 			Chatwindow chatwindow;
 			ObjectOutputStream oos;
 			// 서버 파일
-			List<Chat> chatcontent = (List<Chat>)data.getObject();
+			ChatcontentList chatcontentList = (ChatcontentList)data.getObject();
+			Long groupid = chatcontentList.getGroupid();
+			List<Chat> chatcontent = chatcontentList.getChatcontent();
 			
 			System.out.println("서버데이터 사이즈 " + chatcontent.size()); 
 			if(chatcontent.size() > 0) {
-				Long groupid  = chatcontent.get(0).getGroupid();
+//				Long groupid  = chatcontent.get(0).getGroupid();
 				oos = clientback.getChatFileMap().get(groupid);
 				chatwindow = chatMap.get(groupid);
 				for(Chat content : chatcontent) {
@@ -30,6 +33,8 @@ public class OpenchatResponse {
 					chatwindow.appendMSG(content.getUserid() + " : " + content.getContent() + "\n");
 				}
 			}
+			if( chatMap.get(groupid) != null)
+				chatMap.get(groupid).show();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

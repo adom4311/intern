@@ -21,7 +21,7 @@ public class CreateRoomResponse {
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback);
 				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
-				chatwindow.show();
+//				chatwindow.show();
 			}else {
 				chatMap.get(groupid).getFrame().setVisible(true);
 			}

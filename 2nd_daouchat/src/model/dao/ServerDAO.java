@@ -558,7 +558,7 @@ public class ServerDAO {
 		if(con != null) {
 			// 해당하는 채팅방의 채팅정보를 로그인한 사용자의 마지막읽은 시간보다 늦는데이터 가져오기
 			String query = "select * from chatcontent where groupid = ? "
-					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";
+					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?) order by sendtime, chatid";
 			// 카운트감소 
 //			String query2 = "update chatcontent set count = count-1 where groupid = ? "
 //					+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?)";

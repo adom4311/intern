@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
-import common.DBCPTemplate;
 import model.dao.ServerDAO;
 import model.vo.Chat;
 import model.vo.ChatMember;
+import model.vo.ChatcontentList;
 import model.vo.Data;
 import model.vo.Filedownmessage;
 import model.vo.Filelist;
@@ -247,7 +247,8 @@ public class ServerBack {
 						ChatMember chatmember = (ChatMember)data.getObject();
 						List<Chat> chatcontent = sDao.selectchatcontent(chatmember);
 						Header header = new Header(OPENCHAT,0);
-						Data sendData = new Data(header,chatcontent);
+						ChatcontentList chatcontentList = new ChatcontentList(chatmember.getGroupid(), chatcontent);
+						Data sendData = new Data(header,chatcontentList);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
