@@ -1,4 +1,4 @@
-package client;
+package client.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -23,6 +23,8 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
+
+import client.ClientBack;
 
 public class Chatwindow {
 

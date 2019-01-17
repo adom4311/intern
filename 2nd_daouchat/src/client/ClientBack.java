@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import client.control.ReadchatFile;
+import client.gui.Chatwindow;
+import client.gui.ClientGUI;
+import client.gui.ClientHome;
 import client.request.AddFriendRequest;
 import client.request.CreateGroupRoomListRequest;
 import client.request.CreateGroupRoomRequest;
@@ -76,8 +79,6 @@ public class ClientBack {
 	
 	private DataInputStream is;
 	private DataOutputStream os;
-	private DataInputStream fis;
-	private DataOutputStream fos;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private String SERVER_ADDR = "127.0.0.1";
@@ -170,13 +171,9 @@ public class ClientBack {
 	// 받기만 하는 쓰레드
 	class ClientReceiver extends Thread{
 		private ClientBack clientback;
-		public ClientReceiver(Socket socket, Socket filesocket, ClientBack clientback) {
+		public ClientReceiver(Socket socket, ClientBack clientback) {
 			try {
 				this.clientback = clientback; 
-				is = new DataInputStream(socket.getInputStream());
-				os = new DataOutputStream(socket.getOutputStream());
-				fis = new DataInputStream(filesocket.getInputStream());
-				fos = new DataOutputStream(filesocket.getOutputStream());
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				ois = new ObjectInputStream(socket.getInputStream());
 				System.out.println("클라이언트 리시버 생성");
@@ -233,9 +230,8 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
-			filesocket = new Socket(SERVER_ADDR,FILE_PORT);
 			System.out.println("서버와 연결됨");
-			ClientReceiver receiver = new ClientReceiver(socket, filesocket, this);
+			ClientReceiver receiver = new ClientReceiver(socket, this);
 			receiver.start();
 		} catch (IOException e) {
 			e.printStackTrace();

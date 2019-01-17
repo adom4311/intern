@@ -2,9 +2,9 @@ package client.response;
 
 import java.util.Map;
 
-import client.Chatwindow;
 import client.ClientBack;
-import client.ClientGUI;
+import client.gui.Chatwindow;
+import client.gui.ClientGUI;
 import model.vo.Data;
 
 public class CreateGroupRoomResponse {
@@ -21,6 +21,8 @@ public class CreateGroupRoomResponse {
 				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
 //				chatwindow.show();
+			}else {
+				chatMap.get(groupid).getFrame().setVisible(true);
 			}
 		}else {
 			gui.Alert("채티방 개설 실패");

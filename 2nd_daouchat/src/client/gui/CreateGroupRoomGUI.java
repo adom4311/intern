@@ -1,4 +1,4 @@
-package client;
+package client.gui;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -15,6 +15,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
+import client.ClientBack;
+
 import javax.swing.JButton;
 
 public class CreateGroupRoomGUI extends JFrame {

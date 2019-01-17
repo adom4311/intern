@@ -1,7 +1,7 @@
 package client.response;
 
 import client.ClientBack;
-import client.ClientHome;
+import client.gui.ClientHome;
 import model.vo.Data;
 
 public class RoomResponse {

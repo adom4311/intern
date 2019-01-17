@@ -471,7 +471,7 @@ public class ServerDAO {
 		        pstmt.setLong(2, message.getGroupid());
 		        pstmt.setString(3, new String(message.getContent().getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setLong(4, message.getGroupid());
-				chk = pstmt.executeUpdate();
+			    chk = pstmt.executeUpdate();
 				
 				dataSource.freeConnection(pstmt);
 				

@@ -2,10 +2,10 @@ package client.response;
 
 import java.util.Map;
 
-import client.Chatwindow;
 import client.ClientBack;
-import client.ClientGUI;
-import client.ClientHome;
+import client.gui.Chatwindow;
+import client.gui.ClientGUI;
+import client.gui.ClientHome;
 import model.vo.Data;
 
 public class CreateRoomResponse {

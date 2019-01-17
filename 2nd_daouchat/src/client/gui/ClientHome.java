@@ -1,4 +1,4 @@
-package client;
+package client.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -17,6 +17,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
+import client.ClientBack;
 
 public class ClientHome extends JFrame {
 	private String userid; // 접속유저 아이디

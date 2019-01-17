@@ -1,8 +1,8 @@
 package client.response;
 
 import client.ClientBack;
-import client.ClientGUI;
-import client.ClientHome;
+import client.gui.ClientGUI;
+import client.gui.ClientHome;
 import model.vo.Data;
 
 public class AddfriResponse {

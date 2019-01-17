@@ -1,7 +1,7 @@
 package client.response;
 
 import client.ClientBack;
-import client.ClientGUI;
+import client.gui.ClientGUI;
 import model.vo.Data;
 
 public class SignupResponse {

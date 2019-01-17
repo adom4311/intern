@@ -9,8 +9,8 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
-import client.Chatwindow;
 import client.ClientBack;
+import client.gui.Chatwindow;
 import model.vo.Chat;
 
 public class ReadchatFile {

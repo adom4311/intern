@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 
-import client.Chatwindow;
 import client.ClientBack;
+import client.gui.Chatwindow;
 import model.vo.Chat;
 import model.vo.Data;
 import model.vo.Header;

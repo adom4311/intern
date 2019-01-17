@@ -2,6 +2,11 @@ package client.request;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.instrument.ClassDefinition;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
+import java.util.jar.JarFile;
 
 import client.ClientBack;
 import model.vo.Chat;
@@ -9,7 +14,6 @@ import model.vo.Data;
 import model.vo.Header;
 
 public class SendMessageRequest {
-
 	public SendMessageRequest(ClientBack clientBack, String msg, Long groupid) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();

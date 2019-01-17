@@ -1,4 +1,4 @@
-package client;
+package client.gui;
 
 import java.awt.Dialog;
 import java.awt.EventQueue;
@@ -15,6 +15,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
+
+import client.ClientBack;
 
 public class ClientGUI extends JFrame {
 
@@ -104,11 +109,13 @@ public class ClientGUI extends JFrame {
 		id_tf.setBounds(81, 7, 150, 21);
 		contentPane2.add(id_tf);
 		id_tf.setColumns(10);
+		id_tf.setDocument(new JTextFieldLimit(20));
 		
 		pw_tf = new JTextField("");
 		pw_tf.setBounds(81, 32, 150, 21);
 		contentPane2.add(pw_tf);
 		pw_tf.setColumns(10);
+		pw_tf.setDocument(new JTextFieldLimit(20));
 		
 		JButton okBtn = new JButton("»Æ¿Œ");
 		okBtn.addActionListener(new ActionListener() {
@@ -209,6 +216,24 @@ public class ClientGUI extends JFrame {
 	
 	public void Alert(String msg) {
 		JOptionPane.showMessageDialog(null, msg);
+	}
+	
+	public class JTextFieldLimit extends PlainDocument{
+		private int limit;
+		public JTextFieldLimit(int limit) {
+			super();
+			this.limit = limit;
+		}
+		@Override
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+			// TODO Auto-generated method stub
+			if (str == null)
+				return;
+			if(getLength() + str.length() <= limit)
+				super.insertString(offs, str, a);
+		}
+		
+		
 	}
 	
 }

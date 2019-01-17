@@ -1,4 +1,4 @@
-package client;
+package client.gui;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
@@ -8,6 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import client.ClientBack;
 
 public class ClientFileGUI{
 	JFrame frame;
