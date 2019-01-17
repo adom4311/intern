@@ -21,6 +21,8 @@ public class OpenChatRequest {
 			oos.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			if( clientback.getChatMap().get(groupid) !=null)
+				clientback.getChatMap().get(groupid).show();
 			e.printStackTrace();
 		}
 	}
