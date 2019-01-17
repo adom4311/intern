@@ -70,20 +70,20 @@ public class DBCPTemplate {
         // Connection Pool 생성, 옵션세팅
         GenericObjectPool<DataSource> connectionPool = new GenericObjectPool<DataSource>();
         // 최대 커넥션 개수 
-        connectionPool.setMaxActive(100);
+        connectionPool.setMaxActive(1);
         // 풀에 저장될수 있는 커넥션 최대갯수 설정
-        connectionPool.setMaxIdle(100);
+        connectionPool.setMaxIdle(1);
         // 커넥션 최소갯수 설정
-        connectionPool.setMinIdle(4); 
+        connectionPool.setMinIdle(1); 
         // 커넥션이 비어있으면 기다리는 시간 밀리초
-        connectionPool.setMaxWait(15000);
+        connectionPool.setMaxWait(5000);
         // 유효 커넥션 검사 주기
         connectionPool.setTimeBetweenEvictionRunsMillis(60 * 60 * 1000);
         //  사용되지 않는 커넥션을 추출할 때 이 속성에서 지정한 시간 이상 비활성화 상태인 객체만 추출
         connectionPool.setMinEvictableIdleTimeMillis(30 * 60 * 1000);
         
         // 커넥션의 유효성 검사여부 true 시 약간의 성능저하
-        connectionPool.setTestOnBorrow(false);
+        connectionPool.setTestOnBorrow(true);
 
         // 실제 DB와의 커넥션을 연결해주는 팩토리 생성
         ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(URL, USERNAME, PASSWORD);
@@ -92,8 +92,7 @@ public class DBCPTemplate {
                 connectionFactory,
                 connectionPool,
                 null, // statement pool
-//                "SELECT 1", // 커넥션 테스트 쿼리: 커넥션이 유효한지 테스트할 때 사용되는 쿼리.
-                null,
+                "SELECT 1", // 커넥션 테스트 쿼리: 커넥션이 유효한지 테스트할 때 사용되는 쿼리.
                 false, // read only 여부
                 false); // auto commit;
 

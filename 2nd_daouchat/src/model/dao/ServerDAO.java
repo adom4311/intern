@@ -14,7 +14,6 @@ import java.util.List;
 import common.DBCPTemplate;
 import model.vo.Chat;
 import model.vo.ChatMember;
-import static common.JDBCTemplate.*;
 import static common.DBCPTemplate.*;
 public class ServerDAO {
 	DBCPTemplate dataSource;
@@ -26,46 +25,10 @@ public class ServerDAO {
  
     public ServerDAO() {
     	dataSource = getDataSource();
-//        try {
-//        	Class.forName(driver); // 마리아db driver
-//        	con = DriverManager.getConnection(
-//                    "jdbc:mariadb://127.0.0.1:3306/sw_test",
-//                    "root",
-//                    "daou");
-//        	con.setAutoCommit(false);
-//            
-//			System.out.println("DB 접속 서엉공");
-//		} catch (SQLException e) {
-//			System.out.println("DB 접속 실패");
-//	        e.printStackTrace();
-//		} catch (ClassNotFoundException e) {
-//			System.out.println("드라이버 로드 실패");
-//		}
     }
-    
-    public Connection getConnection() {
-    	con = null;
-		String driver = "org.mariadb.jdbc.Driver";
-		try {
-			Class.forName(driver);
-			con = DriverManager.getConnection(
-	                 "jdbc:mariadb://127.0.0.1:3306/sw_test",
-	                 "root",
-	                 "daou");
-			con.setAutoCommit(false);
-//			System.out.println("DB 접속 서엉공");
-		} catch (SQLException e) {
-			System.out.println("DB 접속 실패");
-	        e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			System.out.println("드라이버 로드 실패");
-		}
-		return con;
-    }
-
+ 
 	public int signUp(String id, String pw) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk = 0;
 
         if( con != null ) {
@@ -85,8 +48,6 @@ public class ServerDAO {
 		        	con.rollback();
 		        }
 		        
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt);
 			} catch (SQLException e) {
 				return -1;
@@ -99,7 +60,6 @@ public class ServerDAO {
 
 	public int login(String id, String pw) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk = 0;
 		System.out.println("login 함수");
 		if( con != null ) {
@@ -110,15 +70,13 @@ public class ServerDAO {
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	System.out.println("로그인 성공");
-		        	pstmt.close();
+			        dataSource.freeConnection(con,pstmt,rs);
 		        	return 1;
 		        }
 		        System.out.println("로그인 실패");
 		        
 
-//		        close(pstmt);
-//		        close(con);
-		        dataSource.freeConnection(con,pstmt);
+		        dataSource.freeConnection(con,pstmt,rs);
 			} catch (SQLException e) {
 				return -1;
 			} catch (UnsupportedEncodingException e) {
@@ -155,10 +113,7 @@ public class ServerDAO {
 		        	rowData[i][1] = rs.getString(1);
 		        	rowData[i++][2] = "";
 		        }
-		        
 
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 		        System.out.println("전체 친구찾기 커넥션 닫힘");
 
@@ -176,7 +131,6 @@ public class ServerDAO {
 	/* 방 목록을 위한 함수*/
 	public int totalRoomCnt(String tempId) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk = 0;
 		if( con != null ) {
             try {
@@ -186,8 +140,6 @@ public class ServerDAO {
 		        while(rs.next()) {
 		        	return rs.getInt(1);
 		        }
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 			} catch (SQLException e) {
 				return -1;
@@ -200,7 +152,6 @@ public class ServerDAO {
 
 	public int addfri(String connectId, String data) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk = 0;
 
         if( con != null ) {
@@ -218,8 +169,6 @@ public class ServerDAO {
 		        	System.out.println("친구추가 실패");
 		        	con.rollback();
 		        }
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt);
 		        System.out.println("친구추가 커넥션 닫힘");
 		        
@@ -234,7 +183,6 @@ public class ServerDAO {
 
 	public Object[][] friList(String connectId) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		if( con != null ) {
             try {
             	int totalcnt = 0;
@@ -258,8 +206,6 @@ public class ServerDAO {
 		        	rowData[i][1] = rs.getString(1);
 		        	rowData[i++][2] = "";
 		        }
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 		        System.out.println("친구목록 커넥션 닫힘");
 		        return rowData;
@@ -275,7 +221,6 @@ public class ServerDAO {
 
 	public Object[][] roomList(String connectId){
 		con = dataSource.getConnection();
-//		con = getConnection();
 		if(con!=null) {
 			try {
 				int totalcount = 0;
@@ -291,8 +236,6 @@ public class ServerDAO {
 				
 				Object rowData[][] = new Object[totalcount][2];
 				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
-//				pstmt = con.prepareStatement("select groupid from chatgroup where userid = ?");
-				//groupname  -> groupid 로 임시변경 
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();		        
 		        int i=0;
@@ -300,8 +243,6 @@ public class ServerDAO {
 		        	rowData[i][0] = rs.getLong(1);
 		        	rowData[i++][1] = rs.getString(2);
 		        }
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 		        System.out.println("방 목록 커넥션 닫힘");
 		        return rowData;
@@ -317,7 +258,6 @@ public class ServerDAO {
 	
 	public int createRoom(String connectId, String data[]) { // data는 friendId
 		con = dataSource.getConnection();
-//		con = getConnection();
 		Date today = new Date();
 		System.out.println(today);
 		int chk = 0;
@@ -348,7 +288,7 @@ public class ServerDAO {
 				dataSource.freeConnection(rs);
 				
 				if(groupidbefore != 0L) {
-					con.close();
+					dataSource.freeConnection(con);
 					return 0;
 				}
 				/* 1:1 채팅방 있는지 검사 */
@@ -362,7 +302,6 @@ public class ServerDAO {
 				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
 				pstmt.setByte(3, ONEROOM); // 채팅 방명
 		        chk = pstmt.executeUpdate();
-//		        pstmt.close();
 		        dataSource.freeConnection(pstmt);
 		        
 		        /* groupid 가져오기 */
@@ -396,14 +335,10 @@ public class ServerDAO {
 		        
 		        con.commit();
 		        
-		        System.out.println("채팅방개설 성공");
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt);
 		        System.out.println("채팅방개설 커넥션 닫힘");
 //		        
 			} catch (SQLException e) {
-				// sql 에러발생시 여기서 rollback????
 				try {
 		        	System.out.println("채팅방개설 실패");
 					con.rollback();
@@ -421,7 +356,6 @@ public class ServerDAO {
 	
 	public Long createGroupRoom(String connectId, String data[]) { // data는 friendId
 		con = dataSource.getConnection();
-//		con = getConnection();
 		Long groupid = 0L;
 		int chk = 0;
 
@@ -434,7 +368,6 @@ public class ServerDAO {
 				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
 				pstmt.setByte(3, GROUPROOM); // 채팅 방명
 		        chk = pstmt.executeUpdate();
-//		        pstmt.close();
 		        dataSource.freeConnection(pstmt);
 		        
 		        /* groupid 가져오기 */
@@ -445,7 +378,6 @@ public class ServerDAO {
 		        while(rs.next()) {
 		        	groupid = rs.getLong(1);
 		        }
-//		        pstmt.close();
 		        dataSource.freeConnection(pstmt);
 		        dataSource.freeConnection(rs);
 		        System.out.println("서버 db 저장시 groupid : " + groupid);
@@ -467,9 +399,6 @@ public class ServerDAO {
 				}  
 		        
 		        con.commit();
-		        System.out.println("채팅방개설 성공");
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt);
 		        System.out.println("채팅방개설 커넥션 닫힘");
 //		        
@@ -494,7 +423,6 @@ public class ServerDAO {
 
 	public Long selectRoom(String connectId, String[] data, byte type) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		Long groupid = 0L;
 		if(con != null) {
 			StringBuffer query = new StringBuffer();
@@ -516,8 +444,6 @@ public class ServerDAO {
 					groupid = rs.getLong(1);
 				}
 
-//		        close(pstmt);
-//		        close(con);	
 				dataSource.freeConnection(con,pstmt,rs);
 		        System.out.println("selectroom 커넥션 닫힘");			
 				return groupid;
@@ -533,25 +459,13 @@ public class ServerDAO {
 
 	public Chat insertMSG(Chat message) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk = 0 ;
 		Chat chat = null;
 		if(con != null) {
-//			String query = "select count(*) from chatmember where groupid = ?";
 	        String query = "select * from chatcontent where chatid = (select LAST_INSERT_ID())";
 			String query2 = "insert into chatcontent(userid,groupid,content,sendtime,count) values(?,?,?,now(6),(select count(*) from chatmember where groupid = ?))";
-			// 메시지를 db에 저장후 보낸사람의 읽은시간을 변경
-			//String query3 = "update chatmember set lastreadtime = now(6) where groupid = ? and userid = ?";
 			
 			try {
-//				pstmt = con.prepareStatement(query);
-//				pstmt.setLong(1, message.getGroupid());
-//				rs = pstmt.executeQuery();
-//				while(rs.next()) {
-//					totalcount = rs.getInt(1);
-//				}
-//				pstmt.close();
-				
 				pstmt = con.prepareStatement(query2);
 				pstmt.setString(1, new String(message.getUserid().getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setLong(2, message.getGroupid());
@@ -559,7 +473,6 @@ public class ServerDAO {
 		        pstmt.setLong(4, message.getGroupid());
 				chk = pstmt.executeUpdate();
 				
-//				close(pstmt);
 				dataSource.freeConnection(pstmt);
 				
 				pstmt = con.prepareStatement(query);
@@ -572,8 +485,6 @@ public class ServerDAO {
 		        	con.commit();
 		        }else
 		        	con.rollback();
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -586,7 +497,6 @@ public class ServerDAO {
 	
 	public boolean insertFile(String userid, Long roomid, String dir, String time) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int chk=0;
 		if(con!=null) {
 			try {
@@ -604,8 +514,6 @@ public class ServerDAO {
 		        	System.out.println("메세지 전송 실패");
 		        }
 
-//		        close(pstmt);
-//		        close(con);
 				dataSource.freeConnection(con,pstmt);
 				
 			}catch(SQLException e){
@@ -619,7 +527,6 @@ public class ServerDAO {
 
 	public List<String> selectGroupmember(Long sendGroupid) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		List<String> groupmemberList = new ArrayList<String>();
 		
 		if(con != null) {
@@ -634,8 +541,6 @@ public class ServerDAO {
 		        	groupmemberList.add(rs.getString(1));
 		        }		        
 
-//		        close(pstmt);
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt,rs);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -647,12 +552,9 @@ public class ServerDAO {
 
 	public List<Chat> selectchatcontent(ChatMember chatmember) {
 		con = dataSource.getConnection();
-//		con = getConnection();
 		List<Chat> chatcontent = new ArrayList<Chat>();
 		Long groupid = chatmember.getGroupid();
 		String userid = chatmember.getUserid();
-		System.out.println("groupid : "+ groupid);
-		System.out.println("userid : "+ userid);
 		if(con != null) {
 			// 해당하는 채팅방의 채팅정보를 로그인한 사용자의 마지막읽은 시간보다 늦는데이터 가져오기
 			String query = "select * from chatcontent where groupid = ? "
@@ -699,9 +601,6 @@ public class ServerDAO {
 				}else {
 					con.rollback();
 				}
-//		        close(pstmt);
-//		        System.out.println("지난 데이터 가져오는 커넥션 닫힘");
-//		        close(con);
 		        dataSource.freeConnection(con,pstmt);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -712,58 +611,14 @@ public class ServerDAO {
 	}
 
 	public int updatereadtime(String member, Chat message) {
-		
-//
-//		con = getConnection();
-//		int result = 0;
 //		// 카운트감소 
 //		String query = "update chatcontent set count = count-1 where groupid = ? "
 //				+ "and sendtime > (select lastreadtime from chatmember where groupid = ? and userid = ?) "
 //				+ "and sendtime <= ?";
 //		// 마지막 읽은시간 수정
 //		String query2 = "update chatmember set lastreadtime = ? where groupid = ? and userid = ?";
-//		
-//		Long groupid = message.getGroupid();
-//		Timestamp date = message.getSendtime();
-//		try {
-//			pstmt = con.prepareStatement(query);
-//			pstmt.setLong(1, groupid);
-//			pstmt.setLong(2, groupid);
-//			pstmt.setString(3, member);
-//			pstmt.setTimestamp(4, date);
-//			result = pstmt.executeUpdate();
-//			close(pstmt);
-//
-////			if(result >=0) {
-////				con.commit();
-////			}else {
-////				con.rollback();
-////			}
-//			System.out.println("result : " + result);
-//			System.out.println(member + "의 con객체3 : " + con);
-//			pstmt = con.prepareStatement(query2);
-//			pstmt.setTimestamp(1, date);
-//			pstmt.setLong(2, groupid);
-//			pstmt.setString(3, member);
-//			System.out.println(member + "의 con객체4 : " + con);
-//			int result2 = pstmt.executeUpdate();
-//			System.out.println("result2 : " + result2);
-//			if(result >=0 && result2 >=0) {
-//				con.commit();
-//			}else {
-//				con.rollback();
-//			}
-//
-//	        close(pstmt);
-//	        close(con);
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return result;
 		
 		con = dataSource.getConnection();
-//		con = getConnection();
 		int result = 0;
 		String query = "update chatcontent set count = count -1 where chatid = ?";
 		String query2 = "update chatmember set lastreadtime = ? where groupid = ? and userid = ?";
@@ -774,27 +629,20 @@ public class ServerDAO {
 			pstmt = con.prepareStatement(query);
 			pstmt.setLong(1, chatid);
 			result = pstmt.executeUpdate();
-//			close(pstmt);
 			dataSource.freeConnection(pstmt);
-
-//			if(result >=0) {
-//				con.commit();
-//			}else {
-//				con.rollback();
-//			}
+			
 			pstmt = con.prepareStatement(query2);
 			pstmt.setTimestamp(1, date);
 			pstmt.setLong(2, groupid);
 			pstmt.setString(3, member);
 			int result2 = pstmt.executeUpdate();
+			
 			if(result >=0 && result2 >=0) {
 				con.commit();
 			}else {
 				con.rollback();
 			}
-
-//	        close(pstmt);
-//	        close(con);
+			
 			dataSource.freeConnection(con,pstmt);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -807,7 +655,6 @@ public class ServerDAO {
 
 	public void deleteolddata() {
 		con = dataSource.getConnection();
-//		con = getConnection();
 //		String query = "delete from chatcontent where sendtime <= date_add(now(), interval -2 day)";
 		String query = "delete from chatcontent where sendtime <= date_add(now(), interval -2 minute)";
 		//2일 지난 데이터 제거
@@ -822,9 +669,6 @@ public class ServerDAO {
 				con.rollback();
 			}
 			
-
-//	        close(pstmt);
-//	        close(con);
 			dataSource.freeConnection(con,pstmt);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -859,6 +703,7 @@ public class ServerDAO {
 					rowData[i++][0]=rs.getString("file_dir");
 					System.out.println(rs.getString("file_dir"));
 				}
+				
 				dataSource.freeConnection(con,pstmt,rs);
 				
 				return rowData;
