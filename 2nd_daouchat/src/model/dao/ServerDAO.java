@@ -495,16 +495,17 @@ public class ServerDAO {
 		return chat;
 	}
 	
-	public boolean insertFile(String userid, Long roomid, String dir, String time) {
+	public boolean insertFile(String userid, Long roomid, String dir) {
 		con = dataSource.getConnection();
+//		con = getConnection();
 		int chk=0;
 		if(con!=null) {
 			try {
-				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,?)");
+				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,now(6))");
 				pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
 				pstmt.setLong(2, roomid);
 				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
+				//pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
 				chk=pstmt.executeUpdate();
 				if(chk >=0) {
 					System.out.println("메세지 전송 성공");
@@ -514,6 +515,8 @@ public class ServerDAO {
 		        	System.out.println("메세지 전송 실패");
 		        }
 
+//		        close(pstmt);
+//		        close(con);
 				dataSource.freeConnection(con,pstmt);
 				
 			}catch(SQLException e){
@@ -679,6 +682,30 @@ public class ServerDAO {
 			e.printStackTrace();
 		}
 	}
+	
+	public void deleteoldFiledata() {
+		con = dataSource.getConnection();
+		String query = "delete from filecontent where sendtime <= date_add(now(), interval -30 day)";
+		
+		//2일 지난 데이터 제거
+		try {
+			pstmt = con.prepareStatement(query);
+			int result = pstmt.executeUpdate();
+			
+			if(result>0) {
+				con.commit();
+				System.out.println("--file data remove--");
+			}else {
+				con.rollback();
+			}
+		
+			dataSource.freeConnection(con,pstmt);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public Object[][] selectfilecontent(Long groupid){
 		con = dataSource.getConnection();

@@ -113,9 +113,8 @@ public class ServerBack {
 			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
-				filesocket=fileserverSocket.accept();
 				System.out.println(socket.getInetAddress() + "에서 접속"); // IP
-				Receiver receiver = new Receiver(socket,filesocket);
+				Receiver receiver = new Receiver(socket);
 				receiver.start();
 			}
 		} catch (IOException e) {
@@ -145,13 +144,10 @@ public class ServerBack {
 		private Socket filesocket;
 		String connectId = "GM" + increment();
 		
-		public Receiver(Socket socket,Socket filesocket) {
+		public Receiver(Socket socket) {
 			try {
 				sDao = new ServerDAO();
 				this.socket = socket;
-				this.filesocket=filesocket;
-				fis = new DataInputStream(filesocket.getInputStream());
-				fos = new DataOutputStream(filesocket.getOutputStream());
 				ois = new ObjectInputStream(socket.getInputStream());
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				
@@ -240,7 +236,7 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == FMSG) {
 						Filemessage filemessage = (Filemessage) data.getObject();
 						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
-						new ServerFileThread(filemessage,filesocket).start();
+						new ServerFileThread(filemessage,fileserverSocket).start();
 						//파일 받고 
 					}
 					else if(data.getHeader().getMenu() == OPENCHAT) {
@@ -289,7 +285,7 @@ public class ServerBack {
 						Data sendData = new Data(header,filedir);
 						oos.writeObject(sendData);
 						oos.flush();
-						new ServerFileTransferThread(filedownmessage,fos).start();
+						new ServerFileTransferThread(filedownmessage,fileserverSocket).start();
 						
 					}
 				}

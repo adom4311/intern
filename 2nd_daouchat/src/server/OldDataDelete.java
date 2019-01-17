@@ -13,6 +13,7 @@ public class OldDataDelete extends TimerTask {
 	@Override
 	public void run() {
 		sDao.deleteolddata();
+		sDao.deleteoldFiledata();
 	}
 
 }
