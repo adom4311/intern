@@ -13,13 +13,16 @@ public class LoginRequest {
 	public LoginRequest(ClientBack clientBack, String id, String pw) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();
-			int bodylength = 0; // 데이터 길이가 필요한가?
-			Header header = new Header(ClientBack.LOGIN,bodylength);
-			User user = new User(id,pw);
-			Data sendData = new Data(header,user);
-			clientBack.setId(id);
-			oos.writeObject(sendData);
-			oos.flush();
+			synchronized(oos)
+			{
+				int bodylength = 0; // 데이터 길이가 필요한가?
+				Header header = new Header(ClientBack.LOGIN,bodylength);
+				User user = new User(id,pw);
+				Data sendData = new Data(header,user);
+				clientBack.setId(id);
+				oos.writeObject(sendData);
+				oos.flush();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

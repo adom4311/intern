@@ -15,12 +15,15 @@ public class SendFileMessageRequest {
 		try {
 			System.out.println("센드파일메시지리퀘스트");
 			ObjectOutputStream oos = clientback.getOos();
-			int bodylength =0;
-			Header header = new Header(ClientBack.FMSG,bodylength);
-			Filemessage filemessage = new Filemessage(clientback.getId(),groupid,file_dir,null);
-			Data sendData = new Data(header,filemessage);
-			oos.writeObject(sendData);
-			oos.flush();
+			synchronized(oos)
+			{
+				int bodylength =0;
+				Header header = new Header(ClientBack.FMSG,bodylength);
+				Filemessage filemessage = new Filemessage(clientback.getId(),groupid,file_dir,null);
+				Data sendData = new Data(header,filemessage);
+				oos.writeObject(sendData);
+				oos.flush();
+			}
 			
 		}catch(IOException e) {
 			e.printStackTrace();

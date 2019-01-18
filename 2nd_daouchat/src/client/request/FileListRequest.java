@@ -11,11 +11,14 @@ public class FileListRequest {
 	public FileListRequest(ClientBack clientBack,Long groupid) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();
-			int bodylength=0;
-			Header header = new Header(ClientBack.FILIST,bodylength);
-			Data sendData = new Data(header,groupid);
-			oos.writeObject(sendData);
-			oos.flush();
+			synchronized(oos)
+			{
+				int bodylength=0;
+				Header header = new Header(ClientBack.FILIST,bodylength);
+				Data sendData = new Data(header,groupid);
+				oos.writeObject(sendData);
+				oos.flush();
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

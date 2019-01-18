@@ -12,11 +12,14 @@ public class CreateRoomRequest {
 		try 
 		{
 			ObjectOutputStream oos = clientBack.getOos();
-			int bodylength = 0; // 데이터 길이가 필요한가?
-			Header header = new Header(ClientBack.CREATEROOM,bodylength);
-			Data sendData = new Data(header,friendids);
-			oos.writeObject(sendData);
-			oos.flush();
+			synchronized(oos)
+			{
+				int bodylength = 0; // 데이터 길이가 필요한가?
+				Header header = new Header(ClientBack.CREATEROOM,bodylength);
+				Data sendData = new Data(header,friendids);
+				oos.writeObject(sendData);
+				oos.flush();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
