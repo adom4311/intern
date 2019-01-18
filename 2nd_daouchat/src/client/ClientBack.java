@@ -10,39 +10,39 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import client.control.ReadchatFile;
+import client.control.sungjo.ReadchatFile;
 import client.gui.Chatwindow;
 import client.gui.ClientGUI;
 import client.gui.ClientHome;
-import client.request.AddFriendRequest;
-import client.request.CreateGroupRoomListRequest;
-import client.request.CreateGroupRoomRequest;
-import client.request.CreateRoomRequest;
-import client.request.FileListRequest;
-import client.request.FiledownRequest;
-import client.request.FindfriendRequest;
-import client.request.FriListRequest;
-import client.request.LoginRequest;
-import client.request.OpenChatRequest;
-import client.request.RoomListRequest;
-import client.request.SendFileMessageRequest;
-import client.request.SendFileRequest;
-import client.request.SendMessageRequest;
-import client.request.SignupRequest;
-import client.response.AddfriResponse;
-import client.response.CreateGroupRoomListResponse;
-import client.response.CreateGroupRoomResponse;
-import client.response.CreateRoomResponse;
-import client.response.FileListResponse;
-import client.response.FileRecResponse;
-import client.response.FmsgResponse;
-import client.response.FrifindResponse;
-import client.response.FrilistResponse;
-import client.response.LoginResponse;
-import client.response.MsgResponse;
-import client.response.OpenchatResponse;
-import client.response.RoomResponse;
-import client.response.SignupResponse;
+import client.request.sangwoo.FileListRequest;
+import client.request.sangwoo.FiledownRequest;
+import client.request.sangwoo.RoomListRequest;
+import client.request.sangwoo.SendFileMessageRequest;
+import client.request.sangwoo.SendFileRequest;
+import client.request.sangwoo.SendMessageRequest;
+import client.request.sungjo.AddFriendRequest;
+import client.request.sungjo.CreateGroupRoomListRequest;
+import client.request.sungjo.CreateGroupRoomRequest;
+import client.request.sungjo.CreateRoomRequest;
+import client.request.sungjo.FindfriendRequest;
+import client.request.sungjo.FriListRequest;
+import client.request.sungjo.LoginRequest;
+import client.request.sungjo.OpenChatRequest;
+import client.request.sungjo.SignupRequest;
+import client.response.sangwoo.FileListResponse;
+import client.response.sangwoo.FileRecResponse;
+import client.response.sangwoo.FmsgResponse;
+import client.response.sangwoo.RoomResponse;
+import client.response.sungjo.AddfriResponse;
+import client.response.sungjo.CreateGroupRoomListResponse;
+import client.response.sungjo.CreateGroupRoomResponse;
+import client.response.sungjo.CreateRoomResponse;
+import client.response.sungjo.FrifindResponse;
+import client.response.sungjo.FrilistResponse;
+import client.response.sungjo.LoginResponse;
+import client.response.sungjo.MsgResponse;
+import client.response.sungjo.OpenchatResponse;
+import client.response.sungjo.SignupResponse;
 import model.vo.Data;
 
 public class ClientBack {
@@ -189,34 +189,46 @@ public class ClientBack {
 					Data data = (Data) ois.readObject();
 					if(data.getHeader().getMenu() == SIGNUP) {
 						new SignupResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == LOGIN) {
+					}
+					else if(data.getHeader().getMenu() == LOGIN) {
 						new LoginResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == FRIFIND) {
+					}
+					else if(data.getHeader().getMenu() == FRIFIND) {
 						new FrifindResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == ADDFRI) {
+					}
+					else if(data.getHeader().getMenu() == ADDFRI) {
 						new AddfriResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == FRILIST) {
+					}
+					else if(data.getHeader().getMenu() == FRILIST) {
 						new FrilistResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == CREATEROOM) {
+					}
+					else if(data.getHeader().getMenu() == CREATEROOM) {
 						new CreateRoomResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == ROOM) {
+					}
+					else if(data.getHeader().getMenu() == ROOM) {
 						new RoomResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == MSG) {
+					}
+					else if(data.getHeader().getMenu() == MSG) {
 						new MsgResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == FMSG) {
+					}
+					else if(data.getHeader().getMenu() == FMSG) {
 						new FmsgResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == OPENCHAT) {
+					}
+					else if(data.getHeader().getMenu() == OPENCHAT) {
 						new OpenchatResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == GROUPROOMLIST) {
+					}
+					else if(data.getHeader().getMenu() == GROUPROOMLIST) {
 						new CreateGroupRoomListResponse(clientback,data);
-					}else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
+					}
+					else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
 						new CreateGroupRoomResponse(clientback,data);
-					}else if(data.getHeader().getMenu()==FILIST) {
+					}
+					else if(data.getHeader().getMenu()==FILIST) {
 						new FileListResponse(clientback,data);
-					}else if(data.getHeader().getMenu()==FIDOWN) {
+					}
+					else if(data.getHeader().getMenu()==FIDOWN) {
 						new FileRecResponse(clientback,data).start();
 					}
-					
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block

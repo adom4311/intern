@@ -23,6 +23,8 @@ import model.vo.Filelist;
 import model.vo.Filemessage;
 import model.vo.Header;
 import model.vo.User;
+import server.sangwoo.ServerFileThread;
+import server.sangwoo.ServerFileTransferThread;
 
 public class ServerBack {
 	public static final int SIGNUP = 1; // 회원가입
@@ -163,6 +165,7 @@ public class ServerBack {
 			try {
 				while(ois != null){
 					Data data = (Data) ois.readObject();
+					/* 김성조 인턴사원 */
 					if(data.getHeader().getMenu() == SIGNUP) {
 						User user = (User)data.getObject();
 						int result = sDao.signUp(user.getUserid(),user.getPassword());
@@ -171,6 +174,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == LOGIN) {
 						User user = (User)data.getObject();
 						int result = sDao.login(user.getUserid(),user.getPassword());
@@ -187,13 +191,15 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
-					else if(data.getHeader().getMenu() == FRIFIND) {
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu() == FRIFIND) { 
 						Object rowData[][] = sDao.friFind(connectId);
 						Header header = new Header(FRIFIND,0);
 						Data sendData = new Data(header,rowData);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == ADDFRI) {
 						String friendId = (String)data.getObject();
 						int result = sDao.addfri(connectId,friendId);
@@ -202,6 +208,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == FRILIST) {
 						Object rowData[][] = sDao.friList(connectId);
 						Header header = new Header(FRILIST,0);
@@ -209,6 +216,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == CREATEROOM) {
 						String[] friendids = (String[])data.getObject();
 						int result = sDao.createRoom(connectId,friendids); // 채팅방 개설
@@ -219,13 +227,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
-					else if(data.getHeader().getMenu() == ROOM) {
-						Object rowData[][] = sDao.roomList(connectId);
-						Header header = new Header(ROOM,0);
-						Data sendData = new Data(header,rowData);
-						oos.writeObject(sendData);
-						oos.flush();
-					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == MSG) {
 						Chat message = (Chat)data.getObject();
 						List<String> groupmember = sDao.selectGroupmember(message.getGroupid());
@@ -233,12 +235,7 @@ public class ServerBack {
 //						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
 						broadcast(chat, groupmember);
 					}
-					else if(data.getHeader().getMenu() == FMSG) {
-						Filemessage filemessage = (Filemessage) data.getObject();
-						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
-						new ServerFileThread(filemessage,fileserverSocket).start();
-						//파일 받고 
-					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == OPENCHAT) {
 						ChatMember chatmember = (ChatMember)data.getObject();
 						List<Chat> chatcontent = sDao.selectchatcontent(chatmember);
@@ -248,6 +245,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == GROUPROOMLIST) {
 						Object rowData[][] = sDao.friList(connectId);
 						Header header = new Header(GROUPROOMLIST,0);
@@ -255,10 +253,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
-					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
-						Chat message = (Chat)data.getObject();
-						int result = sDao.updatereadtime(connectId,message);
-					}
+					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
 						String[] friendids = (String[])data.getObject();
 						Long groupid = sDao.createGroupRoom(connectId,friendids); // 채팅방 개설
@@ -268,6 +263,27 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
+						Chat message = (Chat)data.getObject();
+						int result = sDao.updatereadtime(connectId,message);
+					}
+					/* 백상우 인턴사원 */
+					else if(data.getHeader().getMenu() == ROOM) {
+						Object rowData[][] = sDao.roomList(connectId);
+						Header header = new Header(ROOM,0);
+						Data sendData = new Data(header,rowData);
+						oos.writeObject(sendData);
+						oos.flush();
+					}
+					/* 백상우 인턴사원 */
+					else if(data.getHeader().getMenu() == FMSG) {
+						Filemessage filemessage = (Filemessage) data.getObject();
+						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
+						new ServerFileThread(filemessage,fileserverSocket).start();
+						//파일 받고 
+					}
+					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu()==FILIST) {
 						Long groupid = (Long)data.getObject();
 						Object rowdata[][] = sDao.selectfilecontent(groupid);
@@ -277,6 +293,7 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu()==FIDOWN) {
 						Filedownmessage filedownmessage = (Filedownmessage)data.getObject();
 //						Long groupid = filedownmessage.getGroupid();
@@ -286,7 +303,6 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 						new ServerFileTransferThread(filedownmessage,fileserverSocket).start();
-						
 					}
 				}
 			}catch (SocketException e) {

@@ -26,6 +26,10 @@ public class ServerDAO {
     public ServerDAO() {
     	dataSource = getDataSource();
     }
+    
+    // 여기서부터 김성조 인턴사원 코드
+    // 591번 줄부터 백상우 인턴사원 코드
+    
  
 	public int signUp(String id, String pw) {
 		con = dataSource.getConnection();
@@ -127,28 +131,6 @@ public class ServerDAO {
         }
         return null;
 	}
-	
-	/* 방 목록을 위한 함수*/
-	public int totalRoomCnt(String tempId) {
-		con = dataSource.getConnection();
-		int chk = 0;
-		if( con != null ) {
-            try {
-				pstmt = con.prepareStatement("select count(groupid) from chatgroup where userid = ?");
-				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
-		        rs = pstmt.executeQuery();
-		        while(rs.next()) {
-		        	return rs.getInt(1);
-		        }
-		        dataSource.freeConnection(con,pstmt,rs);
-			} catch (SQLException e) {
-				return -1;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-        }
-        return chk;
-	}
 
 	public int addfri(String connectId, String data) {
 		con = dataSource.getConnection();
@@ -217,43 +199,6 @@ public class ServerDAO {
 			}
         }
         return null;
-	}
-
-	public Object[][] roomList(String connectId){
-		con = dataSource.getConnection();
-		if(con!=null) {
-			try {
-				int totalcount = 0;
-				System.out.println("연결 : "+connectId);
-				pstmt = con.prepareStatement("select count(*) from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
-				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-		        rs = pstmt.executeQuery();
-		        while(rs.next()) {
-		        	totalcount =  rs.getInt(1);
-		        }
-		        dataSource.freeConnection(pstmt);
-		        dataSource.freeConnection(rs);
-				
-				Object rowData[][] = new Object[totalcount][2];
-				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
-				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-		        rs = pstmt.executeQuery();		        
-		        int i=0;
-		        while(rs.next()) {
-		        	rowData[i][0] = rs.getLong(1);
-		        	rowData[i++][1] = rs.getString(2);
-		        }
-		        dataSource.freeConnection(con,pstmt,rs);
-		        System.out.println("방 목록 커넥션 닫힘");
-		        return rowData;
-			} catch (SQLException e) {
-				e.printStackTrace();
-				return null;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
 	}
 	
 	public int createRoom(String connectId, String data[]) { // data는 friendId
@@ -420,43 +365,6 @@ public class ServerDAO {
 	}
 	
 	
-
-	public Long selectRoom(String connectId, String[] data, byte type) {
-		con = dataSource.getConnection();
-		Long groupid = 0L;
-		if(con != null) {
-			StringBuffer query = new StringBuffer();
-			query.append("select groupid, count(groupid) cnt from chatmember where groupid in (select groupid from chatgroup where type =?) and userid in (?");
-        	for (int i = 0; i < data.length; i++) {
-        		query.append(",?");
-			}
-        	query.append(") group by groupid having cnt = 2");
-			try {
-				pstmt = con.prepareStatement(query.toString());
-				pstmt.setByte(1, type); // 채팅타입
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
-				for (int i = 0; i < data.length; i++) { // 각 참여자
-					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
-				}
-				
-				rs = pstmt.executeQuery();
-				while(rs.next()) {
-					groupid = rs.getLong(1);
-				}
-
-				dataSource.freeConnection(con,pstmt,rs);
-		        System.out.println("selectroom 커넥션 닫힘");			
-				return groupid;
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return groupid;
-	}
-
 	public Chat insertMSG(Chat message) {
 		con = dataSource.getConnection();
 		int chk = 0 ;
@@ -495,38 +403,6 @@ public class ServerDAO {
 		return chat;
 	}
 	
-	public boolean insertFile(String userid, Long roomid, String dir) {
-		con = dataSource.getConnection();
-//		con = getConnection();
-		int chk=0;
-		if(con!=null) {
-			try {
-				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,now(6))");
-				pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setLong(2, roomid);
-				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
-				//pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
-				chk=pstmt.executeUpdate();
-				if(chk >=0) {
-					System.out.println("메세지 전송 성공");
-		        	con.commit();
-		        }else {
-		        	con.rollback();
-		        	System.out.println("메세지 전송 실패");
-		        }
-
-//		        close(pstmt);
-//		        close(con);
-				dataSource.freeConnection(con,pstmt);
-				
-			}catch(SQLException e){
-				return false;
-			}catch(UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-		return true;
-	}
 
 	public List<String> selectGroupmember(Long sendGroupid) {
 		con = dataSource.getConnection();
@@ -658,6 +534,129 @@ public class ServerDAO {
 		
 		return result;
 		
+	}
+	
+
+	public Long selectRoom(String connectId, String[] data, byte type) {
+		con = dataSource.getConnection();
+		Long groupid = 0L;
+		if(con != null) {
+			StringBuffer query = new StringBuffer();
+			query.append("select groupid, count(groupid) cnt from chatmember where groupid in (select groupid from chatgroup where type =?) and userid in (?");
+        	for (int i = 0; i < data.length; i++) {
+        		query.append(",?");
+			}
+        	query.append(") group by groupid having cnt = 2");
+			try {
+				pstmt = con.prepareStatement(query.toString());
+				pstmt.setByte(1, type); // 채팅타입
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
+				for (int i = 0; i < data.length; i++) { // 각 참여자
+					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+				}
+				
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					groupid = rs.getLong(1);
+				}
+
+				dataSource.freeConnection(con,pstmt,rs);
+		        System.out.println("selectroom 커넥션 닫힘");			
+				return groupid;
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return groupid;
+	}
+	
+	/*
+	 *  김성조 인턴사원													
+	 */
+	
+	                     
+	//-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	/*
+	 *  백상우 인턴사원
+	 */
+		
+	
+	
+	
+   
+	public Object[][] roomList(String connectId){
+		con = dataSource.getConnection();
+		if(con!=null) {
+			try {
+				int totalcount = 0;
+				System.out.println("연결 : "+connectId);
+				pstmt = con.prepareStatement("select count(*) from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalcount =  rs.getInt(1);
+		        }
+		        dataSource.freeConnection(pstmt);
+		        dataSource.freeConnection(rs);
+				
+				Object rowData[][] = new Object[totalcount][2];
+				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        rs = pstmt.executeQuery();		        
+		        int i=0;
+		        while(rs.next()) {
+		        	rowData[i][0] = rs.getLong(1);
+		        	rowData[i++][1] = rs.getString(2);
+		        }
+		        dataSource.freeConnection(con,pstmt,rs);
+		        System.out.println("방 목록 커넥션 닫힘");
+		        return rowData;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+
+	public boolean insertFile(String userid, Long roomid, String dir) {
+		con = dataSource.getConnection();
+//		con = getConnection();
+		int chk=0;
+		if(con!=null) {
+			try {
+				pstmt=con.prepareStatement("insert into filecontent values(?,?,?,now(6))");
+				pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setLong(2, roomid);
+				pstmt.setString(3, new String(dir.getBytes("UTF-8"),"UTF-8"));
+				//pstmt.setString(4, new String(time.getBytes("UTF-8"),"UTF-8"));
+				chk=pstmt.executeUpdate();
+				if(chk >=0) {
+					System.out.println("메세지 전송 성공");
+		        	con.commit();
+		        }else {
+		        	con.rollback();
+		        	System.out.println("메세지 전송 실패");
+		        }
+
+//		        close(pstmt);
+//		        close(con);
+				dataSource.freeConnection(con,pstmt);
+				
+			}catch(SQLException e){
+				return false;
+			}catch(UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+		return true;
 	}
 
 	public void deleteolddata() {
