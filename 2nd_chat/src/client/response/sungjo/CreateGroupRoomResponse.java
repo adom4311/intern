@@ -14,7 +14,7 @@ public class CreateGroupRoomResponse {
 		Long groupid = (Long)data.getObject();
 		Map<Long, Chatwindow> chatMap = clientback.getChatMap();
 		
-		if(groupid != 0L) {
+		if(groupid != null) {
 			if(chatMap.get(groupid) == null) {
 				System.out.println("채티방 개설");
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback);

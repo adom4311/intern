@@ -21,7 +21,6 @@ public class CreateRoomRequest {
 				oos.flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

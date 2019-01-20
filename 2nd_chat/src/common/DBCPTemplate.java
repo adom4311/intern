@@ -70,9 +70,9 @@ public class DBCPTemplate {
         // Connection Pool 생성, 옵션세팅
         GenericObjectPool<DataSource> connectionPool = new GenericObjectPool<DataSource>();
         // 최대 커넥션 개수 
-        connectionPool.setMaxActive(50);
+        connectionPool.setMaxActive(35);
         // 풀에 저장될수 있는 커넥션 최대갯수 설정
-        connectionPool.setMaxIdle(50);
+        connectionPool.setMaxIdle(35);
         // 커넥션 최소갯수 설정
         connectionPool.setMinIdle(5); 
         // 커넥션이 비어있으면 기다리는 시간 밀리초

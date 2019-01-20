@@ -80,22 +80,22 @@ public class ServerBack {
 		serverBack.setting();
 	}
 
-	private void broadcast(Chat message, List<String> groupmember) {
-		synchronized (currentClientMap) {
+	private synchronized void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
+		Chat chat = sDao.insertMSG(message);
+		
+		Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
+		Data sendData = new Data(header,chat);
+		ObjectOutputStream oos;
+		for (String member : groupmember) {
 			try {
-				Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
-				Data sendData = new Data(header,message);
-				ObjectOutputStream oos;
-				for (String member : groupmember) {
-					oos = currentClientMap.get(member);
-					if(oos != null) {
-						oos.writeObject(sendData);
-						oos.flush();
-					}
+				oos = currentClientMap.get(member);
+				if(oos != null) {
+					oos.writeObject(sendData);
+					oos.flush();
 				}
-				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
+			}catch(NullPointerException e) {
+				e.printStackTrace();
+			} catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -110,8 +110,7 @@ public class ServerBack {
 
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
-//			scheduler.scheduleAtFixedRate(odd, 60000, 172800000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
-//			scheduler.scheduleAtFixedRate(odd, 1, 10000); // 1분 후부터 2일 간격 (2~3일 데이터 저장)
+			scheduler.scheduleAtFixedRate(odd, 60 * 1000, 24 * 60 * 60 * 1000); // 1분 후부터 1일 간격 (2~3일 데이터 저장)
 			
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
@@ -177,17 +176,14 @@ public class ServerBack {
 					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == LOGIN) {
 						User user = (User)data.getObject();
-						int result = sDao.login(user.getUserid(),user.getPassword());
+						user = sDao.login(user.getUserid(),user.getPassword());
 						Header header = new Header(LOGIN,0); // 데이터크기가 사용처가 없음.
-						Data sendData = new Data(header,result);
-						
-						if(result > 0) {
+						Data sendData = new Data(header,user);
+						if(user != null) {
 							currentClientMap.put(user.getUserid().toLowerCase(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
 							currentClientfileMap.put(user.getUserid().toLowerCase(),currentClientfileMap.remove(connectId));
 							connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
-							System.out.println("로그인후 접속자수 : " + currentClientMap.size());
 						}
-						
 						oos.writeObject(sendData);
 						oos.flush();
 					}
@@ -231,9 +227,7 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == MSG) {
 						Chat message = (Chat)data.getObject();
 						List<String> groupmember = sDao.selectGroupmember(message.getGroupid());
-						Chat chat = sDao.insertMSG(message);
-//						List<String> groupmember = sDao.selectGroupmember(chat.getGroupid());
-						broadcast(chat, groupmember);
+						broadcast(message, groupmember ,sDao);
 					}
 					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == OPENCHAT) {
@@ -309,17 +303,13 @@ public class ServerBack {
 				try {
 					currentClientMap.remove(connectId);
 					socket.close();
-					System.out.println(connectId + "님이 클라이언트 종료");
+					System.out.println(connectId + "님이 클라이언트 종료하여 쓰레드 종료합니다.");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

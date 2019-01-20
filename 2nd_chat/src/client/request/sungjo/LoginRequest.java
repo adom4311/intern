@@ -19,12 +19,10 @@ public class LoginRequest {
 				Header header = new Header(ClientBack.LOGIN,bodylength);
 				User user = new User(id,pw);
 				Data sendData = new Data(header,user);
-				clientBack.setId(id);
 				oos.writeObject(sendData);
 				oos.flush();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
