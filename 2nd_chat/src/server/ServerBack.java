@@ -58,6 +58,8 @@ public class ServerBack {
 	/* 현재 접속중인 사용자들의 정보 */
 	private Map<String, ObjectOutputStream> currentClientMap = new HashMap<String, ObjectOutputStream>();
 	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
+	/* groupid 별 현재 사용자 정보 */
+	private Map<Long, Map<String,ObjectOutputStream>> groupidClientMap = new HashMap<Long,Map<String,ObjectOutputStream>>();
 
 	private int non_login_increment = 0; // 로그인 전 임시값
 		
