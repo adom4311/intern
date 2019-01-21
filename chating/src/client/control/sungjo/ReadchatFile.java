@@ -17,6 +17,8 @@ public class ReadchatFile {
 
 	public ReadchatFile(ClientBack clientback, Long groupid) {
 		Map<Long, Chatwindow> chatMap = clientback.getChatMap();
+		Chat chat = new Chat();
+		chat.setGroupid(groupid);
 		try {
 			if(chatMap.get(groupid) == null) { // 채팅방이 없으면 개설
 				System.out.println("채티방 개설");
@@ -47,26 +49,34 @@ public class ReadchatFile {
 					while(fis.available() > 0){
 						msg = (Chat)ois.readObject();
 						list.add(msg);
-						clientback.getChatMap().get(groupid).appendMSG(msg.getUserid() + " : " + msg.getContent() + "   ---" + msg.getCount() + "\n");
 					}
+					ois.close();
 					
 					FileOutputStream fos = new FileOutputStream(file);
 					ObjectOutputStream oos = new ObjectOutputStream(fos);
 					clientback.getChatFileMap().put(groupid, oos);
+					clientback.getChatFileListMap().put(groupid, list);
+					
 					for(Chat writemsg : list) {
-						oos.writeObject(writemsg);
+						if(writemsg.getCount() == 0) {
+							clientback.getChatMap().get(groupid).appendMSG(writemsg.getUserid() + " : " + writemsg.getContent() + "   ---" + writemsg.getCount() + "\n");
+							oos.writeObject(writemsg);
+							list.remove(writemsg);
+						}else {
+							chat = writemsg;
+							break;
+						}
 					}
-					ois.close();
+					
 				}else {
 					FileOutputStream fos = new FileOutputStream(file);
 					ObjectOutputStream oos = new ObjectOutputStream(fos);
 					clientback.getChatFileMap().put(groupid, oos);
+					
 				}
 
-				clientback.openChat(groupid);
+				clientback.openChat(chat);
 			}
-			// db에 저장된 채팅 불러오기
-			System.out.println("db데이터 요청하기");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
