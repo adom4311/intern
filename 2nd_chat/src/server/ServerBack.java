@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,24 +83,31 @@ public class ServerBack {
 		serverBack.setting();
 	}
 
-	private synchronized void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
-		
-		Chat chat = sDao.insertMSG(message);
-		
-		Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
-		Data sendData = new Data(header,chat);
-		ObjectOutputStream oos;
-		for (String member : groupmember) {
-			try {
-				oos = currentClientMap.get(member);
-				if(oos != null) {
-					oos.writeObject(sendData);
-					oos.flush();
+	private void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
+		Map<String, ObjectOutputStream> groupCurrentMap = groupidClientMap.get(message.getGroupid());
+		synchronized (groupCurrentMap) {
+			for (String member : groupmember) {
+				if(groupCurrentMap.get(member) == null && currentClientMap.get(member) != null) {
+					groupCurrentMap.put(member, currentClientMap.get(member));
 				}
-			}catch(NullPointerException e) {
-				e.printStackTrace();
-			} catch(IOException e) {
-				e.printStackTrace();
+			}
+			Chat chat = sDao.insertMSG(message);
+			
+			Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
+			Data sendData = new Data(header,chat);
+			ObjectOutputStream oos;
+			for (String member : groupmember) {
+				try {
+					oos = groupCurrentMap.get(member);
+					if(oos != null) {
+						oos.writeObject(sendData);
+						oos.flush();
+					}
+				}catch(NullPointerException e) {
+					e.printStackTrace();
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -110,6 +118,9 @@ public class ServerBack {
 			fileserverSocket = new ServerSocket(1994);
 
 			System.out.println("---서버 오픈---");
+			
+			//groupid 별 map setting
+			createGroupidMap();
 
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
@@ -124,6 +135,14 @@ public class ServerBack {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
+	}
+	
+	private void createGroupidMap() {
+		ServerDAO sDao = new ServerDAO();
+		ArrayList<Long> list = sDao.selectGroupid();
+		for(Long groupid : list) {
+			groupidClientMap.put(groupid,new HashMap<String,ObjectOutputStream>());
+		}
 	}
 	
 	public synchronized int increment() {
@@ -220,6 +239,8 @@ public class ServerBack {
 						String[] friendids = (String[])data.getObject();
 						int result = sDao.createRoom(connectId,friendids); // 채팅방 개설
 						Long groupid = sDao.selectRoom(connectId,friendids,ONEROOM); // groupid
+						if(groupid != null)
+							groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
 						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 						Header header = new Header(CREATEROOM,0);
 						Data sendData = new Data(header,groupid);
@@ -254,6 +275,8 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
 						String[] friendids = (String[])data.getObject();
 						Long groupid = sDao.createGroupRoom(connectId,friendids); // 채팅방 개설
+						if(groupid != null)
+							groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
 						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 						Header header = new Header(CREATEGROUPROOM,0);
 						Data sendData = new Data(header,groupid);
@@ -305,6 +328,10 @@ public class ServerBack {
 			}catch (SocketException e) {
 				try {
 					currentClientMap.remove(connectId);
+					ArrayList<Long> list = sDao.selectgroupiduser(connectId);
+					for(Long groupid : list) {
+						groupidClientMap.get(groupid).remove(connectId);
+					}
 					socket.close();
 					System.out.println(connectId + "님이 클라이언트 종료하여 쓰레드 종료합니다.");
 				} catch (IOException e1) {

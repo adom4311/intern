@@ -551,6 +551,48 @@ public class ServerDAO {
 		return groupid;
 	}
 	
+	public ArrayList<Long> selectGroupid() {
+		ArrayList<Long> list = new ArrayList<Long>();
+		con = dataSource.getConnection();
+		if(con!=null) {
+			try {
+				String query = "select groupid from chatgroup";
+				pstmt = con.prepareStatement(query);
+				rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	list.add(rs.getLong(1));
+		        }
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}finally {
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+		}
+		return list;
+	}
+	
+
+	public ArrayList<Long> selectgroupiduser(String connectId) {
+		ArrayList<Long> list = new ArrayList<Long>();
+		con = dataSource.getConnection();
+		if(con!=null) {
+			try {
+				String query = "select groupid from chatgroup where userid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, connectId);
+				rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	list.add(rs.getLong(1));
+		        }
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}finally {
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+		}
+		return list;
+	}
+	
 	/*
 	 *  김성조 인턴사원													
 	 */
@@ -722,6 +764,7 @@ public class ServerDAO {
 		return null;
 		
 	}
+
 }
     
    
