@@ -203,13 +203,14 @@ public class ServerDAO {
             try {
             	/* 1:1 있는지 검사 */
             	long groupidbefore = 0L;
-            	String query = "select groupid from chatmember where groupid in (select groupid from chatgroup where type =?) and userid in (?,?)";
+            	String query = "select groupid from chatgroup where groupid in (select groupid from chatmember where userid in (?,?) group by groupid having count(*) = 2) and type = ?";
 				pstmt = con.prepareStatement(query);
-				pstmt.setByte(1, ONEROOM); // 채팅타입
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
-				for (int i = 0; i < data.length; i++) { // 각 참여자
-					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
+				int j = 0;
+				for (;j < data.length; j++) { // 각 참여자
+					pstmt.setString(2+j, new String(data[j].getBytes("UTF-8"),"UTF-8")); 
 				}
+				pstmt.setByte(2+j, ONEROOM); // 채팅타입
 				
 				rs = pstmt.executeQuery();
 				while(rs.next()) {
@@ -525,20 +526,15 @@ public class ServerDAO {
 		con = dataSource.getConnection();
 		Long groupid = null;
 		if(con != null) {
-			StringBuffer query = new StringBuffer();
-			//select groupid from chatgroup where type = 1 and groupid in (select groupid from chatmember where userid in('q','w')) ;
-			query.append("select groupid from chatgroup where type = ? and groupid in (select groupid from chatmember where userid in(?");
-        	for (int i = 0; i < data.length; i++) {
-        		query.append(",?");
-			}
-        	query.append("))");
 			try {
-				pstmt = con.prepareStatement(query.toString());
-				pstmt.setByte(1, type); // 채팅타입
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
-				for (int i = 0; i < data.length; i++) { // 각 참여자
-					pstmt.setString(3+i, new String(data[i].getBytes("UTF-8"),"UTF-8")); 
+	        	String query = "select groupid from chatgroup where groupid in (select groupid from chatmember where userid in (?,?) group by groupid having count(*) = 2) and type = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
+				int j = 0;
+				for (;j < data.length; j++) { // 각 참여자
+					pstmt.setString(2+j, new String(data[j].getBytes("UTF-8"),"UTF-8")); 
 				}
+				pstmt.setByte(2+j, ONEROOM); // 채팅타입
 				
 				rs = pstmt.executeQuery();
 				while(rs.next()) {

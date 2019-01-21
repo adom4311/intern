@@ -83,6 +83,7 @@ public class ServerBack {
 	}
 
 	private synchronized void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
+		
 		Chat chat = sDao.insertMSG(message);
 		
 		Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
