@@ -21,6 +21,7 @@ import client.request.sangwoo.SendFileMessageRequest;
 import client.request.sangwoo.SendFileRequest;
 import client.request.sangwoo.SendMessageRequest;
 import client.request.sungjo.AddFriendRequest;
+import client.request.sungjo.ChatFriListRequest;
 import client.request.sungjo.CreateGroupRoomListRequest;
 import client.request.sungjo.CreateGroupRoomRequest;
 import client.request.sungjo.CreateRoomRequest;
@@ -36,6 +37,7 @@ import client.response.sangwoo.FileRecResponse;
 import client.response.sangwoo.FmsgResponse;
 import client.response.sangwoo.RoomResponse;
 import client.response.sungjo.AddfriResponse;
+import client.response.sungjo.ChatFriListResponse;
 import client.response.sungjo.CreateGroupRoomListResponse;
 import client.response.sungjo.CreateGroupRoomResponse;
 import client.response.sungjo.CreateRoomResponse;
@@ -70,6 +72,7 @@ public class ClientBack {
 	
 	public static final int ROOMNAME =17;//规疙 函版
 	public static final int DELETEFRIEND =18;// 模备 昏力
+	public static final int CHATFRILIST =19;// 盲泼规 模备 府胶飘
 	
 
     public static final byte ONEROOM= 0x01;
@@ -244,6 +247,9 @@ public class ClientBack {
 					else if(data.getHeader().getMenu()==DELETEFRIEND) {
 						new DeleteFriendResponse(clientback,data);
 					}
+					else if(data.getHeader().getMenu()==CHATFRILIST) {
+						new ChatFriListResponse(clientback,data);
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -299,6 +305,10 @@ public class ClientBack {
 	
 	public void fileList(Long groupid) {
 		new FileListRequest(this,groupid);
+	}
+	
+	public void chatfriList(Long groupid) {
+		new ChatFriListRequest(this,groupid);
 	}
 	
 	public void sendFilemessage(String file_dir, Long groupid) {

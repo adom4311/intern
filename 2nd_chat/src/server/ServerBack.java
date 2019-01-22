@@ -16,6 +16,7 @@ import java.util.Timer;
 
 import model.dao.ServerDAO;
 import model.vo.Chat;
+import model.vo.ChatFriList;
 import model.vo.ChatMember;
 import model.vo.ChatcontentList;
 import model.vo.Data;
@@ -48,6 +49,8 @@ public class ServerBack {
 
 	public static final int ROOMNAME =17;//规疙 函版
 	public static final int DELETEFRIEND =18;//模备 昏力
+	public static final int CHATFRILIST =19;// 盲泼规 模备 府胶飘
+
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -347,6 +350,15 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 						new ServerFileTransferThread(filedownmessage,fileserverSocket).start();
+					}
+					else if(data.getHeader().getMenu()==CHATFRILIST) {
+						Long groupid = (Long)data.getObject();
+						Object rowdata[][] = sDao.selectChatFriList(groupid);
+						Header header = new Header(CHATFRILIST,0);
+						ChatFriList chatFriList = new ChatFriList(groupid,rowdata);
+						Data sendData = new Data(header, chatFriList);
+						oos.writeObject(sendData);
+						oos.flush();
 					}
 				}
 			}catch (SocketException e) {

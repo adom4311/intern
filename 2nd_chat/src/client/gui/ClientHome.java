@@ -205,19 +205,8 @@ public class ClientHome extends JFrame {
 		scrollPane = new JScrollPane();
 		scrollPane.setBounds(12, 41, 329, 332);
 		getContentPane().add(scrollPane);
-		
-		
 
-			Object rowData[][] =
-			{
-			{ 1, "맛동산", "오리온" },
-			{ 2, "아폴로", "불량식품" },
-			{ 3, "칸쵸코", "과자계의 레전드" }};
-		
-		
-
-		chatGrouptable = new JTable(rowData, chatGroupcolumnNames); // 채팅방 목록 테이블
-//		fn_roomList(clientback);
+		fn_roomList(clientback);
 
 		scrollPane.setViewportView(chatGrouptable);
 		

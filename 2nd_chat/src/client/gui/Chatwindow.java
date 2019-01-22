@@ -43,12 +43,14 @@ public class Chatwindow {
 	private Panel pannel;
 	private Button buttonSend;
 	private Button buttonfile;
+	private Button buttonFriList;
 	private JTextField textField;
 	private TextArea textArea;
 	
 	private Button btnfilerec;
 	private ClientBack clientback;
 	private ClientFileGUI clientfilegui;
+	private ClientFriListGUI clientfrilistgui;
 	
 	String[] oldchatcontent;
 
@@ -61,6 +63,7 @@ public class Chatwindow {
 		buttonSend = new Button("Send");
 		buttonfile = new Button("File send");
 		btnfilerec = new Button("check received file");
+		buttonFriList = new Button("FriList");
 		textField = new JTextField();
 		textArea = new TextArea(30, 80);
 		this.clientback = clientback;
@@ -68,6 +71,10 @@ public class Chatwindow {
 
 	public ClientFileGUI getCFG() {
 		return clientfilegui;
+	}
+	
+	public ClientFriListGUI getClientfrilistgui() {
+		return clientfrilistgui;
 	}
 	
 	public Frame getFrame() {
@@ -91,6 +98,8 @@ public class Chatwindow {
 		buttonSend.setForeground(Color.WHITE);
 		buttonfile.setForeground(Color.WHITE);
 		btnfilerec.setForeground(Color.BLUE);
+		buttonFriList.setBackground(Color.BLUE);
+		buttonFriList.setForeground(Color.white);
 		buttonSend.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
@@ -120,6 +129,17 @@ public class Chatwindow {
 			}
 			
 		});
+		buttonFriList.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if( clientfrilistgui == null) {
+					clientfrilistgui = new ClientFriListGUI(id,groupid,clientback);
+					clientback.chatfriList(groupid);
+				}
+				clientfrilistgui.getFrame().setVisible(true);
+
+			}
+		});
 
 		// Textfield
 		textField.setColumns(40);
@@ -141,6 +161,7 @@ public class Chatwindow {
 		pannel.add(buttonSend);
 		pannel.add(buttonfile);
 		pannel.add(btnfilerec);
+		pannel.add(buttonFriList);
 		frame.add(BorderLayout.SOUTH, pannel);
 
 		// TextArea

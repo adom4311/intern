@@ -693,6 +693,43 @@ public class ServerDAO {
 		return result;
 	}
 	
+	public Object[][] selectChatFriList(Long groupid) {
+		con = dataSource.getConnection();
+		int totalCnt = 0;
+		Object rowData[][] = null;
+		if(con!=null) {
+			try {
+				String query = "select count(*) from chatmember where groupid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setLong(1, groupid);
+		        rs = pstmt.executeQuery();
+		        while(rs.next()) {
+		        	totalCnt = rs.getInt(1);
+		        }
+				dataSource.freeConnection(pstmt);
+				dataSource.freeConnection(rs);
+				
+				String query2 = "select userid from chatmember where groupid = ?";
+				rowData = new Object[totalCnt][1];
+			
+				pstmt = con.prepareStatement(query2);
+				pstmt.setLong(1, groupid);
+				
+				rs = pstmt.executeQuery();
+				int i=0;
+				while(rs.next()) {
+					rowData[i++][0]=rs.getString("userid");
+				}
+				
+				dataSource.freeConnection(con,pstmt,rs);
+				
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return rowData;
+	}
+	
 	
 	/*
 	 *  김성조 인턴사원													
@@ -866,6 +903,8 @@ public class ServerDAO {
 		return null;
 		
 	}
+
+	
 
 	
 
