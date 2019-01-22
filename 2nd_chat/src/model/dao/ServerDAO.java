@@ -14,6 +14,7 @@ import java.util.List;
 import common.DBCPTemplate;
 import model.vo.Chat;
 import model.vo.ChatMember;
+import model.vo.RoomName;
 import model.vo.User;
 
 import static common.DBCPTemplate.*;
@@ -225,11 +226,11 @@ public class ServerDAO {
 				}
             	
             	/* 채팅방 개설 */
-            	String query2 = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+            	String query2 = "insert into chatgroup(userid,type) values(?,?)";
 				pstmt = con.prepareStatement(query2);
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
-				pstmt.setByte(3, ONEROOM);
+//				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
+				pstmt.setByte(2, ONEROOM);
 		        chk = pstmt.executeUpdate();
 		        dataSource.freeConnection(pstmt);
 		        
@@ -242,6 +243,25 @@ public class ServerDAO {
 		        	groupid = rs.getLong(1);
 		        }
 //		        pstmt.close();
+		        dataSource.freeConnection(pstmt);
+		        dataSource.freeConnection(rs);
+		        
+		        
+		        String query6 = "insert into usergroupname values(?,?,?)";
+		        pstmt = con.prepareStatement(query6);	
+		        pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setLong(2, groupid);
+		        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+		        pstmt.executeUpdate();
+		        
+		        // 채팅방명 추가
+				for (int i = 0; i < data.length; i++) {
+					pstmt.setString(1, new String(data[i].getBytes("UTF-8"),"UTF-8"));
+			        pstmt.setLong(2, groupid);
+			        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+					chk2 = pstmt.executeUpdate();
+				}  
+		        
 		        dataSource.freeConnection(pstmt);
 		        dataSource.freeConnection(rs);
 		        
@@ -292,11 +312,11 @@ public class ServerDAO {
         if( con != null ) {
             try {
             	/* 채팅방 개설 */
-            	String query = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+            	String query = "insert into chatgroup(userid, type) values(?,?)";
 				pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
-				pstmt.setByte(3, GROUPROOM); // 채팅 방명
+//				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
+				pstmt.setByte(2, GROUPROOM); // 채팅 방명
 		        chk = pstmt.executeUpdate();
 		        dataSource.freeConnection(pstmt);
 		        
@@ -311,6 +331,27 @@ public class ServerDAO {
 		        dataSource.freeConnection(pstmt);
 		        dataSource.freeConnection(rs);
 		        System.out.println("서버 db 저장시 groupid : " + groupid);
+		        
+		        
+		        String query6 = "insert into usergroupname values(?,?,?)";
+		        pstmt = con.prepareStatement(query6);	
+		        pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setLong(2, groupid);
+		        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+		        pstmt.executeUpdate();
+		        
+		        // 채팅방명 추가
+				for (int i = 0; i < data.length; i++) {
+					pstmt.setString(1, new String(data[i].getBytes("UTF-8"),"UTF-8"));
+			        pstmt.setLong(2, groupid);
+			        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+					chk2 = pstmt.executeUpdate();
+				}  
+		        
+		        dataSource.freeConnection(pstmt);
+		        dataSource.freeConnection(rs);
+		        
+		        
 		        
 		        /* 채팅방 참여자 추가 */
             	String query3 = "insert into chatmember(groupid,userid,lastreadtime) values(?,?,now(6))";
@@ -624,7 +665,8 @@ public class ServerDAO {
 		        dataSource.freeConnection(rs);
 				
 				Object rowData[][] = new Object[totalcount][2];
-				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
+//				pstmt = con.prepareStatement("select groupid, groupname from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
+				pstmt = con.prepareStatement("select groupid, groupname from usergroupname where userid = ?");
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();		        
 		        int i=0;
@@ -763,6 +805,32 @@ public class ServerDAO {
 		}
 		return null;
 		
+	}
+
+	public int updateRoomName(RoomName rn) {
+		con = dataSource.getConnection();
+		int result = 0 ;
+		if(con != null) {
+			try {
+				String query = "update usergroupname set groupname = ? where userid = ? and groupid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, rn.getGroupName());
+				pstmt.setString(2, rn.getUserid());
+				pstmt.setLong(3, rn.getGroupid());
+				result = pstmt.executeUpdate();
+				
+				if(result > 0) {
+					con.commit();
+				}else {
+					con.rollback();
+				}
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}finally {
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+		}
+		return result;
 	}
 
 }

@@ -23,6 +23,7 @@ import model.vo.Filedownmessage;
 import model.vo.Filelist;
 import model.vo.Filemessage;
 import model.vo.Header;
+import model.vo.RoomName;
 import model.vo.User;
 import server.sangwoo.ServerFileThread;
 import server.sangwoo.ServerFileTransferThread;
@@ -44,6 +45,8 @@ public class ServerBack {
 	public static final int ROOMOPEN = 14; // 선택된 채팅방 오픈
 	public static final int FILIST = 15;//파일 목록
 	public static final int FIDOWN =16;//파일 다운 요청
+
+	public static final int ROOMNAME =17;//방명 변경
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -287,6 +290,16 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
 						Chat message = (Chat)data.getObject();
 						int result = sDao.updatereadtime(connectId,message);
+					}
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu() == ROOMNAME) {
+						RoomName rn = (RoomName)data.getObject();
+						rn.setUserid(connectId);
+						int result = sDao.updateRoomName(rn);
+						Header header = new Header(ROOMNAME,0);
+						Data sendData = new Data(header,result);
+						oos.writeObject(sendData);
+						oos.flush();
 					}
 					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu() == ROOM) {

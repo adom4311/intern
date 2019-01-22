@@ -6,18 +6,19 @@ import java.io.ObjectOutputStream;
 import client.ClientBack;
 import model.vo.Data;
 import model.vo.Header;
+import model.vo.RoomName;
 
-public class CreateGroupRoomRequest {
+public class GroupNameChangRequest {
 
-	public CreateGroupRoomRequest(ClientBack clientBack, String[] friendids) {
+	public GroupNameChangRequest(ClientBack clientback, RoomName rn) {
 		try 
 		{
-			ObjectOutputStream oos = clientBack.getOos();
+			ObjectOutputStream oos = clientback.getOos();
 			synchronized(oos)
 			{
 				int bodylength = 0; // 데이터 길이가 필요한가?
-				Header header = new Header(ClientBack.CREATEGROUPROOM,bodylength);
-				Data sendData = new Data(header,friendids);
+				Header header = new Header(ClientBack.ROOMNAME,bodylength);
+				Data sendData = new Data(header,rn);
 				oos.writeObject(sendData);
 				oos.flush();
 			}
@@ -26,5 +27,5 @@ public class CreateGroupRoomRequest {
 			e.printStackTrace();
 		}
 	}
-
+	
 }

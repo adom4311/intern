@@ -47,7 +47,7 @@ public class ReadchatFile {
 					while(fis.available() > 0){
 						msg = (Chat)ois.readObject();
 						list.add(msg);
-						clientback.getChatMap().get(groupid).appendMSG(msg.getUserid() + " : " + msg.getContent() + "   ---" + msg.getCount() + "\n");
+						clientback.getChatMap().get(groupid).appendMSG(msg.getUserid() + " : " + msg.getContent() + "\n");
 					}
 					
 					FileOutputStream fos = new FileOutputStream(file);

@@ -26,6 +26,7 @@ import client.request.sungjo.CreateGroupRoomRequest;
 import client.request.sungjo.CreateRoomRequest;
 import client.request.sungjo.FindfriendRequest;
 import client.request.sungjo.FriListRequest;
+import client.request.sungjo.GroupNameChangRequest;
 import client.request.sungjo.LoginRequest;
 import client.request.sungjo.OpenChatRequest;
 import client.request.sungjo.SignupRequest;
@@ -39,11 +40,13 @@ import client.response.sungjo.CreateGroupRoomResponse;
 import client.response.sungjo.CreateRoomResponse;
 import client.response.sungjo.FrifindResponse;
 import client.response.sungjo.FrilistResponse;
+import client.response.sungjo.GroupNameChangRequestResponse;
 import client.response.sungjo.LoginResponse;
 import client.response.sungjo.MsgResponse;
 import client.response.sungjo.OpenchatResponse;
 import client.response.sungjo.SignupResponse;
 import model.vo.Data;
+import model.vo.RoomName;
 
 public class ClientBack {
 	public static final int SIGNUP = 1; // 회원가입
@@ -62,6 +65,9 @@ public class ClientBack {
 	public static final int ROOMOPEN = 14; // 선택된 채팅방 오픈
 	public static final int FILIST = 15;//파일 목록
 	public static final int FIDOWN =16;//파일 다운 요청
+	
+	public static final int ROOMNAME =17;//방명 변경
+	
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -229,6 +235,9 @@ public class ClientBack {
 					else if(data.getHeader().getMenu()==FIDOWN) {
 						new FileRecResponse(clientback,data).start();
 					}
+					else if(data.getHeader().getMenu()==ROOMNAME) {
+						new GroupNameChangRequestResponse(clientback,data);
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -311,5 +320,8 @@ public class ClientBack {
 	}
 	public void roomOpen(Long groupid) {
 		new ReadchatFile(this,groupid);
+	}
+	public void groupNameChange(RoomName rn) {
+		new GroupNameChangRequest(this,rn);
 	}
 }

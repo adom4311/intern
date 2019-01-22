@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,6 +20,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import client.ClientBack;
+import model.vo.RoomName;
 
 public class ClientHome extends JFrame {
 	private String userid; // 접속유저 아이디
@@ -37,6 +39,7 @@ public class ClientHome extends JFrame {
 	String chatGroupcolumnNames[] = { "채팅방id", "채팅방명"};
 	
 	CreateGroupRoomGUI cgrgui;
+	JDialog roomNamedialog; 
 
 	/**
 	 * Launch the application.
@@ -297,24 +300,21 @@ public class ClientHome extends JFrame {
 		}
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			System.out.println(menu);
 			if(e.getButton() == 1) {
 				if(e.getClickCount() == 2) {
 					if(menu == 1) { // 친구 찾기 테이블 클릭 이벤트
 						System.out.println(findFritable.getValueAt(findFritable.getSelectedRow(),1));
 						System.out.println("더블클릭");
-	
+
 						addFriendAlert((String)findFritable.getValueAt(findFritable.getSelectedRow(),1));
 					}else if (menu == 2) { // 친구 목록 테이블 클릭 이벤트
 						String friendid = friListtable.getValueAt(friListtable.getSelectedRow(),1).toString(); 
 						System.out.println(friendid);
 						System.out.println("친구 목록 더블클릭"); 
-//						
-//						//그룹 채팅방 생성
+
+						//그룹 채팅방 생성
 						String[] str = {friendid};
 						clientback.createRoom(str);
-						
-						//addFriendAlert((String)friListtable.getValueAt(friListtable.getSelectedRow(),1));
 					}else if (menu == 3) { // 친구 목록 테이블 클릭 이벤트
 						if(frame.cgrgui == null) {
 							frame.cgrgui = new CreateGroupRoomGUI(frame,clientback);
@@ -334,9 +334,21 @@ public class ClientHome extends JFrame {
 						}
 					}
 				}
+			}else if( e.getButton() == 3) {
+				if(menu == 4) {
+					int column = roomtable.columnAtPoint(e.getPoint());
+					int row = roomtable.rowAtPoint(e.getPoint());
+					roomtable.changeSelection(row, column, false, false);
+					Long groupid = Long.parseLong(roomtable.getValueAt(roomtable.getSelectedRow(), 0).toString());
+					String groupName;
+					groupName = JOptionPane.showInputDialog("채팅방명을 입력하세요.");
+					if(groupName != null) {
+						RoomName rn = new RoomName("",groupid,groupName);
+						clientback.groupNameChange(rn);
+					}
+				}
 			}
 		}
-		
 	}
 	
 	public void addFriendAlert(String friendId) {
@@ -350,4 +362,6 @@ public class ClientHome extends JFrame {
 		}
 
 	}
+	
+	
 }

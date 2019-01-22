@@ -2,16 +2,14 @@ package model.vo;
 
 import java.io.Serializable;
 
-public class ChatMember implements Serializable{
+public class RoomName implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7571503592797314312L;
-	/**
-	 * 
-	 */
+	private static final long serialVersionUID = 2275127896970190936L;
 	private String userid;
 	private Long groupid;
+	private String groupName;
 	public String getUserid() {
 		return userid;
 	}
@@ -24,10 +22,17 @@ public class ChatMember implements Serializable{
 	public void setGroupid(Long groupid) {
 		this.groupid = groupid;
 	}
-	public ChatMember(String userid, Long groupid) {
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	public RoomName(String userid, Long groupid, String groupName) {
 		super();
 		this.userid = userid;
 		this.groupid = groupid;
+		this.groupName = groupName;
 	}
 	
 }
