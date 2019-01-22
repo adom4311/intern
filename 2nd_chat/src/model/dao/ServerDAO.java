@@ -88,16 +88,18 @@ public class ServerDAO {
         return user;
 	} 
 
-	public Object[][] friFind(String tempId) {
+	public Object[][] friFind(String tempId,String searchContent) {
 		con = dataSource.getConnection();
 		Object rowData[][] = null;
 		if( con != null ) {
             try {
             	int totalcount = 0;
             	// 나와 친구를 제외한 모든 사용자의 수
-            	pstmt = con.prepareStatement("select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
+            	String query = "select count(userid) from user where userid != ? and userid not in (select friendid from friend where userid = ?) and userid like ?";
+            	pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(3, "%" + new String(searchContent.getBytes("UTF-8"),"UTF-8") + "%");
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
 		        	totalcount =  rs.getInt(1);
@@ -107,9 +109,11 @@ public class ServerDAO {
             	
             	rowData = new Object[totalcount][3];
             	// 나와 친구를 제외한 모든 사용자
-				pstmt = con.prepareStatement("select userid from user where userid != ? and userid not in (select friendid from friend where userid = ?)");
+            	String query2 = "select userid from user where userid != ? and userid not in (select friendid from friend where userid = ?)  and userid like ?";
+				pstmt = con.prepareStatement(query2);
 				pstmt.setString(1, new String(tempId.getBytes("UTF-8"),"UTF-8"));
 		        pstmt.setString(2, new String(tempId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setString(3, "%" + new String(searchContent.getBytes("UTF-8"),"UTF-8") + "%");
 		        rs = pstmt.executeQuery();	
 		        int i=0;
 		        while(rs.next()) {
@@ -634,6 +638,62 @@ public class ServerDAO {
 		return list;
 	}
 	
+	
+	public int updateRoomName(RoomName rn) {
+		con = dataSource.getConnection();
+		int result = 0 ;
+		if(con != null) {
+			try {
+				String query = "update usergroupname set groupname = ? where userid = ? and groupid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, rn.getGroupName());
+				pstmt.setString(2, rn.getUserid());
+				pstmt.setLong(3, rn.getGroupid());
+				result = pstmt.executeUpdate();
+				
+				if(result > 0) {
+					con.commit();
+				}else {
+					con.rollback();
+				}
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}finally {
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+		}
+		return result;
+	}
+
+	public int deleteFriend(String connectId, String friendid) {
+		con = dataSource.getConnection();
+		int result = 0;
+		if(con != null) {
+			String query = "delete from friend where userid = ? and friendid = ?";
+			try {
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				pstmt.setString(2, new String(friendid.getBytes("UTF-8"),"UTF-8"));
+				result = pstmt.executeUpdate();
+				
+				if(result > 0)
+					con.commit();
+				else
+					con.rollback();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				dataSource.freeConnection(con, pstmt, rs);
+			}
+		}
+		return result;
+	}
+	
+	
 	/*
 	 *  김성조 인턴사원													
 	 */
@@ -807,31 +867,7 @@ public class ServerDAO {
 		
 	}
 
-	public int updateRoomName(RoomName rn) {
-		con = dataSource.getConnection();
-		int result = 0 ;
-		if(con != null) {
-			try {
-				String query = "update usergroupname set groupname = ? where userid = ? and groupid = ?";
-				pstmt = con.prepareStatement(query);
-				pstmt.setString(1, rn.getGroupName());
-				pstmt.setString(2, rn.getUserid());
-				pstmt.setLong(3, rn.getGroupid());
-				result = pstmt.executeUpdate();
-				
-				if(result > 0) {
-					con.commit();
-				}else {
-					con.rollback();
-				}
-			}catch(SQLException e) {
-				e.printStackTrace();
-			}finally {
-				dataSource.freeConnection(con,pstmt,rs);
-			}
-		}
-		return result;
-	}
+	
 
 }
     

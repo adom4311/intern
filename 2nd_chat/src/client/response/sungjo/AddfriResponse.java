@@ -15,7 +15,7 @@ public class AddfriResponse {
 		
 		if(result > 0) {
 			gui.Alert("친구추가 성공!");
-			home.getFrame().fn_addfri(clientback);
+			home.getFrame().fn_addfri(clientback,"");
 		}else {
 			gui.Alert("친구추가 실패!");
 		}

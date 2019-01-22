@@ -24,6 +24,7 @@ import client.request.sungjo.AddFriendRequest;
 import client.request.sungjo.CreateGroupRoomListRequest;
 import client.request.sungjo.CreateGroupRoomRequest;
 import client.request.sungjo.CreateRoomRequest;
+import client.request.sungjo.DeleteFriendRequest;
 import client.request.sungjo.FindfriendRequest;
 import client.request.sungjo.FriListRequest;
 import client.request.sungjo.GroupNameChangRequest;
@@ -38,6 +39,7 @@ import client.response.sungjo.AddfriResponse;
 import client.response.sungjo.CreateGroupRoomListResponse;
 import client.response.sungjo.CreateGroupRoomResponse;
 import client.response.sungjo.CreateRoomResponse;
+import client.response.sungjo.DeleteFriendResponse;
 import client.response.sungjo.FrifindResponse;
 import client.response.sungjo.FrilistResponse;
 import client.response.sungjo.GroupNameChangRequestResponse;
@@ -67,6 +69,7 @@ public class ClientBack {
 	public static final int FIDOWN =16;//颇老 促款 夸没
 	
 	public static final int ROOMNAME =17;//规疙 函版
+	public static final int DELETEFRIEND =18;// 模备 昏力
 	
 
     public static final byte ONEROOM= 0x01;
@@ -238,6 +241,9 @@ public class ClientBack {
 					else if(data.getHeader().getMenu()==ROOMNAME) {
 						new GroupNameChangRequestResponse(clientback,data);
 					}
+					else if(data.getHeader().getMenu()==DELETEFRIEND) {
+						new DeleteFriendResponse(clientback,data);
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -267,8 +273,8 @@ public class ClientBack {
 		new LoginRequest(this,id,pw);
 	}
 
-	public void findFriend() {
-		new FindfriendRequest(this);
+	public void findFriend(String searchContent) {
+		new FindfriendRequest(this,searchContent );
 	}
 
 	public void addFriend(String friendId) {
@@ -323,5 +329,8 @@ public class ClientBack {
 	}
 	public void groupNameChange(RoomName rn) {
 		new GroupNameChangRequest(this,rn);
+	}
+	public void deleteFriend(String friendid) {
+		new DeleteFriendRequest(this,friendid);
 	}
 }

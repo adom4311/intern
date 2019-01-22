@@ -47,6 +47,7 @@ public class ServerBack {
 	public static final int FIDOWN =16;//파일 다운 요청
 
 	public static final int ROOMNAME =17;//방명 변경
+	public static final int DELETEFRIEND =18;//친구 삭제
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
@@ -214,7 +215,8 @@ public class ServerBack {
 					}
 					/* 김성조 인턴사원 */
 					else if(data.getHeader().getMenu() == FRIFIND) { 
-						Object rowData[][] = sDao.friFind(connectId);
+						String searchContent = (String)data.getObject();
+						Object rowData[][] = sDao.friFind(connectId,searchContent);
 						Header header = new Header(FRIFIND,0);
 						Data sendData = new Data(header,rowData);
 						oos.writeObject(sendData);
@@ -297,6 +299,15 @@ public class ServerBack {
 						rn.setUserid(connectId);
 						int result = sDao.updateRoomName(rn);
 						Header header = new Header(ROOMNAME,0);
+						Data sendData = new Data(header,result);
+						oos.writeObject(sendData);
+						oos.flush();
+					}
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu() == DELETEFRIEND) {
+						String friendid = (String)data.getObject();
+						int result = sDao.deleteFriend(connectId,friendid);
+						Header header = new Header(DELETEFRIEND,0);
 						Data sendData = new Data(header,result);
 						oos.writeObject(sendData);
 						oos.flush();

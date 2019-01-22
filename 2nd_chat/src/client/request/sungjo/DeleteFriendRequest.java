@@ -6,18 +6,17 @@ import java.io.ObjectOutputStream;
 import client.ClientBack;
 import model.vo.Data;
 import model.vo.Header;
-import model.vo.User;
 
-public class FindfriendRequest {
+public class DeleteFriendRequest {
 
-	public FindfriendRequest(ClientBack clientBack, String searchContent) {
+	public DeleteFriendRequest(ClientBack clientBack, String friendid) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();
 			synchronized(oos)
 			{
 				int bodylength = 0; // 데이터 길이가 필요한가?
-				Header header = new Header(ClientBack.FRIFIND,bodylength);
-				Data sendData = new Data(header,searchContent);
+				Header header = new Header(ClientBack.DELETEFRIEND,bodylength);
+				Data sendData = new Data(header,friendid);
 				oos.writeObject(sendData);
 				oos.flush();
 			}

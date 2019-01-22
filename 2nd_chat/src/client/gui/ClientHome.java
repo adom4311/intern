@@ -18,8 +18,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import client.ClientBack;
+import client.gui.ClientGUI.JTextFieldLimit;
 import model.vo.RoomName;
 
 public class ClientHome extends JFrame {
@@ -136,12 +140,15 @@ public class ClientHome extends JFrame {
 		textField.setBounds(12, 10, 227, 21);
 		getContentPane().add(textField);
 		textField.setColumns(10);
+		textField.setDocument(new JTextFieldLimit(20));
 		
 		JButton btnNewButton = new JButton("검색");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				switch(menuInt) {
-				case 1: System.out.println("검색기능 구현");
+				case 1: 
+					String searchContent = textField.getText();
+					fn_addfri(clientback,searchContent);
 				break;
 				case 2: break;
 				case 3: break;
@@ -156,7 +163,7 @@ public class ClientHome extends JFrame {
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				menuInt = 1;
-				fn_addfri(clientback);
+				fn_addfri(clientback, "");
 			}
 		});
 		btnNewButton_1.setBounds(12, 383, 331, 43);
@@ -218,9 +225,9 @@ public class ClientHome extends JFrame {
 	}
 	
 	/* 친구찾기목록 전체 */
-	public void fn_addfri(ClientBack clientback) {
+	public void fn_addfri(ClientBack clientback, String searchContent) {
 		menuInt = 1;
-		clientback.findFriend();
+		clientback.findFriend(searchContent);
 	}
 	
 	public void fn_addfriView(Object[][] rowData) {
@@ -240,6 +247,7 @@ public class ClientHome extends JFrame {
 		menuInt = 2;
 		clientback.friList();
 	}
+	
 	
 	public void fn_friListView(Object[][] rowData) {
 		// 내용 수정 불가 시작 //
@@ -347,6 +355,20 @@ public class ClientHome extends JFrame {
 						clientback.groupNameChange(rn);
 					}
 				}
+				else if(menu == 2) {
+					int column = friListtable.columnAtPoint(e.getPoint());
+					int row = friListtable.rowAtPoint(e.getPoint());
+					friListtable.changeSelection(row, column, false, false);
+					String friendid= friListtable.getValueAt(friListtable.getSelectedRow(), 1).toString();
+					
+					int result = JOptionPane.showConfirmDialog(null, friendid + "님을 삭제하시겠습니까? ","친구 삭제", JOptionPane.OK_CANCEL_OPTION);
+					
+					if(result == JOptionPane.OK_OPTION) {
+						clientback.deleteFriend(friendid);
+					}
+
+
+				}
 			}
 		}
 	}
@@ -361,6 +383,24 @@ public class ClientHome extends JFrame {
 			System.out.println("안해");
 		}
 
+	}
+	
+	public class JTextFieldLimit extends PlainDocument{
+		private int limit;
+		public JTextFieldLimit(int limit) {
+			super();
+			this.limit = limit;
+		}
+		@Override
+		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+			// TODO Auto-generated method stub
+			if (str == null)
+				return;
+			if(getLength() + str.length() <= limit)
+				super.insertString(offs, str, a);
+		}
+		
+		
 	}
 	
 	
