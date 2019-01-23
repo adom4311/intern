@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Timer;
 
 import model.dao.ServerDAO;
+import model.vo.Amemessage;
 import model.vo.Chat;
 import model.vo.ChatFriList;
 import model.vo.ChatMember;
@@ -23,8 +24,10 @@ import model.vo.Data;
 import model.vo.Filedownmessage;
 import model.vo.Filelist;
 import model.vo.Filemessage;
+import model.vo.Galmessage;
 import model.vo.Header;
 import model.vo.RoomName;
+import model.vo.Roominfo;
 import model.vo.User;
 import server.sangwoo.ServerFileThread;
 import server.sangwoo.ServerFileTransferThread;
@@ -46,10 +49,15 @@ public class ServerBack {
 	public static final int ROOMOPEN = 14; // 선택된 채팅방 오픈
 	public static final int FILIST = 15;//파일 목록
 	public static final int FIDOWN =16;//파일 다운 요청
-
+	
 	public static final int ROOMNAME =17;//방명 변경
-	public static final int DELETEFRIEND =18;//친구 삭제
+	public static final int DELETEFRIEND =18;// 친구 삭제
 	public static final int CHATFRILIST =19;// 채팅방 친구 리스트
+	
+	public static final int OROOM = 20;//그룹방 날가기 요청
+	public static final int GAL = 21;//갤러리 기능 요청
+	public static final int AMEM = 22;//채팅방 멤버 추가 가능리스트 요청
+	public static final int MEM = 23;//채팅방 멤버 추가 요창
 
 
     public static final byte ONEROOM= 0x01;
@@ -315,6 +323,16 @@ public class ServerBack {
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu()==CHATFRILIST) {
+						Long groupid = (Long)data.getObject();
+						Object rowdata[][] = sDao.selectChatFriList(groupid);
+						Header header = new Header(CHATFRILIST,0);
+						ChatFriList chatFriList = new ChatFriList(groupid,rowdata);
+						Data sendData = new Data(header, chatFriList);
+						oos.writeObject(sendData);
+						oos.flush();
+					}
 					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu() == ROOM) {
 						Object rowData[][] = sDao.roomList(connectId);
@@ -327,7 +345,7 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == FMSG) {
 						Filemessage filemessage = (Filemessage) data.getObject();
 						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
-						new ServerFileThread(filemessage,fileserverSocket).start();
+						new ServerFileThread(filemessage,fileserverSocket,oos).start();
 						//파일 받고 
 					}
 					/* 백상우 인턴사원 */
@@ -351,15 +369,46 @@ public class ServerBack {
 						oos.flush();
 						new ServerFileTransferThread(filedownmessage,fileserverSocket).start();
 					}
-					else if(data.getHeader().getMenu()==CHATFRILIST) {
+					/* 백상우 인턴사원 */
+					else if(data.getHeader().getMenu()==OROOM) {
+						Roominfo roominfo = (Roominfo)data.getObject();
+						if(sDao.outRoom(roominfo)) {
+							System.out.println("방에서 나가졌습니다.");
+							Header header = new Header(OROOM,0);
+							Data sendData = new Data(header,roominfo);
+							oos.writeObject(sendData);
+							oos.flush();
+						}
+					}
+					/*백상우 인턴사원 */
+					else if(data.getHeader().getMenu()==GAL) {
 						Long groupid = (Long)data.getObject();
-						Object rowdata[][] = sDao.selectChatFriList(groupid);
-						Header header = new Header(CHATFRILIST,0);
-						ChatFriList chatFriList = new ChatFriList(groupid,rowdata);
-						Data sendData = new Data(header, chatFriList);
+						ArrayList <String> images = sDao.selectimagecontents(groupid);
+						Galmessage galmessage = new Galmessage(groupid,images);
+						Header header = new Header(GAL,0);
+						Data sendData = new Data(header,galmessage);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
+					/* 백상우 인턴사원 */
+					else if(data.getHeader().getMenu()==AMEM) {
+						Long groupid = (Long)data.getObject();
+						ArrayList<String> memadd_avail = sDao.memberavailable(connectId,groupid);
+						Header header = new Header(AMEM,0);
+						Amemessage amem = new Amemessage(groupid,memadd_avail);
+						Data sendData = new Data(header,amem);
+						oos.writeObject(sendData);
+						oos.flush();
+						}
+					
+					/* 백상우 인턴사원 */
+					else if(data.getHeader().getMenu()==MEM) {
+						ChatMember member = (ChatMember)data.getObject();
+						if(sDao.memberInsert(member.getUserid(),member.getGroupid())) {
+							System.out.println("무사히 완료");
+						}
+					}
+					
 				}
 			}catch (SocketException e) {
 				try {

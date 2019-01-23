@@ -14,8 +14,12 @@ import client.control.sungjo.ReadchatFile;
 import client.gui.Chatwindow;
 import client.gui.ClientGUI;
 import client.gui.ClientHome;
+import client.request.sangwoo.Addmemberrequest;
 import client.request.sangwoo.FileListRequest;
 import client.request.sangwoo.FiledownRequest;
+import client.request.sangwoo.Galaryrequest;
+import client.request.sangwoo.Memberrequest;
+import client.request.sangwoo.Outroomrequest;
 import client.request.sangwoo.RoomListRequest;
 import client.request.sangwoo.SendFileMessageRequest;
 import client.request.sangwoo.SendFileRequest;
@@ -32,9 +36,12 @@ import client.request.sungjo.GroupNameChangRequest;
 import client.request.sungjo.LoginRequest;
 import client.request.sungjo.OpenChatRequest;
 import client.request.sungjo.SignupRequest;
+import client.response.sangwoo.Addmemberresponse;
 import client.response.sangwoo.FileListResponse;
 import client.response.sangwoo.FileRecResponse;
 import client.response.sangwoo.FmsgResponse;
+import client.response.sangwoo.GalListResponse;
+import client.response.sangwoo.OutRoomResponse;
 import client.response.sangwoo.RoomResponse;
 import client.response.sungjo.AddfriResponse;
 import client.response.sungjo.ChatFriListResponse;
@@ -73,6 +80,11 @@ public class ClientBack {
 	public static final int ROOMNAME =17;//방명 변경
 	public static final int DELETEFRIEND =18;// 친구 삭제
 	public static final int CHATFRILIST =19;// 채팅방 친구 리스트
+	
+	public static final int OROOM = 20;//그룹방 날가기 요청
+	public static final int GAL = 21;//갤러리 기능 요청
+	public static final int AMEM = 22;//채팅방 멤버 추가 가능리스트 요청
+	public static final int MEM = 23;//채팅방 멤버 추가 요창
 	
 
     public static final byte ONEROOM= 0x01;
@@ -250,6 +262,15 @@ public class ClientBack {
 					else if(data.getHeader().getMenu()==CHATFRILIST) {
 						new ChatFriListResponse(clientback,data);
 					}
+					else if(data.getHeader().getMenu()==OROOM) {
+						new OutRoomResponse(clientback,data);
+					}
+					else if(data.getHeader().getMenu()==GAL) {
+						new GalListResponse(clientback,data);
+					}
+					else if(data.getHeader().getMenu()==AMEM) {
+						new Addmemberresponse(clientback,data);
+					}
 				}
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -316,8 +337,8 @@ public class ClientBack {
 		new SendFileRequest(this,file_dir, groupid).start();
 	}
 	
-	public void filedownreq(Long groupid, String dir) {
-		new FiledownRequest(this,groupid,dir);
+	public void filedownreq(Long groupid, String dir,boolean isImg) {
+		new FiledownRequest(this,groupid,dir,isImg);
 	}
 	
 	public void createGroupRoom(String[] friendids) { // 채팅방 생성
@@ -342,5 +363,20 @@ public class ClientBack {
 	}
 	public void deleteFriend(String friendid) {
 		new DeleteFriendRequest(this,friendid);
+	}
+	public void outroom(String userid,Long groupid) {
+		new Outroomrequest(this,userid,groupid);
+	}
+	
+	public void galaryfunc(Long groupid) {
+		new Galaryrequest(this,groupid);
+	}
+	
+	public void addmemberfunc(Long groupid) {
+		new Addmemberrequest(this,groupid);
+	}
+	
+	public void memberfunc(Long groupid,String userid) {
+		new Memberrequest(this,groupid,userid);
 	}
 }

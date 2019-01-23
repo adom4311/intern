@@ -17,21 +17,12 @@ public class AutoBot {
 		clientThreadMap = new HashMap<String,Client>();
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.print("클라이언트 개설수 : ");
-		total = sc.nextInt();
-		sc.nextLine();
-		
-		System.out.print("클라이언트 아이디 : ");
-		String user = sc.nextLine();
-		int i = 0;
-		String userid;
-		for (; i < total; i++) {
-			userid = user + i;
-			clientMap.put(userid, new ClientBack());
-		}
 		
 		int menu;
 		while(true) {
+
+			
+			
 			System.out.println("------오토봇------\n"
 					+ "1. 회원가입\n"
 					+ "2. 로그인\n"
@@ -47,6 +38,19 @@ public class AutoBot {
 			
 			switch(menu) {
 			case 1: 
+				System.out.print("클라이언트 개설수 : ");
+				total = sc.nextInt();
+				sc.nextLine();
+				
+				System.out.print("클라이언트 아이디 : ");
+				String user = sc.nextLine();
+				int i = 0;
+				String userid;
+				for (; i < total; i++) {
+					userid = user + i;
+					clientMap.put(userid, new ClientBack());
+				}
+				
 				for (String key : clientMap.keySet()) {
 					new Client(menu, key, clientMap.get(key)).start();					
 				}
@@ -127,8 +131,9 @@ class Client extends Thread{
 		else if(menu == 5) {
 			while(true){
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(50);
 					clientback.sendMessage("ㅋㅋㅋㅋㅋㅋㅋㅋ", AutoBot.groupid);
+					System.out.println("계속중");
 				} catch (InterruptedException e) {
 					break;
 				}

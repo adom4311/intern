@@ -76,7 +76,7 @@ public class DBCPTemplate {
         // 커넥션 최소갯수 설정
         connectionPool.setMinIdle(35); 
         // 커넥션이 비어있으면 기다리는 시간 밀리초
-        connectionPool.setMaxWait(10000);
+        connectionPool.setMaxWait(3000);
         // 유효 커넥션 검사 주기
         connectionPool.setTimeBetweenEvictionRunsMillis(60 * 60 * 1000);
         //  사용되지 않는 커넥션을 추출할 때 이 속성에서 지정한 시간 이상 비활성화 상태인 객체만 추출

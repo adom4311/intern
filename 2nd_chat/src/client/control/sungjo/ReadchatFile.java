@@ -63,6 +63,7 @@ public class ReadchatFile {
 					clientback.getChatFileMap().put(groupid, oos);
 				}
 
+				fis.close();
 				clientback.openChat(groupid);
 			}
 			// db에 저장된 채팅 불러오기

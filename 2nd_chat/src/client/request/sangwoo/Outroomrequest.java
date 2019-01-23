@@ -4,20 +4,20 @@ import java.io.ObjectOutputStream;
 
 import client.ClientBack;
 import model.vo.Data;
-import model.vo.Filedownmessage;
 import model.vo.Header;
+import model.vo.Roominfo;
 
-public class FiledownRequest {
+public class Outroomrequest {
 	
-	public FiledownRequest(ClientBack clientback,Long groupid,String dir,boolean isImg) {
+	public Outroomrequest(ClientBack clientback,String userid,Long groupid) {
 		try {
 			ObjectOutputStream oos = clientback.getOos();
 			synchronized(oos)
 			{
 				int bodylength=0;
-				Header header = new Header(ClientBack.FIDOWN,bodylength);
-				Filedownmessage filedownmessage = new Filedownmessage(groupid,dir,isImg);
-				Data sendData = new Data(header,filedownmessage);
+				Header header = new Header(ClientBack.OROOM,bodylength);
+				Roominfo roominfo = new Roominfo(userid,groupid);
+				Data sendData = new Data(header,roominfo);
 				oos.writeObject(sendData);
 				oos.flush();
 			}
@@ -25,4 +25,5 @@ public class FiledownRequest {
 			e.printStackTrace();
 		}
 	}
+
 }

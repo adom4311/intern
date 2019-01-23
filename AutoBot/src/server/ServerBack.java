@@ -100,6 +100,7 @@ public class ServerBack {
 				try {
 					oos = groupCurrentMap.get(member);
 					if(oos != null) {
+						System.out.println("현재 진행중인 쓰레드 : " + message.getUserid() + "-- 보내려는 id는? "+ member);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
@@ -107,8 +108,11 @@ public class ServerBack {
 					e.printStackTrace();
 				} catch(IOException e) {
 					e.printStackTrace();
+				} catch(Exception e) {
+					e.printStackTrace();
 				}
 			}
+			System.out.println("브로드캐스트 종료");
 		}
 	}
 	

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.AttributeSet;
@@ -48,6 +49,9 @@ public class Chatwindow {
 	private TextArea textArea;
 	
 	private Button btnfilerec;
+	private Button outbtn;
+	private Button galbut;
+	private Button addbut;
 	private ClientBack clientback;
 	private ClientFileGUI clientfilegui;
 	private ClientFriListGUI clientfrilistgui;
@@ -63,6 +67,9 @@ public class Chatwindow {
 		buttonSend = new Button("Send");
 		buttonfile = new Button("File send");
 		btnfilerec = new Button("check received file");
+		galbut=new Button("galary");
+		outbtn = new Button("채팅방 나가기");
+		addbut = new Button("멤버추가");
 		buttonFriList = new Button("FriList");
 		textField = new JTextField();
 		textArea = new TextArea(30, 80);
@@ -100,6 +107,12 @@ public class Chatwindow {
 		btnfilerec.setForeground(Color.BLUE);
 		buttonFriList.setBackground(Color.BLUE);
 		buttonFriList.setForeground(Color.white);
+		outbtn.setBackground(Color.RED);
+		outbtn.setForeground(Color.YELLOW);
+		galbut.setBackground(Color.magenta);
+		galbut.setForeground(Color.CYAN);
+		addbut.setBackground(Color.green);
+		addbut.setForeground(Color.BLACK);
 		buttonSend.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
@@ -116,6 +129,39 @@ public class Chatwindow {
 			}
 
 		});
+		
+
+		outbtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Alert("채팅방을 나갑니다.");
+				clientback.outroom(id,groupid);
+				frame.setVisible(false);
+			}
+		
+		});
+		
+		galbut.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				clientback.galaryfunc(groupid);
+				
+			}
+			
+		});
+		
+		addbut.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				clientback.addmemberfunc(groupid);
+				
+			}
+			
+		});
+
 		
 		btnfilerec.addActionListener(new ActionListener() {
 
@@ -161,6 +207,9 @@ public class Chatwindow {
 		pannel.add(buttonSend);
 		pannel.add(buttonfile);
 		pannel.add(btnfilerec);
+		pannel.add(galbut);
+		pannel.add(outbtn);
+		pannel.add(addbut);
 		pannel.add(buttonFriList);
 		frame.add(BorderLayout.SOUTH, pannel);
 
@@ -228,6 +277,10 @@ public class Chatwindow {
 			e.printStackTrace();
 		}
 	 }
+	 public void Alert(String msg) {
+			JOptionPane.showMessageDialog(null, msg);
+		}
+	 
 	public class JTextFieldLimit extends PlainDocument{
 		private int limit;
 		public JTextFieldLimit(int limit) {
@@ -245,4 +298,5 @@ public class Chatwindow {
 		
 		
 	}
+	
 }

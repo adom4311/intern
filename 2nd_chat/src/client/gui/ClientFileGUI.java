@@ -84,7 +84,7 @@ public class ClientFileGUI{
 			if(e.getClickCount()==2) {
 				System.out.println(menu);
 				System.out.println(table.getValueAt(table.getSelectedRow(), 0));
-				clientback.filedownreq(groupid, (String)table.getValueAt(table.getSelectedRow(), 0));
+				clientback.filedownreq(groupid, (String)table.getValueAt(table.getSelectedRow(), 0),false);
 				//sendrequest give me the file..
 			}
 		}

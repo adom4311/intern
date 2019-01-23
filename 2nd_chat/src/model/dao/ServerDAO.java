@@ -1,23 +1,22 @@
 package model.dao;
 
+import static common.DBCPTemplate.getDataSource;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import common.DBCPTemplate;
 import model.vo.Chat;
 import model.vo.ChatMember;
 import model.vo.RoomName;
+import model.vo.Roominfo;
 import model.vo.User;
-
-import static common.DBCPTemplate.*;
 public class ServerDAO {
 	DBCPTemplate dataSource;
     Connection con;
@@ -903,6 +902,121 @@ public class ServerDAO {
 		return null;
 		
 	}
+	
+
+	public boolean outRoom(Roominfo roominfo) {
+		con = dataSource.getConnection();
+		Long groupid = roominfo.getGroupid();
+		String userid = roominfo.getUserid();
+		if(con!=null) {
+			try {
+				String query = "delete from chatmember where userid = ? and groupid = ?";
+				pstmt=con.prepareStatement(query);
+				pstmt.setString(1, userid);
+				pstmt.setLong(2, groupid);
+				int result = pstmt.executeUpdate();
+				
+				dataSource.freeConnection(pstmt);
+				dataSource.freeConnection(rs);
+				
+				String query2 = "delete from usergroupname where userid = ? and groupid = ?";
+				pstmt=con.prepareStatement(query2);
+				pstmt.setString(1, userid);
+				pstmt.setLong(2, groupid);
+				int result2 = pstmt.executeUpdate();
+				
+				con.commit();
+				System.out.println(userid+groupid);
+				dataSource.freeConnection(con,pstmt,rs);
+				return true;
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+
+	}
+	
+	public ArrayList<String> selectimagecontents(Long groupid){
+		con=dataSource.getConnection();
+		ArrayList<String> images = new ArrayList(); 
+		if(con!=null) {
+			try {
+				String query = "select * from filecontent where groupid = ?";
+				pstmt = con.prepareStatement(query);
+				pstmt.setLong(1, groupid);
+				rs=pstmt.executeQuery();
+				while(rs.next()) {
+					String dir = rs.getString("file_dir");
+					String []dir_tokens= dir.split("\\\\");
+					String [] extension = dir_tokens[dir_tokens.length-1].split("\\.");
+					//System.out.println(extension[1]);
+					if(extension[1].equals("png")||extension[1].equals("jpg")||extension[1].equals("gif")) {
+						images.add(dir);
+						
+					}
+				}
+				dataSource.freeConnection(con,pstmt,rs);
+				return images;
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return images;
+		
+	}
+	
+	public ArrayList<String> memberavailable(String userid,Long groupid){
+		con=dataSource.getConnection();
+		ArrayList<String> avail= new ArrayList();
+		if(con!=null) {
+			try {
+				String query = "select * from friend where userid = ? and friendid not in (select chatmember.userid from (select * from friend where userid = ?) p, chatmember where p.friendid = chatmember.userid and groupid =?)";
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1,userid);
+				pstmt.setString(2,userid);
+				pstmt.setLong(3, groupid);
+				rs=pstmt.executeQuery();
+				while(rs.next()) {
+					System.out.println(rs.getString("friendid"));
+					avail.add(rs.getString("friendid"));
+				}
+				dataSource.freeConnection(con,pstmt,rs);
+				return avail;
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return avail;
+	}
+	
+	public boolean memberInsert(String userid, Long groupid) {
+		con=dataSource.getConnection();
+		int chk=0;
+		if(con!=null) {
+			try {
+				String query = "insert into chatmember(groupid,userid,lastreadtime) values(?,?,now(6))";
+				pstmt = con.prepareStatement(query);
+				pstmt.setLong(1, groupid);
+				pstmt.setString(2, userid);
+				chk = pstmt.executeUpdate();
+
+				if (chk > 0) {
+					System.out.println("멤버추가 완료");
+					con.commit();
+					return true;
+				} else {
+					System.out.println("멤버추가 실패");
+					con.rollback();
+					return false;
+				}
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
 
 	
 
