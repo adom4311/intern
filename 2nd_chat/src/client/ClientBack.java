@@ -94,6 +94,8 @@ public class ClientBack {
 	private String pw;
 	private Socket socket;
 	private Socket filesocket;
+	private Socket readProcessingSocket;
+
 	private ClientGUI gui;
 	private ClientHome home;
 	private Chatwindow chatwindow;
@@ -105,10 +107,17 @@ public class ClientBack {
 	private DataOutputStream os;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
+	private ObjectOutputStream rpoos;
 	private String SERVER_ADDR = "127.0.0.1";
 	private int PORT = 1993;
 	private int FILE_PORT = 1994;
 	
+	public Socket getReadProcessingSocket() {
+		return readProcessingSocket;
+	}
+	public void setReadProcessingSocket(Socket readProcessingSocket) {
+		this.readProcessingSocket = readProcessingSocket;
+	}
 	public ClientHome getHome() {
 		return home;
 	}
@@ -284,6 +293,8 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
+			readProcessingSocket = new Socket(SERVER_ADDR,PORT);
+			rpoos = new ObjectOutputStream(readProcessingSocket.getOutputStream());
 			System.out.println("서버와 연결됨");
 			ClientReceiver receiver = new ClientReceiver(socket, this);
 			receiver.start();
