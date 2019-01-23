@@ -28,6 +28,14 @@ public class ClientGUI extends JFrame {
 	JDialog signUpdialog; 
 	JDialog logindialog; 
 
+	public JDialog getSignUpdialog() {
+		return signUpdialog;
+	}
+
+	public JDialog getLogindialog() {
+		return logindialog;
+	}
+
 	/**
 	 * Launch the application.
 	 */
@@ -193,7 +201,7 @@ public class ClientGUI extends JFrame {
 		cancelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("√Îº“");
-				logindialog.setVisible(false);
+				logindialog.dispose();
 			}
 		});
 		
@@ -206,13 +214,13 @@ public class ClientGUI extends JFrame {
 		logindialog.setVisible(true);
 	}
 	
-	public void signUpInvi() {
-		signUpdialog.setVisible(false);
-	}
+//	public void signUpInvi() {
+//		signUpdialog.setVisible(false);
+//	}
 	
-	public void loginInvi() {
-		logindialog.setVisible(false);
-	}
+//	public void loginInvi() {
+//		logindialog.setVisible(false);
+//	}
 	
 	public void Alert(String msg) {
 		JOptionPane.showMessageDialog(null, msg);

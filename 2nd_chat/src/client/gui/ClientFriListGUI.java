@@ -21,6 +21,7 @@ public class ClientFriListGUI{
 	DefaultTableModel m;
 	JScrollPane sc;
 	DefaultTableModel model;
+	String a[] = {"FRIEND LIST"};
 	
 	public JFrame getFrame() {
 		return frame;
@@ -30,38 +31,24 @@ public class ClientFriListGUI{
 		this.groupid=groupid;
 		this.clientback=clientback;
 		//this.dirs=dirs;
+		frame=new JFrame("FRIEND LIST");
 		
-		String []a= {"FRIEND LIST"};
-		String [][]b= {};
-	
-	
-		model = new DefaultTableModel(b, a) {
+		
+	}
+	public void insertable(Object[][] dir) {
+		model = new DefaultTableModel(dir, a) {
 			public boolean isCellEditable(int rowIndex, int mColIndex) {
 				return false;
 			}
 		};
 		
-		frame=new JFrame("FRIEND LIST");
 		table = new JTable(model);
 		
 		sc = new JScrollPane(table);
 		frame.add(sc);
 		
-		m = (DefaultTableModel)table.getModel();
-		
-   
 		frame.setBounds(0,0,300,300);
-		table.addMouseListener(new FileMouseListener(1));
 		frame.setVisible(true);
-		
-	}
-	public void insertable(Object[][] dir) {
-		for(int i=0;i<dir.length;i++) {
-//			m.insertRow(i, dir[i]);
-			m.addRow(dir[i]);
-		}
-		
-		table.updateUI();
 	}
 	public JTable getTable() {
 		return table;
@@ -73,24 +60,5 @@ public class ClientFriListGUI{
 		
 		
 	}
-	
-	private class FileMouseListener extends MouseAdapter{
-		int menu;
-		public FileMouseListener(int menu) {
-			super();
-			this.menu=menu;
-		}
-		
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			//마우스 클릭되면 이벤트 여기다
-			if(e.getClickCount()==2) {
-//				System.out.println(menu);
-//				System.out.println(table.getValueAt(table.getSelectedRow(), 0));
-				//sendrequest give me the file..
-			}
-		}
-	}
-
 }
 

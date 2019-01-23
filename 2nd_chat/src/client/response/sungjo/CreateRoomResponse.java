@@ -5,20 +5,23 @@ import java.util.Map;
 import client.ClientBack;
 import client.gui.Chatwindow;
 import client.gui.ClientGUI;
-import client.gui.ClientHome;
 import model.vo.Data;
+import model.vo.GroupInfo;
 
 public class CreateRoomResponse {
 
 	public CreateRoomResponse(ClientBack clientback, Data data) {
 		ClientGUI gui = clientback.getGui();
-		Long groupid = (Long)data.getObject();
+		GroupInfo info = (GroupInfo)data.getObject();
 		Map<Long, Chatwindow> chatMap = clientback.getChatMap();
 		
-		if(groupid != null) {
+		if(info != null) {
+			Long groupid = info.getGroupid();
 			if(chatMap.get(groupid) == null) {
 				System.out.println("채티방 개설");
 				Chatwindow chatwindow = new Chatwindow(clientback.getId(), groupid, clientback);
+				chatwindow.getFrame().setTitle(info.getGroupname());
+				
 				chatMap.put(groupid, chatwindow);
 				chatMap.get(groupid).readchatFile();
 //				chatwindow.show();

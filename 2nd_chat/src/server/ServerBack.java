@@ -25,6 +25,7 @@ import model.vo.Filedownmessage;
 import model.vo.Filelist;
 import model.vo.Filemessage;
 import model.vo.Galmessage;
+import model.vo.GroupInfo;
 import model.vo.Header;
 import model.vo.RoomName;
 import model.vo.Roominfo;
@@ -254,12 +255,12 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == CREATEROOM) {
 						String[] friendids = (String[])data.getObject();
 						int result = sDao.createRoom(connectId,friendids); // 채팅방 개설
-						Long groupid = sDao.selectRoom(connectId,friendids,ONEROOM); // groupid
-						if(groupid != null)
-							groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
-						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
+						GroupInfo info = sDao.selectRoom(connectId,friendids,ONEROOM); // groupid
+						if(info != null)
+							groupidClientMap.put(info.getGroupid(), new HashMap<String,ObjectOutputStream>());
+						System.out.println("CREATEROOM select 시 그룹아이디 : " + info.getGroupid());
 						Header header = new Header(CREATEROOM,0);
-						Data sendData = new Data(header,groupid);
+						Data sendData = new Data(header,info);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
@@ -273,8 +274,9 @@ public class ServerBack {
 					else if(data.getHeader().getMenu() == OPENCHAT) {
 						ChatMember chatmember = (ChatMember)data.getObject();
 						List<Chat> chatcontent = sDao.selectchatcontent(chatmember);
+						String groupname = sDao.selectGroupName(chatmember);
 						Header header = new Header(OPENCHAT,0);
-						ChatcontentList chatcontentList = new ChatcontentList(chatmember.getGroupid(), chatcontent);
+						ChatcontentList chatcontentList = new ChatcontentList(chatmember.getGroupid(), groupname, chatcontent);
 						Data sendData = new Data(header,chatcontentList);
 						oos.writeObject(sendData);
 						oos.flush();
@@ -309,8 +311,9 @@ public class ServerBack {
 						RoomName rn = (RoomName)data.getObject();
 						rn.setUserid(connectId);
 						int result = sDao.updateRoomName(rn);
+						rn.setResult(result);
 						Header header = new Header(ROOMNAME,0);
-						Data sendData = new Data(header,result);
+						Data sendData = new Data(header,rn);
 						oos.writeObject(sendData);
 						oos.flush();
 					}
@@ -404,8 +407,23 @@ public class ServerBack {
 					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu()==MEM) {
 						ChatMember member = (ChatMember)data.getObject();
-						if(sDao.memberInsert(member.getUserid(),member.getGroupid())) {
-							System.out.println("무사히 완료");
+						byte type =sDao.typechk(member.getGroupid());
+						if(type == 0x01) {
+							String[] friends = sDao.selectmember(connectId,member.getGroupid(),member.getUserid());
+							if(friends != null) {
+								Long groupid = sDao.createGroupRoom(connectId,friends); // 채팅방 개설
+								if(groupid != null)
+									groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
+								System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
+								Header header = new Header(CREATEGROUPROOM,0);
+								Data sendData = new Data(header,groupid);
+								oos.writeObject(sendData);
+								oos.flush();
+							}
+						}else {
+							if(sDao.memberInsert(connectId, member.getUserid(),member.getGroupid())) {
+								System.out.println("무사히 완료");
+							}
 						}
 					}
 					

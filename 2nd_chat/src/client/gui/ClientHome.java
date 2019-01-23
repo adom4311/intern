@@ -391,6 +391,10 @@ public class ClientHome extends JFrame {
 		
 		
 	}
+
+	public void Alert(String msg) {
+		JOptionPane.showMessageDialog(null, msg);
+	}
 	
 	
 }

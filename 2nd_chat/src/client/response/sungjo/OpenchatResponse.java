@@ -33,8 +33,10 @@ public class OpenchatResponse {
 					chatwindow.appendMSG(content.getUserid() + " : " + content.getContent() + "\n");
 				}
 			}
-			if( chatMap.get(groupid) != null)
+			if( chatMap.get(groupid) != null) {
+				chatMap.get(groupid).getFrame().setTitle(chatcontentList.getGroupName());
 				chatMap.get(groupid).show();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

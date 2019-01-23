@@ -11,10 +11,10 @@ public class SignupResponse {
 		int result = (int)data.getObject();
 		if(result > 0) {
 			gui.Alert("회원가입 성공! 로그인해주세요.");
-			gui.signUpInvi();
+			gui.getSignUpdialog().dispose();
 		}else {
 			gui.Alert("회원가입 실패. 아이디 중복");
-			gui.signUpInvi();
+			gui.getSignUpdialog().dispose();
 		}
 	}
 

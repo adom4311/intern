@@ -14,6 +14,7 @@ import java.util.List;
 import common.DBCPTemplate;
 import model.vo.Chat;
 import model.vo.ChatMember;
+import model.vo.GroupInfo;
 import model.vo.RoomName;
 import model.vo.Roominfo;
 import model.vo.User;
@@ -566,23 +567,26 @@ public class ServerDAO {
 		return result;
 	}
 
-	public Long selectRoom(String connectId, String[] data, byte type) {
+	public GroupInfo selectRoom(String connectId, String[] data, byte type) {
 		con = dataSource.getConnection();
 		Long groupid = null;
+		GroupInfo info = null;
 		if(con != null) {
 			try {
-	        	String query = "select groupid from chatgroup where groupid in (select groupid from chatmember where userid in (?,?) group by groupid having count(*) = 2) and type = ?";
+//	        	String query = "select groupid from chatgroup where groupid in (select groupid from chatmember where userid in (?,?) group by groupid having count(*) = 2) and type = ?";
+	        	String query = "select * from usergroupname where userid = ? and groupid = (select groupid from chatgroup where groupid in (select groupid from chatmember where userid in (?,?) group by groupid having count(*) = 2) and type = ?)";
 				pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8")); 
 				int j = 0;
 				for (;j < data.length; j++) { // 각 참여자
-					pstmt.setString(2+j, new String(data[j].getBytes("UTF-8"),"UTF-8")); 
+					pstmt.setString(3+j, new String(data[j].getBytes("UTF-8"),"UTF-8")); 
 				}
-				pstmt.setByte(2+j, ONEROOM); // 채팅타입
+				pstmt.setByte(3+j, ONEROOM); // 채팅타입
 				
 				rs = pstmt.executeQuery();
 				while(rs.next()) {
-					groupid = rs.getLong(1);
+					info = new GroupInfo(rs.getLong("groupid"), rs.getString("groupname"));
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -592,7 +596,7 @@ public class ServerDAO {
 				dataSource.freeConnection(con,pstmt,rs);
 			}
 		}
-		return groupid;
+		return info;
 	}
 	
 	public ArrayList<Long> selectGroupid() {
@@ -751,7 +755,8 @@ public class ServerDAO {
 			try {
 				int totalcount = 0;
 				System.out.println("연결 : "+connectId);
-				pstmt = con.prepareStatement("select count(*) from chatgroup where groupid in (select groupid from chatmember where userid = ?)");
+//				pstmt = con.prepareStatement("select count(*) from usergroupname where groupid in (select groupid from chatmember where userid = ?)");
+				pstmt = con.prepareStatement("select count(groupid) from usergroupname where userid = ?");
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
 		        rs = pstmt.executeQuery();
 		        while(rs.next()) {
@@ -990,9 +995,10 @@ public class ServerDAO {
 		return avail;
 	}
 	
-	public boolean memberInsert(String userid, Long groupid) {
+	public boolean memberInsert(String connectId, String userid, Long groupid) {
 		con=dataSource.getConnection();
 		int chk=0;
+		int chk2=0;
 		if(con!=null) {
 			try {
 				String query = "insert into chatmember(groupid,userid,lastreadtime) values(?,?,now(6))";
@@ -1000,8 +1006,18 @@ public class ServerDAO {
 				pstmt.setLong(1, groupid);
 				pstmt.setString(2, userid);
 				chk = pstmt.executeUpdate();
-
-				if (chk > 0) {
+				
+				dataSource.freeConnection(pstmt);
+				dataSource.freeConnection(rs);
+				
+				String query6 = "insert into usergroupname values(?,?,?)";
+		        pstmt = con.prepareStatement(query6);	
+		        pstmt.setString(1, new String(userid.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setLong(2, groupid);
+		        pstmt.setString(3, new String((userid+"의 방").getBytes("UTF-8"),"UTF-8"));
+		        chk2 = pstmt.executeUpdate();
+				
+				if (chk > 0 && chk2 > 0) {
 					System.out.println("멤버추가 완료");
 					con.commit();
 					return true;
@@ -1012,9 +1028,108 @@ public class ServerDAO {
 				}
 			}catch(SQLException e) {
 				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				dataSource.freeConnection(con,pstmt,rs);
 			}
 		}
 		return false;
+	}
+
+	public String selectGroupName(ChatMember chatmember) {
+		con = dataSource.getConnection();
+		String groupName = null;
+		int result = 0;
+		if(con != null) {
+			String query = "select groupname from usergroupname where userid = ? and groupid = ?";
+			try {
+				pstmt = con.prepareStatement(query);
+				pstmt.setString(1, new String(chatmember.getUserid().getBytes("UTF-8"),"UTF-8"));
+				pstmt.setLong(2, chatmember.getGroupid());
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					groupName  = rs.getString("groupname");
+				}
+				if(result > 0)
+					con.commit();
+				else
+					con.rollback();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				dataSource.freeConnection(con, pstmt, rs);
+			}
+		}
+		return groupName;
+	}
+
+	public byte typechk(Long groupid) {
+		con = dataSource.getConnection();
+		byte type = 0;
+		if(con != null) {
+			String sql = "select type from chatgroup where groupid = ?";
+			try {
+				pstmt = con.prepareStatement(sql);
+				pstmt.setLong(1, groupid);
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					type = rs.getByte("type");
+				}
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+			
+		}
+		return type;
+	}
+
+	public String[] selectmember(String connectId, Long groupid,String userid) {
+		con = dataSource.getConnection();
+		String[] data = null;
+		if(con != null) {
+			try {
+				String sql = "select * from chatmember where groupid = ? and userid != ?";
+				pstmt = con.prepareStatement(sql);
+				pstmt.setLong(1, groupid);
+				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+				rs = pstmt.executeQuery();
+				
+				ArrayList<String> list = new ArrayList<String>();
+				while(rs.next()) {
+					list.add(rs.getString("userid"));
+				}
+				if(list.size() > 0) {
+					data = new String[list.size()+1];
+					for(int i = 0; i < list.size() ; i++) {
+						data[i] = list.get(i);
+					}
+					data[list.size()] = userid;
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				dataSource.freeConnection(con,pstmt,rs);
+			}
+			
+		}
+		return data;
 	}
 	
 

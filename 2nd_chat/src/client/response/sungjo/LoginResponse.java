@@ -15,14 +15,14 @@ public class LoginResponse {
 		if(user != null) {
 			clientback.setId(user.getUserid());
 			gui.Alert("로그인 성공!");
-			gui.loginInvi();
-			gui.setVisible(false);
+			gui.getLogindialog().dispose();
+			gui.dispose();
 			home = new ClientHome();
 			clientback.setHome(home);
 			home.home(clientback,clientback.getId());
 		}else {
 			gui.Alert("로그인 실패. 아이디 또는 비밀번호 오류.");
-			gui.loginInvi();
+			gui.getLogindialog().dispose();
 		}
 	}
 

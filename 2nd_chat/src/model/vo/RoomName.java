@@ -7,6 +7,23 @@ public class RoomName implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2275127896970190936L;
+	private int result;
+	public RoomName(int result, String userid, Long groupid, String groupName) {
+		super();
+		this.result = result;
+		this.userid = userid;
+		this.groupid = groupid;
+		this.groupName = groupName;
+	}
+	public int getResult() {
+		return result;
+	}
+	public void setResult(int result) {
+		this.result = result;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 	private String userid;
 	private Long groupid;
 	private String groupName;
