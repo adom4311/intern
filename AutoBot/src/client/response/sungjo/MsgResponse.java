@@ -24,7 +24,7 @@ public class MsgResponse {
 //				chatwindow.show();
 //			} 
 			// 채팅방이 켜져 있을 경우
-			ObjectOutputStream foos = clientback.getOos();
+			ObjectOutputStream foos = clientback.getRpoos();
 			synchronized(foos) // 읽음처리
 			{
 				Header header = new Header(clientback.UPDATELASTREAD,0);

@@ -133,7 +133,6 @@ class Client extends Thread{
 				try {
 					Thread.sleep(50);
 					clientback.sendMessage("せせせせせせせせ", AutoBot.groupid);
-					System.out.println("域紗掻");
 				} catch (InterruptedException e) {
 					break;
 				}

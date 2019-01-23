@@ -52,6 +52,8 @@ public class ReadchatFile {
 					ObjectOutputStream oos = new ObjectOutputStream(fos);
 					clientback.getChatFileMap().put(groupid, oos);
 				}
+				clientback.getChatFileMap().remove(groupid);
+				fis.close();
 
 				clientback.openChat(groupid);
 		} catch (IOException e) {

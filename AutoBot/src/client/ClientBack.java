@@ -71,6 +71,7 @@ public class ClientBack {
 	private String id;
 	private String pw;
 	private Socket socket;
+	private Socket readProcessingSocket;
 	private Socket filesocket;
 	private Object dirs[][];
 	private Map<Long,ObjectOutputStream> chatFileMap = new HashMap<Long, ObjectOutputStream>();
@@ -79,12 +80,21 @@ public class ClientBack {
 	private DataOutputStream os;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
+	private ObjectOutputStream rpoos;
 	private String SERVER_ADDR = "127.0.0.1";
 	private int PORT = 1993;
 	private int FILE_PORT = 1994;
 	static public ArrayList<Chat> list;
 	Long groupid;
 	
+
+	public ObjectOutputStream getRpoos() {
+		return rpoos;
+	}
+
+	public void setRpoos(ObjectOutputStream rpoos) {
+		this.rpoos = rpoos;
+	}
 
 	public Long getGroupid() {
 		return groupid;
@@ -234,8 +244,11 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
+			readProcessingSocket = new Socket(SERVER_ADDR,PORT);
+			rpoos = new ObjectOutputStream(readProcessingSocket.getOutputStream());
 			System.out.println("서버와 연결됨");
 			ClientReceiver receiver = new ClientReceiver(socket, this);
+			
 			receiver.start();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -293,11 +293,11 @@ public class ServerDAO {
         if( con != null ) {
             try {
             	/* 채팅방 개설 */
-            	String query = "insert into chatgroup(userid, groupname, type) values(?,?,?)";
+            	String query = "insert into chatgroup(userid, type) values(?,?)";
 				pstmt = con.prepareStatement(query);
 				pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
-				pstmt.setByte(3, GROUPROOM); // 채팅 방명
+//				pstmt.setString(2, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8")); // 채팅 방명
+				pstmt.setByte(2, GROUPROOM); // 채팅 방명
 		        chk = pstmt.executeUpdate();
 		        dataSource.freeConnection(pstmt);
 		        
@@ -313,6 +313,27 @@ public class ServerDAO {
 		        dataSource.freeConnection(rs);
 		        System.out.println("서버 db 저장시 groupid : " + groupid);
 		        
+		        
+		        String query6 = "insert into usergroupname values(?,?,?)";
+		        pstmt = con.prepareStatement(query6);	
+		        pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+		        pstmt.setLong(2, groupid);
+		        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+		        pstmt.executeUpdate();
+		        
+		        // 채팅방명 추가
+				for (int i = 0; i < data.length; i++) {
+					pstmt.setString(1, new String(data[i].getBytes("UTF-8"),"UTF-8"));
+			        pstmt.setLong(2, groupid);
+			        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+					chk2 = pstmt.executeUpdate();
+				}  
+		        
+		        dataSource.freeConnection(pstmt);
+		        dataSource.freeConnection(rs);
+		        
+		        
+		        
 		        /* 채팅방 참여자 추가 */
             	String query3 = "insert into chatmember(groupid,userid,lastreadtime) values(?,?,now(6))";
 		        
@@ -323,7 +344,7 @@ public class ServerDAO {
 				pstmt.executeUpdate(); 
 		        
 		        // chatmember에 초대한 아이디 추가
-				for (int i = 1; i < data.length; i++) {
+				for (int i = 0; i < data.length; i++) {
 					pstmt.setLong(1, groupid);
 					pstmt.setString(2, new String(data[i].getBytes("UTF-8"),"UTF-8"));
 					chk2 = pstmt.executeUpdate();

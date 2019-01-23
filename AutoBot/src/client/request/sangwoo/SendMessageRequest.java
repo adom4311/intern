@@ -25,6 +25,7 @@ public class SendMessageRequest {
 				Data sendData = new Data(header,message);
 				oos.writeObject(sendData);
 				oos.flush();
+				System.out.println(msg);
 			}
 			
 		} catch (IOException e) {
