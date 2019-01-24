@@ -15,6 +15,7 @@ import client.control.sungjo.ReadchatFile;
 import client.gui.Chatwindow;
 import client.gui.ClientGUI;
 import client.gui.ClientHome;
+import client.gui.Galarygui;
 import client.request.sangwoo.Addmemberrequest;
 import client.request.sangwoo.FileListRequest;
 import client.request.sangwoo.FiledownRequest;
@@ -98,7 +99,6 @@ public class ClientBack {
 
 	private ClientGUI gui;
 	private ClientHome home;
-	private Chatwindow chatwindow;
 	private Object dirs[][];
 	private Map<Long,Chatwindow> chatMap = new HashMap<Long, Chatwindow>();
 	private Map<Long,FileWriter> chatFileMap = new HashMap<Long, FileWriter>();
@@ -112,6 +112,14 @@ public class ClientBack {
 	private int PORT = 1993;
 	private int READ_PORT = 1995;
 	
+	private Galarygui galgui=null;
+	
+	public Galarygui getGalgui() {
+		return galgui;
+	}
+	public void setGalgui(Galarygui galgui) {
+		this.galgui = galgui;
+	}
 	public ObjectOutputStream getRpoos() {
 		return rpoos;
 	}
@@ -281,17 +289,15 @@ public class ClientBack {
 						new OutRoomResponse(clientback,data);
 					}
 					else if(data.getHeader().getMenu()==GAL) {
-						new GalListResponse(clientback,data);
+						galgui = new GalListResponse(clientback,data,galgui).show();
 					}
 					else if(data.getHeader().getMenu()==AMEM) {
 						new Addmemberresponse(clientback,data);
 					}
 				}
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

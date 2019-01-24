@@ -11,6 +11,14 @@ import javax.swing.table.DefaultTableModel;
 public class Galarygui {
 	
 	JFrame frame;
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public void setFrame(JFrame frame) {
+		this.frame = frame;
+	}
+
 	JTable table;
 	ArrayList<String> images;
 	DefaultTableModel model;

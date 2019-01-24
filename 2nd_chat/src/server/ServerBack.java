@@ -1,7 +1,5 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,8 +28,6 @@ import model.vo.Header;
 import model.vo.RoomName;
 import model.vo.Roominfo;
 import model.vo.User;
-import server.ServerBack.rpReceiver;
-import server.ServerBack.rpmReceiver;
 import server.sangwoo.ServerFileThread;
 import server.sangwoo.ServerFileTransferThread;
 
@@ -67,6 +63,7 @@ public class ServerBack {
     public static final byte GROUPROOM = 0x02;
 
 	private int PORT = 1993;
+	private int FILE_PORT = 1994;
 	private int READ_PORT = 1995;
 	
 	private ServerSocket serverSocket; // 서버소켓
@@ -75,13 +72,11 @@ public class ServerBack {
 
 	private Socket socket; // 받아올 소켓
 	private Socket socket2;
-	private Socket filesocket;
 
 	String connectId;
 
 	/* 현재 접속중인 사용자들의 정보 */
 	private Map<String, ObjectOutputStream> currentClientMap = new HashMap<String, ObjectOutputStream>();
-	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
 	/* groupid 별 현재 사용자 정보 */
 	private Map<Long, Map<String,ObjectOutputStream>> groupidClientMap = new HashMap<Long,Map<String,ObjectOutputStream>>();
 
@@ -92,12 +87,6 @@ public class ServerBack {
 	}
 	public void setCurrentClientMap(Map<String, ObjectOutputStream> currentClientMap) {
 		this.currentClientMap = currentClientMap;
-	}
-	public Map<String, DataOutputStream> getCurrentClientfileMap() {
-		return currentClientfileMap;
-	}
-	public void setCurrentClientfileMap(Map<String, DataOutputStream> currentClientfileMap) {
-		this.currentClientfileMap = currentClientfileMap;
 	}
 	
 	
@@ -138,7 +127,7 @@ public class ServerBack {
 	public void setting() {
 		try {
 			serverSocket = new ServerSocket(PORT); // 서버 소켓 생성
-			fileserverSocket = new ServerSocket(1994);
+			fileserverSocket = new ServerSocket(FILE_PORT);
 			readProcessingSocket = new ServerSocket(READ_PORT);
 
 			System.out.println("---서버 오픈---");
@@ -175,9 +164,8 @@ public class ServerBack {
 	}
 	
 	/* 현재접속자 맵에 추가 */
-	public void addClient(String id, ObjectOutputStream oos, DataOutputStream fos) {
+	public void addClient(String id, ObjectOutputStream oos) {
 		currentClientMap.put(id, oos);
-		currentClientfileMap.put(id, fos);
 	}
 	
 	/* 서버는 연결된 클라이언트의 데이터 수신 대기 */
@@ -185,11 +173,7 @@ public class ServerBack {
 		private ServerDAO sDao;
 		private ObjectInputStream ois;
 		private ObjectOutputStream oos;
-		private DataInputStream fis;
-		private DataOutputStream fos;
-		private ServerBack serverback; 
 		private Socket socket;
-		private Socket filesocket;
 		String connectId = "GM" + increment();
 		
 		public Receiver(Socket socket) {
@@ -199,7 +183,7 @@ public class ServerBack {
 				ois = new ObjectInputStream(socket.getInputStream());
 				oos = new ObjectOutputStream(socket.getOutputStream());
 				
-				addClient(connectId,oos,fos);
+				addClient(connectId,oos);
 				System.out.println("리시버 생성");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -228,7 +212,6 @@ public class ServerBack {
 						Data sendData = new Data(header,user);
 						if(user != null) {
 							currentClientMap.put(user.getUserid().toLowerCase(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
-							currentClientfileMap.put(user.getUserid().toLowerCase(),currentClientfileMap.remove(connectId));
 							connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
 						}
 						oos.writeObject(sendData);
@@ -356,7 +339,6 @@ public class ServerBack {
 					/* 백상우 인턴사원 */
 					else if(data.getHeader().getMenu() == FMSG) {
 						Filemessage filemessage = (Filemessage) data.getObject();
-						List<String> groupmember = sDao.selectGroupmember(filemessage.getGroupid());
 						new ServerFileThread(filemessage,fileserverSocket,oos).start();
 						//파일 받고 
 					}
@@ -468,7 +450,6 @@ public class ServerBack {
 				this.socket = socket;
 				ois = new ObjectInputStream(socket.getInputStream());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -528,7 +509,6 @@ public class ServerBack {
 					rpReceiver rpreceiver = new rpReceiver(socket2);
 					rpreceiver.start();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

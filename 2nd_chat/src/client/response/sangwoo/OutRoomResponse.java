@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import client.ClientBack;
+import client.request.sangwoo.SendMessageRequest;
 import model.vo.Data;
 import model.vo.Roominfo;
 
@@ -26,7 +27,8 @@ public class OutRoomResponse {
 				else System.out.println("파일 삭제 불가");
 			}
 			else System.out.println("파일 존재 x");
-			
+			String msg = "님이 채팅방을 나갔습니다.";
+			new SendMessageRequest(clientback, msg, roominfo.getGroupid());
 			clientback.getChatMap().remove(roominfo.getGroupid());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

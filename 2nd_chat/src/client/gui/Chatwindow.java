@@ -137,7 +137,7 @@ public class Chatwindow {
 			public void actionPerformed(ActionEvent arg0) {
 				Alert("채팅방을 나갑니다.");
 				clientback.outroom(id,groupid);
-				frame.setVisible(false);
+				closeAll();
 			}
 		
 		});
@@ -167,9 +167,14 @@ public class Chatwindow {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				clientfilegui = new ClientFileGUI(id,groupid,clientback);
-				System.out.println("new gui start!");
-				clientback.fileList(groupid);
+				if(clientfilegui==null)
+				{
+					clientfilegui = new ClientFileGUI(id,groupid,clientback);
+					System.out.println("new gui start!");
+					clientback.fileList(groupid);
+					
+				}
+				clientfilegui.frame.setVisible(true);
 				
 				
 			}
@@ -221,13 +226,22 @@ public class Chatwindow {
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 //				frame.setVisible(false);
-				frame.dispose();
-				if(clientfrilistgui != null)
-					clientfrilistgui.getFrame().dispose();
+				closeAll();
 			}
 		});
 		frame.setVisible(true);
 		frame.pack();
+	}
+
+	protected void closeAll() {
+		frame.dispose();
+		if(clientfrilistgui != null)
+			clientfrilistgui.getFrame().dispose();
+		if(clientfilegui != null)
+			clientfilegui.getFrame().dispose();
+		if(clientback.getGalgui() != null)
+			clientback.getGalgui().getFrame().dispose();
+		
 	}
 
 	private void sendMessage() {

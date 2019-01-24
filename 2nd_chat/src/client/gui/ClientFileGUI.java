@@ -22,6 +22,12 @@ public class ClientFileGUI{
 	JScrollPane sc;
 	DefaultTableModel model;
 	
+	public JFrame getFrame() {
+		return frame;
+	}
+	public void setFrame(JFrame frame) {
+		this.frame = frame;
+	}
 	public ClientFileGUI(String id, Long groupid, ClientBack clientback) {
 		this.id=id;
 		this.groupid=groupid;

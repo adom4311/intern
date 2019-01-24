@@ -10,10 +10,13 @@ import model.vo.Data;
 import model.vo.Galmessage;
 
 public class GalListResponse {
+	Galarygui galgui;
+	ArrayList<String> images;
 	
-	public GalListResponse(ClientBack clientback, Data data) {
+	public GalListResponse(ClientBack clientback, Data data, Galarygui galgui) {
+		this.galgui = galgui;
 		Galmessage galmessage = (Galmessage)data.getObject();
-		ArrayList <String> images = galmessage.getImages();
+		images = galmessage.getImages();
 		String path;
 		for(String image : images) {
 			System.out.println("**@**@**@*@*@*"+image);
@@ -25,6 +28,15 @@ public class GalListResponse {
 				new FiledownRequest(clientback,galmessage.getGroupid(),image,true);				
 			}
 		}
-		new Galarygui(images);
+	
+		
+	}
+	public Galarygui show() {
+		if(galgui==null)
+		{
+			galgui=new Galarygui(images);
+		}
+		galgui.getFrame().setVisible(true);
+		return galgui;
 	}
 }
