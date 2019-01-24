@@ -1,13 +1,14 @@
 package client.control.sungjo;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.json.simple.parser.JSONParser;
 
 import client.ClientBack;
 import model.vo.Chat;
@@ -28,38 +29,25 @@ public class ReadchatFile {
 					file.createNewFile();
 				}
 				
-				FileInputStream fis = new FileInputStream(file);
-				if(fis.available() > 0) {
-					ObjectInputStream ois = new ObjectInputStream(fis);
-					
-					list = new ArrayList<Chat>();
-					Chat msg;
-					System.out.println("¿¡ÀÌºí1 : " +fis.available());
-					while(fis.available() > 0){
-						msg = (Chat)ois.readObject();
-						list.add(msg);
-					}
-					
-					FileOutputStream fos = new FileOutputStream(file);
-					ObjectOutputStream oos = new ObjectOutputStream(fos);
-					clientback.getChatFileMap().put(groupid, oos);
-					for(Chat writemsg : list) {
-						oos.writeObject(writemsg);
-					}
-					ois.close();
-				}else {
-					FileOutputStream fos = new FileOutputStream(file);
-					ObjectOutputStream oos = new ObjectOutputStream(fos);
-					clientback.getChatFileMap().put(groupid, oos);
+
+				JSONParser parser = new JSONParser();
+				ObjectMapper mapper = new ObjectMapper();
+				
+				FileReader fr = new FileReader(file);
+				BufferedReader br = new BufferedReader(fr);
+				String str;
+				Chat c;
+				while((str = br.readLine())!=null) {
+					c = mapper.readValue(str, Chat.class);
 				}
-				clientback.getChatFileMap().remove(groupid);
-				fis.close();
+				br.close();
+				fr.close();
+
+				FileWriter fw = new FileWriter(file,true);
+				clientback.getChatFileMap().put(groupid, fw);
 
 				clientback.openChat(groupid);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -129,10 +129,10 @@ class Client extends Thread{
 			clientback.readchatFile(AutoBot.groupid);
 		}
 		else if(menu == 5) {
-			while(true){
+			while(!isInterrupted()){
 				try {
-					Thread.sleep(50);
 					clientback.sendMessage("せせせせせせせせ", AutoBot.groupid);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					break;
 				}

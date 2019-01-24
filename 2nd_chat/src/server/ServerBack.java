@@ -30,6 +30,8 @@ import model.vo.Header;
 import model.vo.RoomName;
 import model.vo.Roominfo;
 import model.vo.User;
+import server.ServerBack.rpReceiver;
+import server.ServerBack.rpmReceiver;
 import server.sangwoo.ServerFileThread;
 import server.sangwoo.ServerFileTransferThread;
 
@@ -63,11 +65,16 @@ public class ServerBack {
 
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
+
+	private int PORT = 1993;
+	private int READ_PORT = 1995;
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private ServerSocket fileserverSocket;
+	private ServerSocket readProcessingSocket;
 
 	private Socket socket; // 받아올 소켓
+	private Socket socket2;
 	private Socket filesocket;
 
 	String connectId;
@@ -130,8 +137,9 @@ public class ServerBack {
 	
 	public void setting() {
 		try {
-			serverSocket = new ServerSocket(1993); // 서버 소켓 생성
+			serverSocket = new ServerSocket(PORT); // 서버 소켓 생성
 			fileserverSocket = new ServerSocket(1994);
+			readProcessingSocket = new ServerSocket(READ_PORT);
 
 			System.out.println("---서버 오픈---");
 			
@@ -141,7 +149,8 @@ public class ServerBack {
 			OldDataDelete odd = new OldDataDelete(this);
 			Timer scheduler = new Timer();
 			scheduler.scheduleAtFixedRate(odd, 60 * 1000, 24 * 60 * 60 * 1000); // 1분 후부터 1일 간격 (2~3일 데이터 저장)
-			
+			rpmReceiver rpmreceiver = new rpmReceiver(readProcessingSocket);
+			rpmreceiver.start();
 			while(true) {
 				socket = serverSocket.accept(); // 클라이언트 소켓 저장
 				System.out.println(socket.getInetAddress() + "에서 접속"); // IP
@@ -444,6 +453,84 @@ public class ServerBack {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+		}
+	}
+	
+	class rpReceiver extends Thread{
+		private ServerDAO sDao;
+		private Socket socket;
+		private ObjectInputStream ois;
+		private String connectId;
+		public rpReceiver(Socket socket) {
+			try {
+				sDao = new ServerDAO();
+				this.socket = socket;
+				ois = new ObjectInputStream(socket.getInputStream());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		@Override
+		public void run() {
+			try {
+				while(ois != null){
+					Data data = (Data) ois.readObject();
+					/* 김성조 인턴사원 */
+					if(data.getHeader().getMenu() == LOGIN) {
+						User user = (User)data.getObject();
+						user = sDao.login(user.getUserid(),user.getPassword());
+						if(user != null) {
+							connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
+						}
+
+					}
+					/* 김성조 인턴사원 */
+					else if(data.getHeader().getMenu() == UPDATELASTREAD) {
+						Chat message = (Chat)data.getObject();
+						int result = sDao.updatereadtime(connectId,message);
+					}
+				}
+			}catch (SocketException e) {
+				try {
+					currentClientMap.remove(connectId);
+					ArrayList<Long> list = sDao.selectgroupiduser(connectId);
+					for(Long groupid : list) {
+						groupidClientMap.get(groupid).remove(connectId);
+					}
+					socket.close();
+					System.out.println(connectId + "님이 클라이언트 종료하여 쓰레드 종료합니다.");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		
+		}
+	}
+	
+	class rpmReceiver extends Thread{
+		private ServerSocket socket;
+		public rpmReceiver(ServerSocket socket) {
+			this.socket = socket;
+		}
+		
+		@Override
+		public void run() {
+			while(true) {
+				try {
+					socket2 = socket.accept();
+					rpReceiver rpreceiver = new rpReceiver(socket2);
+					rpreceiver.start();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}

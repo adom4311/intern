@@ -17,8 +17,6 @@ public class SendMessageRequest {
 	public SendMessageRequest(ClientBack clientBack, String msg, Long groupid) {
 		try {
 			ObjectOutputStream oos = clientBack.getOos();
-			synchronized(oos)
-			{
 				int bodylength = 0; // 데이터 길이가 필요한가?
 				Header header = new Header(ClientBack.MSG,bodylength);
 				Chat message = new Chat(0L,clientBack.getId(),groupid,msg,null,0);
@@ -26,8 +24,6 @@ public class SendMessageRequest {
 				oos.writeObject(sendData);
 				oos.flush();
 				System.out.println(msg);
-			}
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

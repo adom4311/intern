@@ -1,9 +1,11 @@
 package client.response.sungjo;
 
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 import client.ClientBack;
 import client.gui.Chatwindow;
@@ -17,7 +19,8 @@ public class OpenchatResponse {
 		try {
 			Map<Long,Chatwindow> chatMap = clientback.getChatMap();
 			Chatwindow chatwindow;
-			ObjectOutputStream oos;
+			FileWriter fw;
+			ObjectMapper mapper = new ObjectMapper();
 			// 서버 파일
 			ChatcontentList chatcontentList = (ChatcontentList)data.getObject();
 			Long groupid = chatcontentList.getGroupid();
@@ -26,10 +29,11 @@ public class OpenchatResponse {
 			System.out.println("서버데이터 사이즈 " + chatcontent.size()); 
 			if(chatcontent.size() > 0) {
 //				Long groupid  = chatcontent.get(0).getGroupid();
-				oos = clientback.getChatFileMap().get(groupid);
+				fw = clientback.getChatFileMap().get(groupid);
 				chatwindow = chatMap.get(groupid);
 				for(Chat content : chatcontent) {
-					oos.writeObject(content);
+					fw.write(mapper.writeValueAsString(content) + "\n");
+					fw.flush();
 					chatwindow.appendMSG(content.getUserid() + " : " + content.getContent() + "\n");
 				}
 			}

@@ -21,6 +21,8 @@ public class LoginRequest {
 				Data sendData = new Data(header,user);
 				oos.writeObject(sendData);
 				oos.flush();
+				clientBack.getRpoos().writeObject(sendData);
+				clientBack.getRpoos().flush();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

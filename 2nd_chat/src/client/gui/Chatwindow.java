@@ -222,7 +222,8 @@ public class Chatwindow {
 			public void windowClosing(WindowEvent e) {
 //				frame.setVisible(false);
 				frame.dispose();
-				clientfrilistgui.getFrame().dispose();
+				if(clientfrilistgui != null)
+					clientfrilistgui.getFrame().dispose();
 			}
 		});
 		frame.setVisible(true);

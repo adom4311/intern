@@ -1,9 +1,12 @@
 package client.response.sungjo;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 import client.ClientBack;
 import client.gui.Chatwindow;
@@ -18,6 +21,7 @@ public class MsgResponse {
 			Map<Long,Chatwindow> chatMap = clientback.getChatMap();
 			Chat message = (Chat)data.getObject();
 			Long groupid = message.getGroupid();
+			ObjectMapper mapper = new ObjectMapper();
 			//채팅전송이 오면 채팅창이 켜지는건 따로 기능을 제작해야함
 //			if(chatMap.get(message.getGroupid()) == null) {
 //				Chatwindow chatwindow = new Chatwindow(clientback.getId(),message.getGroupid(), clientback, clientback.getfilesocket());
@@ -27,7 +31,7 @@ public class MsgResponse {
 //			} 
 			// 채팅방이 켜져 있을 경우
 			if(chatMap.get(message.getGroupid()) != null) {
-				ObjectOutputStream foos = clientback.getOos();
+				ObjectOutputStream foos = clientback.getRpoos();
 				synchronized(foos) // 읽음처리
 				{
 					Header header = new Header(clientback.UPDATELASTREAD,0);
@@ -39,9 +43,10 @@ public class MsgResponse {
 				String line = message.getUserid() + " : " + message.getContent() + "\n";
 				chatMap.get(message.getGroupid()).appendMSG(line);
 				
-				ObjectOutputStream oos = clientback.getChatFileMap().get(groupid);
-				if(oos !=null) {
-					oos.writeObject(message);
+				FileWriter fw = clientback.getChatFileMap().get(groupid);
+				if(fw !=null) {
+					fw.write(mapper.writeValueAsString(message) + "\n");
+					fw.flush();
 				}
 			}
 		} catch (IOException e) {

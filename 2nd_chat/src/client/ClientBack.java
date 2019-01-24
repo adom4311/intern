@@ -2,6 +2,7 @@ package client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -91,7 +92,6 @@ public class ClientBack {
     public static final byte GROUPROOM = 0x02;
 	
 	private String id;
-	private String pw;
 	private Socket socket;
 	private Socket filesocket;
 	private Socket readProcessingSocket;
@@ -101,7 +101,7 @@ public class ClientBack {
 	private Chatwindow chatwindow;
 	private Object dirs[][];
 	private Map<Long,Chatwindow> chatMap = new HashMap<Long, Chatwindow>();
-	private Map<Long,ObjectOutputStream> chatFileMap = new HashMap<Long, ObjectOutputStream>();
+	private Map<Long,FileWriter> chatFileMap = new HashMap<Long, FileWriter>();
 	
 	private DataInputStream is;
 	private DataOutputStream os;
@@ -110,8 +110,14 @@ public class ClientBack {
 	private ObjectOutputStream rpoos;
 	private String SERVER_ADDR = "127.0.0.1";
 	private int PORT = 1993;
-	private int FILE_PORT = 1994;
+	private int READ_PORT = 1995;
 	
+	public ObjectOutputStream getRpoos() {
+		return rpoos;
+	}
+	public void setRpoos(ObjectOutputStream rpoos) {
+		this.rpoos = rpoos;
+	}
 	public Socket getReadProcessingSocket() {
 		return readProcessingSocket;
 	}
@@ -181,10 +187,10 @@ public class ClientBack {
 		connect();
 	}
 	
-	public Map<Long, ObjectOutputStream> getChatFileMap() {
+	public Map<Long, FileWriter> getChatFileMap() {
 		return chatFileMap;
 	}
-	public void setChatFileMap(Map<Long, ObjectOutputStream> chatFileMap) {
+	public void setChatFileMap(Map<Long, FileWriter> chatFileMap) {
 		this.chatFileMap = chatFileMap;
 	}
 	
@@ -293,7 +299,7 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
-			readProcessingSocket = new Socket(SERVER_ADDR,PORT);
+			readProcessingSocket = new Socket(SERVER_ADDR,READ_PORT);
 			rpoos = new ObjectOutputStream(readProcessingSocket.getOutputStream());
 			System.out.println("서버와 연결됨");
 			ClientReceiver receiver = new ClientReceiver(socket, this);

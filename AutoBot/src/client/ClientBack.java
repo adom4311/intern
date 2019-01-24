@@ -2,6 +2,7 @@ package client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -43,7 +44,6 @@ import client.response.sungjo.OpenchatResponse;
 import client.response.sungjo.SignupResponse;
 import model.vo.Chat;
 import model.vo.ChatMember;
-import model.vo.ChatcontentList;
 import model.vo.Data;
 import model.vo.Header;
 
@@ -74,14 +74,14 @@ public class ClientBack {
 	private Socket readProcessingSocket;
 	private Socket filesocket;
 	private Object dirs[][];
-	private Map<Long,ObjectOutputStream> chatFileMap = new HashMap<Long, ObjectOutputStream>();
+	private Map<Long,FileWriter> chatFileMap = new HashMap<Long, FileWriter>();
 	
 	private DataInputStream is;
 	private DataOutputStream os;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private ObjectOutputStream rpoos;
-	private String SERVER_ADDR = "127.0.0.1";
+	private String SERVER_ADDR = "172.21.25.28";
 	private int PORT = 1993;
 	private int FILE_PORT = 1994;
 	static public ArrayList<Chat> list;
@@ -147,10 +147,10 @@ public class ClientBack {
 		connect();
 	}
 	
-	public Map<Long, ObjectOutputStream> getChatFileMap() {
+	public Map<Long, FileWriter> getChatFileMap() {
 		return chatFileMap;
 	}
-	public void setChatFileMap(Map<Long, ObjectOutputStream> chatFileMap) {
+	public void setChatFileMap(Map<Long, FileWriter> chatFileMap) {
 		this.chatFileMap = chatFileMap;
 	}
 	
@@ -244,7 +244,7 @@ public class ClientBack {
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
-			readProcessingSocket = new Socket(SERVER_ADDR,PORT);
+			readProcessingSocket = new Socket(SERVER_ADDR,1995);
 			rpoos = new ObjectOutputStream(readProcessingSocket.getOutputStream());
 			System.out.println("서버와 연결됨");
 			ClientReceiver receiver = new ClientReceiver(socket, this);

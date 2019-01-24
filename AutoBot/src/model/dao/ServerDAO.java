@@ -316,10 +316,10 @@ public class ServerDAO {
 		        
 		        String query6 = "insert into usergroupname values(?,?,?)";
 		        pstmt = con.prepareStatement(query6);	
-		        pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-		        pstmt.setLong(2, groupid);
-		        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
-		        pstmt.executeUpdate();
+//		        pstmt.setString(1, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+//		        pstmt.setLong(2, groupid);
+//		        pstmt.setString(3, new String((connectId+"의 방").getBytes("UTF-8"),"UTF-8"));
+//		        pstmt.executeUpdate();
 		        
 		        // 채팅방명 추가
 				for (int i = 0; i < data.length; i++) {
@@ -339,9 +339,9 @@ public class ServerDAO {
 		        
 		        // chatmember에 개설자 아이디 추가
 		        pstmt = con.prepareStatement(query3);
-				pstmt.setLong(1, groupid);
-				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
-				pstmt.executeUpdate(); 
+//				pstmt.setLong(1, groupid);
+//				pstmt.setString(2, new String(connectId.getBytes("UTF-8"),"UTF-8"));
+//				pstmt.executeUpdate(); 
 		        
 		        // chatmember에 초대한 아이디 추가
 				for (int i = 0; i < data.length; i++) {
