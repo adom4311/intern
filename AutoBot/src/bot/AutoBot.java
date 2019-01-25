@@ -132,7 +132,7 @@ class Client extends Thread{
 			while(!isInterrupted()){
 				try {
 					clientback.sendMessage("せせせせせせせせ", AutoBot.groupid);
-					Thread.sleep(200);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					break;
 				}

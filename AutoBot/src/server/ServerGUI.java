@@ -3,10 +3,9 @@ package server;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectOutputStream;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -56,40 +55,38 @@ public class ServerGUI extends JFrame {
 		setVisible(true);
 	}
 	
-	public void userStatus(Map<String, ObjectOutputStream> map) {
-		synchronized (map) {
-			System.out.println("맵크기" + map.size());
-			int i = 0;
-			int login = 0;
-			int non = 0;
-			Object rowData[][] = new Object[map.size()][3];
-			SortedSet<String> keys = new TreeSet<String>(map.keySet());
-			for (String s : keys) { 
-				rowData[i][0] = i+1;
-				rowData[i][1] = s;
-				if(!s.substring(0, 2).equals("GM")) {
-					rowData[i][2] = "로그인 중";
-					login++;
-				}else {
-					rowData[i][2] = "연결 중";
-					non++;
-				}
-				i++;
+	public void userStatus(ConcurrentHashMap<String, ObjectOutputStream> map) {
+		System.out.println("맵크기" + map.size());
+		int i = 0;
+		int login = 0;
+		int non = 0;
+		Object rowData[][] = new Object[map.size()][3];
+		SortedSet<String> keys = new TreeSet<String>(map.keySet());
+		for (String s : keys) { 
+			rowData[i][0] = i+1;
+			rowData[i][1] = s;
+			if(!s.substring(0, 2).equals("GM")) {
+				rowData[i][2] = "로그인 중";
+				login++;
+			}else {
+				rowData[i][2] = "연결 중";
+				non++;
 			}
-		
-
-			lblNewLabel_1.setText(String.valueOf(i) + "- 로그인 : " + String.valueOf(login) + ", 비로그인 : "+ String.valueOf(non));
-			
-			// 내용 수정 불가 시작 //
-	        DefaultTableModel mod = new DefaultTableModel(rowData, columnName) {
-	        public boolean isCellEditable(int rowIndex, int mColIndex) {
-	                return false;
-	            }
-	        };
-	      
-	
-			jt = new JTable(mod); // 친구 찾기 테이블
-			scrollPane.setViewportView(jt);
+			i++;
 		}
+	
+
+		lblNewLabel_1.setText(String.valueOf(i) + "- 로그인 : " + String.valueOf(login) + ", 비로그인 : "+ String.valueOf(non));
+		
+		// 내용 수정 불가 시작 //
+        DefaultTableModel mod = new DefaultTableModel(rowData, columnName) {
+        public boolean isCellEditable(int rowIndex, int mColIndex) {
+                return false;
+            }
+        };
+      
+
+		jt = new JTable(mod); // 친구 찾기 테이블
+		scrollPane.setViewportView(jt);
 	}
 }

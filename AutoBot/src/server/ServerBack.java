@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import model.dao.ServerDAO;
 import model.vo.Chat;
@@ -24,8 +25,6 @@ import model.vo.Filelist;
 import model.vo.Filemessage;
 import model.vo.Header;
 import model.vo.User;
-import server.ServerBack.Receiver;
-import server.ServerBack.rpReceiver;
 import server.sangwoo.ServerFileThread;
 import server.sangwoo.ServerFileTransferThread;
 
@@ -65,26 +64,18 @@ public class ServerBack {
 	
 	
 	/* 현재 접속중인 사용자들의 정보 */
-	private Map<String, ObjectOutputStream> currentClientMap = new HashMap<String, ObjectOutputStream>();
-	private Map<String, DataOutputStream> currentClientfileMap = new HashMap<String, DataOutputStream>();
+	private ConcurrentHashMap<String, ObjectOutputStream> currentClientMap = new ConcurrentHashMap<String, ObjectOutputStream>();
 	/* groupid 별 현재 사용자 정보 */
-	private Map<Long, Map<String,ObjectOutputStream>> groupidClientMap = new HashMap<Long,Map<String,ObjectOutputStream>>();
+	private ConcurrentHashMap<Long, ConcurrentHashMap<String,ObjectOutputStream>> groupidClientMap = new ConcurrentHashMap<Long,ConcurrentHashMap<String,ObjectOutputStream>>();
 
 	private int non_login_increment = 0; // 로그인 전 임시값
 		
-	public Map<String, ObjectOutputStream> getCurrentClientMap() {
+	public ConcurrentHashMap<String, ObjectOutputStream> getCurrentClientMap() {
 		return currentClientMap;
 	}
-	public void setCurrentClientMap(Map<String, ObjectOutputStream> currentClientMap) {
+	public void setCurrentClientMap(ConcurrentHashMap<String, ObjectOutputStream> currentClientMap) {
 		this.currentClientMap = currentClientMap;
 	}
-	public Map<String, DataOutputStream> getCurrentClientfileMap() {
-		return currentClientfileMap;
-	}
-	public void setCurrentClientfileMap(Map<String, DataOutputStream> currentClientfileMap) {
-		this.currentClientfileMap = currentClientfileMap;
-	}
-	
 	
 	public static void main(String[] args) {
 		ServerBack serverBack = new ServerBack();
@@ -92,7 +83,7 @@ public class ServerBack {
 	}
 
 	private void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
-		Map<String, ObjectOutputStream> groupCurrentMap = groupidClientMap.get(message.getGroupid());
+		ConcurrentHashMap<String, ObjectOutputStream> groupCurrentMap = groupidClientMap.get(message.getGroupid());
 		synchronized (groupCurrentMap) {
 			for (String member : groupmember) {
 				if(groupCurrentMap.get(member) == null && currentClientMap.get(member) != null) {
@@ -156,7 +147,7 @@ public class ServerBack {
 		ServerDAO sDao = new ServerDAO();
 		ArrayList<Long> list = sDao.selectGroupid();
 		for(Long groupid : list) {
-			groupidClientMap.put(groupid,new HashMap<String,ObjectOutputStream>());
+			groupidClientMap.put(groupid,new ConcurrentHashMap<String,ObjectOutputStream>());
 		}
 	}
 	public synchronized int increment() {
@@ -166,7 +157,6 @@ public class ServerBack {
 	/* 현재접속자 맵에 추가 */
 	public synchronized void addClient(String id, ObjectOutputStream oos, DataOutputStream fos) {
 		currentClientMap.put(id, oos);
-		currentClientfileMap.put(id, fos);
 	}
 	
 	/* 서버는 연결된 클라이언트의 데이터 수신 대기 */
@@ -219,7 +209,6 @@ public class ServerBack {
 							synchronized (currentClientMap) {
 								currentClientMap.put(user.getUserid().toLowerCase(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
 							}
-							currentClientfileMap.put(user.getUserid().toLowerCase(),currentClientfileMap.remove(connectId));
 							connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
 						}else {
 							System.out.println("로그인 실패");
@@ -258,7 +247,7 @@ public class ServerBack {
 						int result = sDao.createRoom(connectId,friendids); // 채팅방 개설
 						Long groupid = sDao.selectRoom(connectId,friendids,ONEROOM); // groupid
 						if(groupid != null)
-							groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
+							groupidClientMap.put(groupid, new ConcurrentHashMap<String,ObjectOutputStream>());
 						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 						Header header = new Header(CREATEROOM,0);
 						Data sendData = new Data(header,groupid);
@@ -294,7 +283,7 @@ public class ServerBack {
 						String[] friendids = (String[])data.getObject();
 						Long groupid = sDao.createGroupRoom(connectId,friendids); // 채팅방 개설
 						if(groupid != null)
-							groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
+							groupidClientMap.put(groupid, new ConcurrentHashMap<String,ObjectOutputStream>());
 						System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 						Header header = new Header(CREATEGROUPROOM,0);
 						Data sendData = new Data(header,groupid);
@@ -447,29 +436,6 @@ public class ServerBack {
 			}
 		}
 	}
-	
-//	class guiThread extends Thread{
-//		ServerBack sb;
-//		ServerGUI gui;
-//		public guiThread(ServerBack serverBack, ServerGUI gui) {
-//			this.sb = serverBack;
-//			this.gui = gui;
-//		}
-//		
-//		@Override
-//		public void run() {
-//			while(true) {
-//				try {
-//					this.gui.userStatus(currentClientMap);
-//					Thread.sleep(3000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//		
-//	}
 }
 
 

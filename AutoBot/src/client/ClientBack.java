@@ -81,7 +81,7 @@ public class ClientBack {
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private ObjectOutputStream rpoos;
-	private String SERVER_ADDR = "172.21.25.28";
+	private String SERVER_ADDR = "127.0.0.1";
 	private int PORT = 1993;
 	private int FILE_PORT = 1994;
 	static public ArrayList<Chat> list;
