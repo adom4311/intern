@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import client.control.sungjo.ReadchatFile;
 import client.gui.Chatwindow;
 import client.gui.ClientGUI;
@@ -298,10 +300,17 @@ public class ClientBack {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
+				Alert("일정시간 입력이 없어 종료됩니다.");
+				System.exit(0);
 				e.printStackTrace();
 			}
 		}
 	}
+	
+	public void Alert(String msg) {
+		JOptionPane.showMessageDialog(null, msg);
+	}
+	
 	public void connect() {
 		try {
 			socket = new Socket(SERVER_ADDR,PORT);
