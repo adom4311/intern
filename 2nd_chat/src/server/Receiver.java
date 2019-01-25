@@ -119,33 +119,31 @@ public class Receiver extends Thread{
 	
 	private void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
 		Map<String, ObjectOutputStream> groupCurrentMap = groupidClientMap.get(message.getGroupid());
-		Chat chat = sDao.insertMSG(message);
-		ObjectOutputStream oos;
-
-		for (String member : groupmember) {
-			if ((currentClientMap.get(member)) != null) {
-				oos = currentClientMap.get(member);
-				Header header = new Header(MSG, 0); // 데이터크기가 사용처가 없음.
-				Data sendData = new Data(header, chat);
+		synchronized (groupCurrentMap) {
+			for (String member : groupmember) {
+				if(groupCurrentMap.get(member) == null && currentClientMap.get(member) != null) {
+					groupCurrentMap.put(member, currentClientMap.get(member));
+				}
+			}
+			Chat chat = sDao.insertMSG(message);
+			
+			Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
+			Data sendData = new Data(header,chat);
+			ObjectOutputStream oos;
+			for (String member : groupmember) {
 				try {
-
-					if (oos != null) {
-						synchronized (oos) {
-							oos.writeObject(sendData);
-							oos.flush();
-						}
-
+					oos = groupCurrentMap.get(member);
+					if(oos != null) {
+						oos.writeObject(sendData);
+						oos.flush();
 					}
-				} catch (NullPointerException e) {
+				}catch(NullPointerException e) {
 					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
+				} catch(IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-
 	}
 	
 	@Override
