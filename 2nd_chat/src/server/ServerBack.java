@@ -61,6 +61,8 @@ public class ServerBack {
 	private Socket socket2;
 
 	String connectId;
+	
+	ServerGUI gui;
 
 	/* 현재 접속중인 사용자들의 정보 */
 	private Map<String, ObjectOutputStream> currentClientMap = new HashMap<String, ObjectOutputStream>();
@@ -111,6 +113,7 @@ public class ServerBack {
 			serverSocket = new ServerSocket(PORT); // 서버 소켓 생성
 			fileserverSocket = new ServerSocket(FILE_PORT);
 			readProcessingSocket = new ServerSocket(READ_PORT);
+			gui = new ServerGUI(this);
 
 			System.out.println("---서버 오픈---");
 			

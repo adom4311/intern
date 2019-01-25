@@ -131,6 +131,9 @@ public class ClientGUI extends JFrame {
 				if(id_tf.getText().equals("") || pw_tf.getText().equals("")) {
 					Alert("회원정보를 입력해주세요.");
 					return;
+				}else if(id_tf.getText().length() > 1 && id_tf.getText().substring(0, 2).equals("GM")) {
+					Alert("GM으로 시작하는 아이디는 사용할 수 없습니다.");
+					return;
 				}
 				clientback.signUp(id_tf.getText(),pw_tf.getText());
 			}
