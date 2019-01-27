@@ -1,20 +1,15 @@
 package server;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import model.dao.ServerDAO;
-import model.vo.Chat;
-import model.vo.Data;
-import model.vo.User;
 
 public class ServerBack {
 	public static final int SIGNUP = 1; // 회원가입
@@ -43,7 +38,6 @@ public class ServerBack {
 	public static final int AMEM = 22;//채팅방 멤버 추가 가능리스트 요청
 	public static final int MEM = 23;//채팅방 멤버 추가 요창
 
-
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
 
@@ -53,7 +47,6 @@ public class ServerBack {
 	
 	private ServerSocket serverSocket; // 서버소켓
 	private ServerSocket fileserverSocket;
-	
 
 	private ServerSocket readProcessingSocket;
 
@@ -65,23 +58,21 @@ public class ServerBack {
 	ServerGUI gui;
 
 	/* 현재 접속중인 사용자들의 정보 */
-	private Map<String, ObjectOutputStream> currentClientMap = new HashMap<String, ObjectOutputStream>();
+	private ConcurrentHashMap<String, ObjectOutputStream> currentClientMap = new ConcurrentHashMap<String, ObjectOutputStream>();
 	/* groupid 별 현재 사용자 정보 */
-	private Map<Long, Map<String,ObjectOutputStream>> groupidClientMap = new HashMap<Long,Map<String,ObjectOutputStream>>();
+	private ConcurrentHashMap<Long, ConcurrentHashMap<String,ObjectOutputStream>> groupidClientMap = new ConcurrentHashMap<Long,ConcurrentHashMap<String,ObjectOutputStream>>();
 
-
-		
-	public void setGroupidClientMap(Map<Long, Map<String, ObjectOutputStream>> groupidClientMap) {
+	public void setGroupidClientMap(ConcurrentHashMap<Long, ConcurrentHashMap<String, ObjectOutputStream>> groupidClientMap) {
 		this.groupidClientMap = groupidClientMap;
 	}
 	
-	public Map<Long , Map<String, ObjectOutputStream>> getGroupidClientMap(){
+	public ConcurrentHashMap<Long , ConcurrentHashMap<String, ObjectOutputStream>> getGroupidClientMap(){
 		return groupidClientMap;
 	}
-	public Map<String, ObjectOutputStream> getCurrentClientMap() {
+	public ConcurrentHashMap<String, ObjectOutputStream> getCurrentClientMap() {
 		return currentClientMap;
 	}
-	public void setCurrentClientMap(Map<String, ObjectOutputStream> currentClientMap) {
+	public void setCurrentClientMap(ConcurrentHashMap<String, ObjectOutputStream> currentClientMap) {
 		this.currentClientMap = currentClientMap;
 	}
 	
@@ -102,11 +93,9 @@ public class ServerBack {
 		ServerDAO sDao = new ServerDAO();
 		ArrayList<Long> list = sDao.selectGroupid();
 		for(Long groupid : list) {
-			groupidClientMap.put(groupid,new HashMap<String,ObjectOutputStream>());
+			groupidClientMap.put(groupid,new ConcurrentHashMap<String,ObjectOutputStream>());
 		}
 	}
-
-	
 
 	public void setting() {
 		try {

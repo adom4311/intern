@@ -185,9 +185,13 @@ public class Chatwindow {
 			public void actionPerformed(ActionEvent e) {
 				if( clientfrilistgui == null) {
 					clientfrilistgui = new ClientFriListGUI(id,groupid,clientback);
+					clientfrilistgui.show();					
 					clientback.chatfriList(groupid);
+				}else {
+					clientback.chatfriList(groupid);
+					clientfrilistgui.getFrame().setVisible(true);
 				}
-				clientfrilistgui.getFrame().setVisible(true);
+//				clientfrilistgui.getFrame().setVisible(true);
 
 			}
 		});

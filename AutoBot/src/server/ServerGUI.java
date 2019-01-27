@@ -3,10 +3,9 @@ package server;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectOutputStream;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -56,7 +55,7 @@ public class ServerGUI extends JFrame {
 		setVisible(true);
 	}
 	
-	public void userStatus(Map<String, ObjectOutputStream> map) {
+	public void userStatus(ConcurrentHashMap<String, ObjectOutputStream> map) {
 		synchronized (map) {
 			System.out.println("∏ ≈©±‚" + map.size());
 			int i = 0;

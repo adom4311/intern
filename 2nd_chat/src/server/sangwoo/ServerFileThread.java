@@ -69,7 +69,7 @@ public class ServerFileThread extends Thread {
 			SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
 			String time = transFormat.format(date);
 			String[] recdir = filemessage.getfile_dir().split("\\\\");
-			dir = "C:\\Users\\user\\Desktop\\file\\server\\" + time+recdir[recdir.length - 1];
+			dir = "C:\\Users\\Naya\\Desktop\\file\\server\\" + time+recdir[recdir.length - 1];
 			boolean chk;
 			int wordsize = 16*1024;
 			byte[] bytes = new byte[wordsize];

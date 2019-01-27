@@ -9,6 +9,22 @@ public class ChatcontentList implements Serializable {
 	 */
 	private static final long serialVersionUID = 2296897224149804822L;
 	private Long groupid;
+	private String groupName;
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	public ChatcontentList(Long groupid, String groupName, List<Chat> chatcontent) {
+		super();
+		this.groupid = groupid;
+		this.groupName = groupName;
+		this.chatcontent = chatcontent;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 	private List<Chat> chatcontent;
 	public Long getGroupid() {
 		return groupid;

@@ -16,7 +16,8 @@ public class GroupNameChangRequestResponse {
 		if(result.getResult() > 0) {
 			System.out.println("성공!");
 			//clientback.roomList();
-			clientback.getChatMap().get(result.getGroupid()).getFrame().setTitle(result.getGroupName());
+			if(clientback.getChatMap().get(result.getGroupid()) != null)
+				clientback.getChatMap().get(result.getGroupid()).getFrame().setTitle(result.getGroupName());
 			home.fn_roomList(clientback);
 		}else {
 			gui.Alert("채팅방명 변경실패");

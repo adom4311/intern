@@ -9,14 +9,14 @@ import model.vo.Header;
 
 public class FiledownRequest {
 	
-	public FiledownRequest(ClientBack clientback,Long groupid,String dir) {
+	public FiledownRequest(ClientBack clientback,Long groupid,String dir,boolean isImg) {
 		try {
 			ObjectOutputStream oos = clientback.getOos();
 			synchronized(oos)
 			{
 				int bodylength=0;
 				Header header = new Header(ClientBack.FIDOWN,bodylength);
-				Filedownmessage filedownmessage = new Filedownmessage(groupid,dir);
+				Filedownmessage filedownmessage = new Filedownmessage(groupid,dir,isImg);
 				Data sendData = new Data(header,filedownmessage);
 				oos.writeObject(sendData);
 				oos.flush();

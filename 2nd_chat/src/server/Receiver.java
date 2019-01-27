@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import model.dao.ServerDAO;
 import model.vo.Amemessage;
@@ -33,8 +34,6 @@ import server.sangwoo.Timer;
 
 /* 서버는 연결된 클라이언트의 데이터 수신 대기 */
 public class Receiver extends Thread{
-	
-	
 	public static final int SIGNUP = 1; // 회원가입
 	public static final int LOGIN = 2; // 로그인
 	public static final int MSG = 3; // 일반메시지
@@ -64,17 +63,15 @@ public class Receiver extends Thread{
     public static final byte ONEROOM= 0x01;
     public static final byte GROUPROOM = 0x02;
 	
-	
 	private ServerDAO sDao;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private Socket socket;
 	private ServerSocket fileserverSocket;
 	private int non_login_increment = 0; // 로그인 전 임시값
-	private Map<String, ObjectOutputStream> currentClientMap;
-	private Map<Long, Map<String,ObjectOutputStream>> groupidClientMap;
+	private ConcurrentHashMap<String, ObjectOutputStream> currentClientMap;
+	private ConcurrentHashMap<Long, ConcurrentHashMap<String,ObjectOutputStream>> groupidClientMap;
 	Timer timer;
-	
 
 	String connectId = "GM" + increment();
 	Long acc_time;
@@ -105,7 +102,6 @@ public class Receiver extends Thread{
 		this.socket = socket;
 	}
 	
-
 	
 	public synchronized int increment() {
 		return non_login_increment++;
@@ -116,36 +112,30 @@ public class Receiver extends Thread{
 		currentClientMap.put(id, oos);
 	}
 	
-	
 	private void broadcast(Chat message, List<String> groupmember, ServerDAO sDao) {
 		Map<String, ObjectOutputStream> groupCurrentMap = groupidClientMap.get(message.getGroupid());
-		Chat chat = sDao.insertMSG(message);
-		ObjectOutputStream oos;
-
-		for (String member : groupmember) {
-			if ((currentClientMap.get(member)) != null) {
-				oos = currentClientMap.get(member);
-				Header header = new Header(MSG, 0); // 데이터크기가 사용처가 없음.
-				Data sendData = new Data(header, chat);
-				try {
-
-					if (oos != null) {
-						synchronized (oos) {
-							oos.writeObject(sendData);
-							oos.flush();
-						}
-
+		synchronized (groupCurrentMap) {
+			Chat chat = sDao.insertMSG(message);
+			
+			Header header = new Header(MSG,0); // 데이터크기가 사용처가 없음.
+			Data sendData = new Data(header,chat);
+			ObjectOutputStream oos;
+			
+			for(String member : groupCurrentMap.keySet()) {
+				oos = groupCurrentMap.get(member);
+				if(oos != null) {
+					try {
+						oos.writeObject(sendData);
+						oos.flush();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NullPointerException e) {
+						e.printStackTrace();
 					}
-				} catch (NullPointerException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
 		}
-
 	}
 	
 	@Override
@@ -175,6 +165,10 @@ public class Receiver extends Thread{
 					if(user != null) {
 						currentClientMap.put(user.getUserid().toLowerCase(), currentClientMap.remove(connectId)); // 임시아이디를 로그인 아이디로 변경
 						connectId = user.getUserid().toLowerCase(); // serverBack의 connectId를 접속자로
+						ArrayList<Long> list = sDao.selectgroupiduser(connectId);
+						for(Long groupid : list) {
+							groupidClientMap.get(groupid).put(connectId, currentClientMap.get(connectId));
+						}
 					}
 					oos.writeObject(sendData);
 					oos.flush();
@@ -210,8 +204,9 @@ public class Receiver extends Thread{
 					String[] friendids = (String[])data.getObject();
 					int result = sDao.createRoom(connectId,friendids); // 채팅방 개설
 					GroupInfo info = sDao.selectRoom(connectId,friendids,ONEROOM); // groupid
-					if(info != null)
-						groupidClientMap.put(info.getGroupid(), new HashMap<String,ObjectOutputStream>());
+					if(info != null) {
+						groupidClientMap.put(info.getGroupid(), new ConcurrentHashMap<String,ObjectOutputStream>());
+					}
 					System.out.println("CREATEROOM select 시 그룹아이디 : " + info.getGroupid());
 					Header header = new Header(CREATEROOM,0);
 					Data sendData = new Data(header,info);
@@ -231,6 +226,8 @@ public class Receiver extends Thread{
 					String groupname = sDao.selectGroupName(chatmember);
 					Header header = new Header(OPENCHAT,0);
 					ChatcontentList chatcontentList = new ChatcontentList(chatmember.getGroupid(), groupname, chatcontent);
+					// 열린채팅방id에만 oos 추가
+					groupidClientMap.get(chatmember.getGroupid()).put(connectId, currentClientMap.get(connectId));
 					Data sendData = new Data(header,chatcontentList);
 					oos.writeObject(sendData);
 					oos.flush();
@@ -247,8 +244,14 @@ public class Receiver extends Thread{
 				else if(data.getHeader().getMenu() == CREATEGROUPROOM) {
 					String[] friendids = (String[])data.getObject();
 					Long groupid = sDao.createGroupRoom(connectId,friendids); // 채팅방 개설
-					if(groupid != null)
-						groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
+					if(groupid != null) {
+						groupidClientMap.put(groupid, new ConcurrentHashMap<String,ObjectOutputStream>());
+//						List<String> list = sDao.selectGroupmember(groupid);
+//						for(String member : list) {
+//							if(currentClientMap.get(member) != null)
+//								groupidClientMap.get(groupid).put(member, currentClientMap.get(member));
+//						}
+					}
 					System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 					Header header = new Header(CREATEGROUPROOM,0);
 					Data sendData = new Data(header,groupid);
@@ -366,12 +369,14 @@ public class Receiver extends Thread{
 						if(friends != null) {
 							Long groupid = sDao.createGroupRoom(connectId,friends); // 채팅방 개설
 							if(groupid != null)
-								groupidClientMap.put(groupid, new HashMap<String,ObjectOutputStream>());
+								groupidClientMap.put(groupid, new ConcurrentHashMap<String,ObjectOutputStream>());
 							System.out.println("CREATEROOM select 시 그룹아이디 : " + groupid);
 							Header header = new Header(CREATEGROUPROOM,0);
 							Data sendData = new Data(header,groupid);
 							oos.writeObject(sendData);
 							oos.flush();
+						}else {
+							sDao.memberInsert(connectId, member.getUserid(),member.getGroupid());
 						}
 					}else {
 						if(sDao.memberInsert(connectId, member.getUserid(),member.getGroupid())) {
