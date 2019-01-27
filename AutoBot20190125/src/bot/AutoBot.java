@@ -20,6 +20,9 @@ public class AutoBot {
 		
 		int menu;
 		while(true) {
+
+			
+			
 			System.out.println("------오토봇------\n"
 					+ "1. 회원가입\n"
 					+ "2. 로그인\n"
@@ -129,7 +132,7 @@ class Client extends Thread{
 			while(!isInterrupted()){
 				try {
 					clientback.sendMessage("ㅋㅋㅋㅋㅋㅋㅋㅋ", AutoBot.groupid);
-					Thread.sleep(1);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					break;
 				}

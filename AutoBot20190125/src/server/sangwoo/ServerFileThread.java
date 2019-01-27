@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,14 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import model.dao.ServerDAO;
-import model.vo.Data;
 import model.vo.Filemessage;
-import model.vo.Header;
 
 
 public class ServerFileThread extends Thread {
 
-	public static final int FMSG = 6;// 파일, 이미지 전송
 
 	Filemessage filemessage;
 	//ServerDAO sDao;
@@ -30,11 +26,9 @@ public class ServerFileThread extends Thread {
 	String dir;
 	InputStream in;
 	OutputStream out;
-	ObjectOutputStream oos;
 	
-	public ServerFileThread(Filemessage filemessage, ServerSocket serversocket,ObjectOutputStream oos) { //serverdao 새로 생성 추후 수정시 parameter추가
+	public ServerFileThread(Filemessage filemessage, ServerSocket serversocket) { //serverdao 새로 생성 추후 수정시 parameter추가
 		this.filemessage = filemessage;
-		this.oos = oos;
 		//this.sDao = sDao;
 		try {
 			filesocket=serversocket.accept();
@@ -62,14 +56,12 @@ public class ServerFileThread extends Thread {
 	public void run() {
 
 		try {
-			Long start = System.currentTimeMillis();
-			System.out.println("시작 ******************"+start);
 			System.out.println("서버파일 받기쓰레드  시작");
 			Date date = new Date();
 			SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
 			String time = transFormat.format(date);
 			String[] recdir = filemessage.getfile_dir().split("\\\\");
-			dir = "C:\\Users\\user\\Desktop\\file\\server\\" + time+recdir[recdir.length - 1];
+			dir = "C:\\Users\\user\\Desktop\\file\\server\\" + recdir[recdir.length - 1];
 			boolean chk;
 			int wordsize = 16*1024;
 			byte[] bytes = new byte[wordsize];
@@ -91,7 +83,7 @@ public class ServerFileThread extends Thread {
 			while ((count = in.read(bytes)) > 0) {
 				out.write(bytes, 0, count);
 				length -= count;
-				//System.out.println(length);
+				System.out.println(length);
 				/*
 				 * if(length<wordsize) { bytes=new byte[toIntExact(length)]; }
 				 */
@@ -104,20 +96,12 @@ public class ServerFileThread extends Thread {
 			System.out.println("서버 - 팡ㄹ읽기 끝");
 			out.flush();
 			out.close();
-			Long end = System.currentTimeMillis();
-			System.out.println("끝*********************"+end);
-			System.out.println("총시간 ****************"+(end-start));
+			
 			ServerDAO sDao=new ServerDAO();
 
 			chk = sDao.insertFile(filemessage.getSenduserid(), filemessage.getGroupid(), dir);
 			if (chk) {
 				System.out.println("성공***********");
-				Header header = new Header(FMSG,0);
-				Data sendData = new Data(header,filemessage);
-				synchronized(oos) {
-					oos.writeObject(sendData);
-					oos.flush();
-				}
 			}		
 			else
 				System.out.println("실패*********");

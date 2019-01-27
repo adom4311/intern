@@ -54,9 +54,8 @@ public class Chat implements Serializable {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	public Chat() {
-	}
 	public Chat(Long chatid, String userid, Long groupid, String content, Timestamp sendtime, int count) {
+		super();
 		this.chatid = chatid;
 		this.userid = userid;
 		this.groupid = groupid;
@@ -64,4 +63,10 @@ public class Chat implements Serializable {
 		this.sendtime = sendtime;
 		this.count = count;
 	}
+	@Override
+	public String toString() {
+		return "Chat [chatid=" + chatid + ", userid=" + userid + ", groupid=" + groupid + ", content=" + content
+				+ ", sendtime=" + sendtime + ", count=" + count + "]";
+	}
+	
 }

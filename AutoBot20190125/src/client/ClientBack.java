@@ -81,7 +81,7 @@ public class ClientBack {
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private ObjectOutputStream rpoos;
-	private String SERVER_ADDR = "127.0.0.1";
+	private String SERVER_ADDR = "172.21.25.28";
 	private int PORT = 1993;
 	private int FILE_PORT = 1994;
 	static public ArrayList<Chat> list;
@@ -296,8 +296,8 @@ public class ClientBack {
 		new SendFileRequest(this,file_dir, groupid).start();
 	}
 	
-	public void filedownreq(Long groupid, String dir,boolean isImg) {
-		new FiledownRequest(this,groupid,dir,isImg);
+	public void filedownreq(Long groupid, String dir) {
+		new FiledownRequest(this,groupid,dir);
 	}
 	
 	public void createGroupRoom(String[] friendids) { // 辰特号 持失
