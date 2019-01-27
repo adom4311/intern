@@ -3,6 +3,8 @@ package client.gui;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -31,10 +33,21 @@ public class ClientFriListGUI{
 		this.groupid=groupid;
 		this.clientback=clientback;
 		//this.dirs=dirs;
-		frame=new JFrame("FRIEND LIST");
-		
-		
 	}
+	
+	public void show() {
+
+		frame=new JFrame("FRIEND LIST");
+
+		frame.setBounds(0,0,300,300);
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+//				frame.setVisible(false);
+				frame.dispose();
+			}
+		});
+	}
+	
 	public void insertable(Object[][] dir) {
 		model = new DefaultTableModel(dir, a) {
 			public boolean isCellEditable(int rowIndex, int mColIndex) {
@@ -47,7 +60,6 @@ public class ClientFriListGUI{
 		sc = new JScrollPane(table);
 		frame.add(sc);
 		
-		frame.setBounds(0,0,300,300);
 		frame.setVisible(true);
 	}
 	public JTable getTable() {
