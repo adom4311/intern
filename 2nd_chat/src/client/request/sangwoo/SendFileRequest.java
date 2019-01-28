@@ -44,13 +44,15 @@ public class SendFileRequest extends Thread{
 	}
 	
 	public void run() {
+		InputStream in = null;
+		OutputStream out = null;
 		try
 		{
 			System.out.println("센드파일리퀘스트");
 			File file = new File(file_dir);
 			long length=file.length();
 			
-			OutputStream out = filesocket.getOutputStream();
+			out = filesocket.getOutputStream();
 			if(length>=1.0737e+9) {//파일의 크기가 2GB를 넘을 경우
 				out.write(longToBytes(-1));
 				filesocket.close();
@@ -58,7 +60,7 @@ public class SendFileRequest extends Thread{
 				Alert("전송하기에는 파일의 크기가 너무 큽니다.");
 				return ;
 			}
-			InputStream in = new FileInputStream(file);
+			in = new FileInputStream(file);
 			byte[] sizebyte = longToBytes(length);
 			int wordsize = 16*1024;
 			byte[] bytes = new byte[wordsize];
@@ -84,6 +86,13 @@ public class SendFileRequest extends Thread{
 			se.printStackTrace();
 		}catch(Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				filesocket.close();
+				in.close();
+			}catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

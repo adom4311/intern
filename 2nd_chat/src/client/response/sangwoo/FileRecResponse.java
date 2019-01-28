@@ -83,6 +83,12 @@ public class FileRecResponse extends Thread{
 			se.printStackTrace();
 		}catch(Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				filesocket.close();
+			}catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
