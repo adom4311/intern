@@ -2,6 +2,8 @@ package client.gui;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -15,18 +17,37 @@ public class Addmembergui {
 	
 	JFrame frame;
 	JTable table;
-	ArrayList<String> member_avail;
 	ClientBack clientback;
 	DefaultTableModel model;
 	DefaultTableModel m;
 	JScrollPane sc;
 	Long groupid;
+	String [] a = {"목록"};
+	AddmemMouseListner listener;
 	
-	public Addmembergui(ArrayList<String> member_avail,Long groupid, ClientBack clientback) {
-		this.member_avail = member_avail;
+	public Addmembergui(Long groupid, ClientBack clientback) {
 		this.groupid = groupid;
 		this.clientback = clientback;
-		String [] a = {"목록"};
+		
+		
+		frame = new JFrame("대화상대 추가");
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				frame.dispose();
+			}
+		});
+		
+		table = new JTable(model);
+		
+		sc = new JScrollPane(table);
+		frame.add(sc);
+		frame.setBounds(0,0,300,300);
+		frame.setVisible(true);
+		
+	}
+	
+	public void insertbl(ArrayList<String> member_avail) {
+		table.removeMouseListener(listener);
 		int length = member_avail.size();
 		Object row[][] = new Object[length][1];
 		int i=0;
@@ -34,23 +55,18 @@ public class Addmembergui {
 			row[i++][0]=member;
 			//System.out.println(member);
 		}
+
 		
 		model = new DefaultTableModel(row, a) {
-
 			public boolean isCellEditable(int rowIndex, int mColIndex) {
 				return false;
 			}
-
 		};
-		frame = new JFrame("대화상대 추가");
-		table = new JTable(model);
-		table.addMouseListener(new AddmemMouseListner());
-		
-		sc = new JScrollPane(table);
-		frame.add(sc);
-		frame.setBounds(0,0,300,300);
+		table.setModel(model);
+		listener =new AddmemMouseListner();
+		table.addMouseListener(listener);
 		frame.setVisible(true);
-		
+//		table.updateUI();
 	}
 	
 	

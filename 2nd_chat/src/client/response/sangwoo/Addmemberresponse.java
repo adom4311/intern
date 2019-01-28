@@ -13,6 +13,6 @@ public class Addmemberresponse {
 		Amemessage amem = (Amemessage)data.getObject();
 		ArrayList<String> avail_member = amem.getMem_avail();
 		Long groupid = amem.getGroupid();
-		new Addmembergui(avail_member,groupid,clientback);
+		clientback.getChatMap().get(groupid).getAddmembergui().insertbl(avail_member);
 	}
 }

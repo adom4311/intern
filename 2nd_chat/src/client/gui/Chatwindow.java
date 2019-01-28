@@ -55,7 +55,18 @@ public class Chatwindow {
 	private ClientBack clientback;
 	private ClientFileGUI clientfilegui;
 	private ClientFriListGUI clientfrilistgui;
+	private Addmembergui addmembergui;
 	
+	
+	
+	public Addmembergui getAddmembergui() {
+		return addmembergui;
+	}
+
+	public void setAddmembergui(Addmembergui addmembergui) {
+		this.addmembergui = addmembergui;
+	}
+
 	String[] oldchatcontent;
 
 
@@ -156,7 +167,14 @@ public class Chatwindow {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				clientback.addmemberfunc(groupid);
+				if(addmembergui == null) {
+					addmembergui = new Addmembergui(groupid, clientback);
+					clientback.addmemberfunc(groupid);
+				}else {
+					clientback.addmemberfunc(groupid);
+					addmembergui.frame.setVisible(true);
+				}
+//				clientback.addmemberfunc(groupid);
 				
 			}
 			
@@ -170,11 +188,14 @@ public class Chatwindow {
 				if(clientfilegui==null)
 				{
 					clientfilegui = new ClientFileGUI(id,groupid,clientback);
+					clientfilegui.show();
 					System.out.println("new gui start!");
 					clientback.fileList(groupid);
-					
+				}else {
+					clientback.fileList(groupid);
+					clientfilegui.frame.setVisible(true);
+
 				}
-				clientfilegui.frame.setVisible(true);
 				
 				
 			}
@@ -245,6 +266,8 @@ public class Chatwindow {
 			clientfilegui.getFrame().dispose();
 		if(clientback.getGalgui() != null)
 			clientback.getGalgui().getFrame().dispose();
+		if(addmembergui != null)
+			addmembergui.frame.dispose();
 		
 	}
 
