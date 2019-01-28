@@ -6,6 +6,13 @@ import server.Receiver;
 
 public class Timer extends Thread{
 	private Long acc_time;
+	private Long ev_time;
+	public Long getEv_time() {
+		return ev_time;
+	}
+	public void setEv_time(Long ev_time) {
+		this.ev_time = ev_time;
+	}
 	private boolean signupflag;
 	public boolean isSignupflag() {
 		return signupflag;
@@ -14,9 +21,10 @@ public class Timer extends Thread{
 		this.signupflag = signupflag;
 	}
 	Receiver receiver;
-	public Timer(Long acc_time, Receiver receiver) {
+	public Timer(Long acc_time, Receiver receiver, Long ev_time) {
 		this.acc_time = acc_time;
 		this.receiver=receiver;
+		this.ev_time = ev_time;
 		signupflag=false;
 	}
 	@Override
@@ -35,6 +43,14 @@ public class Timer extends Thread{
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				}
+			}
+			if(current-ev_time>600000L) {
+				try {
+					receiver.getSocket().close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}

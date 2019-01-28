@@ -1,13 +1,12 @@
 package client.request.sangwoo;
 
-import static java.lang.Math.toIntExact;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
@@ -80,6 +79,9 @@ public class SendFileRequest extends Thread{
 			System.out.println("다보냄");
 			filesocket.close();
 			
+		}catch(SocketException se) {
+			Alert("인터넷 연결을 확인해 주세요");
+			se.printStackTrace();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

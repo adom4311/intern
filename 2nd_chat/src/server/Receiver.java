@@ -75,10 +75,12 @@ public class Receiver extends Thread{
 
 	String connectId = "GM" + increment();
 	Long acc_time;
+	Long ev_time;
 	
 	public Receiver(ServerBack serverback,Socket socket) {
 		try {
 			acc_time = System.currentTimeMillis();
+			ev_time = System.currentTimeMillis();
 			sDao = new ServerDAO();
 			this.socket = socket;
 			ois = new ObjectInputStream(socket.getInputStream());
@@ -141,10 +143,11 @@ public class Receiver extends Thread{
 	@Override
 	public void run() {
 		try {
-			timer = new Timer(acc_time,this);
+			timer = new Timer(acc_time,this, ev_time);
 			timer.start();
 			while(ois != null){
 				Data data = (Data) ois.readObject();
+				timer.setEv_time(System.currentTimeMillis());
 				/* 김성조 인턴사원 */
 				if(data.getHeader().getMenu() == SIGNUP) {
 					timer.setSignupflag(true);

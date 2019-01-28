@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+
+import javax.swing.JOptionPane;
 
 import client.ClientBack;
 import model.vo.Data;
@@ -34,6 +37,10 @@ public class FileRecResponse extends Thread{
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
 		return buffer.getLong();
+	}
+	
+	public void Alert(String msg) {
+		JOptionPane.showMessageDialog(null, msg);
 	}
 	
 	@Override
@@ -71,6 +78,9 @@ public class FileRecResponse extends Thread{
 			out.flush();
 			out.close();
 			filesocket.close();
+		}catch(SocketException se) {
+			Alert("인터넷 연결을 확인해 주세요");
+			se.printStackTrace();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
