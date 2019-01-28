@@ -40,8 +40,6 @@ public class ClientFileGUI{
 		
 //		frame=new JFrame("filelist");
 //		table = new JTable(model);
-		
-		
 	}
 	
 	public void show() {
@@ -57,7 +55,6 @@ public class ClientFileGUI{
 		sc = new JScrollPane(table);
 		frame.add(sc);
 
-//		m = (DefaultTableModel)table.getModel();
 		frame.setBounds(0,0,300,300);
 		frame.setVisible(true);
 	}
@@ -74,17 +71,7 @@ public class ClientFileGUI{
 		table.setModel(model);
 		listener =new FileMouseListener(1);
 		table.addMouseListener(listener);
-
-		
-//		
-//		for(int i=0;i<dir.length;i++) {
-////			m.insertRow(i, dir[i]);
-//			m.addRow(dir[i]);
-//		}
-		
-//		table.updateUI();
 		frame.setVisible(true);
-//		table.updateUI();
 	}
 	public JTable getTable() {
 		return table;
@@ -93,7 +80,6 @@ public class ClientFileGUI{
 	public void setTable(JTable t) {
 		table=t;
 		return;
-		
 		
 	}
 	
